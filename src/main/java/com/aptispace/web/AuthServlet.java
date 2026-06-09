@@ -44,9 +44,11 @@ public class AuthServlet extends HttpServlet {
             throw new IllegalArgumentException("La cuenta no pertenece al entorno seleccionado.");
         }
 
+        boolean administrador = tieneRol(encontrado, "ADMINISTRADOR");
         request.getSession(true).setAttribute("aptispace.usuario", encontrado.getNombreUsuario());
         request.getSession(true).setAttribute("aptispace.tipo", tipo);
-        response.sendRedirect(destino(request, tipo));
+        request.getSession(true).setAttribute("aptispace.admin", administrador);
+        response.sendRedirect(destino(request, tipo, administrador));
     }
 
     private void registrar(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -81,7 +83,8 @@ public class AuthServlet extends HttpServlet {
             confirmarSiEsPropia(em, transaccionPropia);
             request.getSession(true).setAttribute("aptispace.usuario", usuario);
             request.getSession(true).setAttribute("aptispace.tipo", tipo);
-            response.sendRedirect(destino(request, tipo));
+            request.getSession(true).setAttribute("aptispace.admin", false);
+            response.sendRedirect(destino(request, tipo, false));
         }
         catch (RuntimeException ex) {
             revertirSiEsPropia(em, transaccionPropia);
@@ -221,9 +224,10 @@ public class AuthServlet extends HttpServlet {
         em.persist(evaluado);
     }
 
-    private String destino(HttpServletRequest request, String tipo) {
-        if ("EVALUADO".equals(tipo)) return request.getContextPath() + "/m/RespuestaEvaluado";
-        return request.getContextPath() + "/m/AplicacionPrueba";
+    private String destino(HttpServletRequest request, String tipo, boolean administrador) {
+        if ("EVALUADO".equals(tipo)) return request.getContextPath() + "/evaluado-home.jsp";
+        if (administrador) return request.getContextPath() + "/admin-home.jsp";
+        return request.getContextPath() + "/evaluador-home.jsp";
     }
 
     private String valor(HttpServletRequest request, String nombre) {

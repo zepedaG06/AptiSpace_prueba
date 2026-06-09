@@ -28,13 +28,29 @@ public class SesionAptiSpaceFilter implements Filter {
 
         String usuario = (String) http.getSession(true).getAttribute("aptispace.usuario");
         String tipo = (String) http.getSession(true).getAttribute("aptispace.tipo");
-        if (usuario == null && path.startsWith("/m/")) {
+        boolean administrador = Boolean.TRUE.equals(http.getSession(true).getAttribute("aptispace.admin"));
+        if (usuario == null) {
             res.sendRedirect(http.getContextPath() + "/index.jsp");
+            return;
+        }
+
+        if ("EVALUADO".equals(tipo) && esRutaEvaluador(path)) {
+            res.sendRedirect(http.getContextPath() + "/evaluado-home.jsp");
             return;
         }
 
         if ("EVALUADO".equals(tipo) && path.startsWith("/m/") && !esModuloEvaluado(path)) {
             res.sendRedirect(http.getContextPath() + "/m/RespuestaEvaluado");
+            return;
+        }
+
+        if ("PSICOLOGO".equals(tipo) && !administrador && path.startsWith("/m/") && esModuloAdministrador(path)) {
+            res.sendRedirect(http.getContextPath() + "/evaluador-home.jsp");
+            return;
+        }
+
+        if ("PSICOLOGO".equals(tipo) && !administrador && path.equals("/admin-home.jsp")) {
+            res.sendRedirect(http.getContextPath() + "/evaluador-home.jsp");
             return;
         }
 
@@ -58,6 +74,29 @@ public class SesionAptiSpaceFilter implements Filter {
 
     private boolean esModuloEvaluado(String path) {
         return path.startsWith("/m/RespuestaEvaluado") || path.startsWith("/m/ResultadoPrueba");
+    }
+
+    private boolean esModuloAdministrador(String path) {
+        return path.startsWith("/m/Usuario")
+            || path.startsWith("/m/Rol")
+            || path.startsWith("/m/Prueba")
+            || path.startsWith("/m/Ejercicio")
+            || path.startsWith("/m/OpcionEjercicio")
+            || path.startsWith("/m/PlantillaCorreccion");
+    }
+
+    private boolean esRutaEvaluador(String path) {
+        return path.equals("/admin-home.jsp")
+            || path.equals("/evaluador-home.jsp")
+            || path.startsWith("/m/Usuario")
+            || path.startsWith("/m/Rol")
+            || path.startsWith("/m/Evaluado")
+            || path.startsWith("/m/Prueba")
+            || path.startsWith("/m/Ejercicio")
+            || path.startsWith("/m/OpcionEjercicio")
+            || path.startsWith("/m/PlantillaCorreccion")
+            || path.startsWith("/m/AplicacionPrueba")
+            || path.startsWith("/m/ObservacionPsicologica");
     }
 
     @Override

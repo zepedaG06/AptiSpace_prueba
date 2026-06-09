@@ -3,8 +3,9 @@
     String error = request.getParameter("error");
     String usuario = (String) session.getAttribute("aptispace.usuario");
     String tipo = (String) session.getAttribute("aptispace.tipo");
+    boolean administrador = Boolean.TRUE.equals(session.getAttribute("aptispace.admin"));
     if (usuario != null && tipo != null) {
-        response.sendRedirect("EVALUADO".equals(tipo) ? "m/RespuestaEvaluado" : "m/AplicacionPrueba");
+        response.sendRedirect("EVALUADO".equals(tipo) ? "evaluado-home.jsp" : (administrador ? "admin-home.jsp" : "evaluador-home.jsp"));
         return;
     }
 %>

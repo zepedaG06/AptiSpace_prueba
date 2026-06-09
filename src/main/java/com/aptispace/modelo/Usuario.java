@@ -33,7 +33,7 @@ public class Usuario {
     @Column(name = "apellidos", nullable = false, length = 80)
     private String apellidos;
 
-    @Email @Size(max = 120)
+    @Size(max = 120)
     @Column(name = "correo", length = 120)
     private String correo;
 

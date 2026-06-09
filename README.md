@@ -53,5 +53,9 @@ Usuarios de prueba:
 ```text
 Evaluador: evaluador / evaluador123
 Evaluado: evaluado / evaluado123
-Admin: admin / admin123
+Admin interno: admin / admin123
 ```
+
+El administrador entra desde el panel de Evaluador. Por su rol interno se redirige al
+panel secreto de plantillas, pruebas, ejercicios y opciones. Los psicologos normales
+no pueden entrar a esos modulos de configuracion.
