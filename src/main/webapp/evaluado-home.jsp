@@ -32,8 +32,8 @@
             <a class="logout" href="logout">Cerrar sesion</a>
         </div>
         <section class="grid">
-            <a class="tile" href="m/RespuestaEvaluado"><strong>Responder prueba</strong><span>Ver ejercicios asignados y marcar las opciones correspondientes.</span></a>
-            <a class="tile" href="m/ResultadoPrueba"><strong>Mi resultado</strong><span>Consultar resultado cuando este disponible.</span></a>
+            <a class="tile" href="mi-prueba"><strong>Responder prueba</strong><span>Realiza la prueba una pregunta a la vez, con imagen modelo y opciones visuales.</span></a>
+            <a class="tile" href="mi-prueba"><strong>Mi resultado</strong><span>Consulta el resultado cuando la prueba este finalizada.</span></a>
         </section>
     </main>
 </body>

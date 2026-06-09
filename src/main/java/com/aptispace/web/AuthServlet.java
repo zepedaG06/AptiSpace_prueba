@@ -34,9 +34,11 @@ public class AuthServlet extends HttpServlet {
         String tipo = valor(request, "tipo");
 
         EntityManager em = XPersistence.getManager();
-        asegurarDatosBase(em);
         Usuario encontrado = buscarUsuario(em, usuario);
-        if (encontrado == null) encontrado = crearUsuarioDemoSiAplica(em, usuario, contrasena);
+        if (encontrado == null && esCuentaDemo(usuario, contrasena)) {
+            asegurarCuentaDemo(em, usuario);
+            encontrado = buscarUsuario(em, usuario);
+        }
         if (encontrado == null || !encontrado.getContrasena().equals(contrasena)) {
             throw new IllegalArgumentException("Usuario o contrasena incorrectos.");
         }
@@ -64,7 +66,6 @@ public class AuthServlet extends HttpServlet {
         if (nombres.isEmpty() || apellidos.isEmpty()) throw new IllegalArgumentException("Nombres y apellidos son obligatorios.");
 
         EntityManager em = XPersistence.getManager();
-        asegurarDatosBase(em);
         boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
         try {
             if (buscarUsuario(em, usuario) != null) throw new IllegalArgumentException("Ese usuario ya existe.");
@@ -173,6 +174,71 @@ public class AuthServlet extends HttpServlet {
             em.persist(usuario);
         }
         for (Rol rol : roles) usuario.getRoles().add(rol);
+    }
+
+    private boolean esCuentaDemo(String usuario, String contrasena) {
+        return ("admin".equals(usuario) && "admin123".equals(contrasena))
+            || ("evaluador".equals(usuario) && "evaluador123".equals(contrasena))
+            || ("evaluado".equals(usuario) && "evaluado123".equals(contrasena));
+    }
+
+    private void asegurarCuentaDemo(EntityManager em, String usuario) {
+        boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
+        try {
+            insertarRolSiNoExiste(em, "ADMINISTRADOR", "Gestiona usuarios, pruebas y configuraciones.");
+            insertarRolSiNoExiste(em, "PSICOLOGO", "Registra evaluados, aplica pruebas y consulta resultados.");
+            insertarRolSiNoExiste(em, "EVALUADO", "Realiza la prueba asignada.");
+
+            if ("admin".equals(usuario)) {
+                insertarUsuarioSiNoExiste(em, "admin", "admin123", "Administrador", "AptiSpace", "admin@aptispace.local");
+                asignarRol(em, "admin", "ADMINISTRADOR");
+                asignarRol(em, "admin", "PSICOLOGO");
+            }
+            else if ("evaluador".equals(usuario)) {
+                insertarUsuarioSiNoExiste(em, "evaluador", "evaluador123", "Evaluador", "Demo", "evaluador@aptispace.local");
+                asignarRol(em, "evaluador", "PSICOLOGO");
+            }
+            else if ("evaluado".equals(usuario)) {
+                insertarUsuarioSiNoExiste(em, "evaluado", "evaluado123", "Persona", "Demo", "evaluado@aptispace.local");
+                asignarRol(em, "evaluado", "EVALUADO");
+            }
+
+            confirmarSiEsPropia(em, transaccionPropia);
+        }
+        catch (RuntimeException ex) {
+            revertirSiEsPropia(em, transaccionPropia);
+            throw ex;
+        }
+    }
+
+    private void insertarRolSiNoExiste(EntityManager em, String nombre, String descripcion) {
+        em.createNativeQuery(
+            "merge into rol (nombre_rol, descripcion) key(nombre_rol) values (?, ?)")
+            .setParameter(1, nombre)
+            .setParameter(2, descripcion)
+            .executeUpdate();
+    }
+
+    private void insertarUsuarioSiNoExiste(EntityManager em, String usuario, String contrasena, String nombres, String apellidos, String correo) {
+        em.createNativeQuery(
+            "merge into usuario (nombre_usuario, contrasena, nombres, apellidos, correo, estado, fecha_creacion) "
+                + "key(nombre_usuario) values (?, ?, ?, ?, ?, 'ACTIVO', CURRENT_TIMESTAMP)")
+            .setParameter(1, usuario)
+            .setParameter(2, contrasena)
+            .setParameter(3, nombres)
+            .setParameter(4, apellidos)
+            .setParameter(5, correo)
+            .executeUpdate();
+    }
+
+    private void asignarRol(EntityManager em, String usuario, String rol) {
+        em.createNativeQuery(
+            "merge into usuario_rol (usuario_id, rol_id) key(usuario_id, rol_id) "
+                + "select u.id, r.id from usuario u, rol r "
+                + "where u.nombre_usuario = ? and r.nombre_rol = ?")
+            .setParameter(1, usuario)
+            .setParameter(2, rol)
+            .executeUpdate();
     }
 
     private Usuario crearUsuarioDemoSiAplica(EntityManager em, String nombreUsuario, String contrasena) {
