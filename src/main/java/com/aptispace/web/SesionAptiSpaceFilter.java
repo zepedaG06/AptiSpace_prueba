@@ -28,7 +28,6 @@ public class SesionAptiSpaceFilter implements Filter {
 
         String usuario = (String) http.getSession(true).getAttribute("aptispace.usuario");
         String tipo = (String) http.getSession(true).getAttribute("aptispace.tipo");
-        boolean administrador = Boolean.TRUE.equals(http.getSession(true).getAttribute("aptispace.admin"));
         if (usuario == null) {
             res.sendRedirect(http.getContextPath() + "/index.jsp");
             return;
@@ -44,12 +43,7 @@ public class SesionAptiSpaceFilter implements Filter {
             return;
         }
 
-        if ("PSICOLOGO".equals(tipo) && !administrador && path.startsWith("/m/") && esModuloAdministrador(path)) {
-            res.sendRedirect(http.getContextPath() + "/evaluador-home.jsp");
-            return;
-        }
-
-        if ("PSICOLOGO".equals(tipo) && !administrador && path.equals("/admin-home.jsp")) {
+        if ("PSICOLOGO".equals(tipo) && path.equals("/admin-home.jsp")) {
             res.sendRedirect(http.getContextPath() + "/evaluador-home.jsp");
             return;
         }
@@ -76,21 +70,14 @@ public class SesionAptiSpaceFilter implements Filter {
         return path.startsWith("/m/RespuestaEvaluado") || path.startsWith("/m/ResultadoPrueba");
     }
 
-    private boolean esModuloAdministrador(String path) {
-        return path.startsWith("/m/Usuario")
-            || path.startsWith("/m/Rol")
-            || path.startsWith("/m/Prueba")
-            || path.startsWith("/m/Ejercicio")
-            || path.startsWith("/m/OpcionEjercicio")
-            || path.startsWith("/m/PlantillaCorreccion");
-    }
-
     private boolean esRutaEvaluador(String path) {
         return path.equals("/admin-home.jsp")
             || path.equals("/evaluador-home.jsp")
+            || path.equals("/plantilla-wizard")
             || path.startsWith("/m/Usuario")
             || path.startsWith("/m/Rol")
             || path.startsWith("/m/Evaluado")
+            || path.startsWith("/m/GrupoEvaluacion")
             || path.startsWith("/m/Prueba")
             || path.startsWith("/m/Ejercicio")
             || path.startsWith("/m/OpcionEjercicio")

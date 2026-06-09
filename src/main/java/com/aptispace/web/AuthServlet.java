@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.openxava.jpa.XPersistence;
 import com.aptispace.modelo.Evaluado;
+import com.aptispace.modelo.GrupoEvaluacion;
 import com.aptispace.modelo.Rol;
 import com.aptispace.modelo.Usuario;
 
@@ -46,11 +47,10 @@ public class AuthServlet extends HttpServlet {
             throw new IllegalArgumentException("La cuenta no pertenece al entorno seleccionado.");
         }
 
-        boolean administrador = tieneRol(encontrado, "ADMINISTRADOR");
         request.getSession(true).setAttribute("aptispace.usuario", encontrado.getNombreUsuario());
         request.getSession(true).setAttribute("aptispace.tipo", tipo);
-        request.getSession(true).setAttribute("aptispace.admin", administrador);
-        response.sendRedirect(destino(request, tipo, administrador));
+        request.getSession(true).setAttribute("aptispace.admin", false);
+        response.sendRedirect(destino(request, tipo));
     }
 
     private void registrar(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -79,13 +79,13 @@ public class AuthServlet extends HttpServlet {
             nuevo.getRoles().add(obtenerRol(em, tipo));
             em.persist(nuevo);
 
-            if ("EVALUADO".equals(tipo)) crearEvaluadoDemo(em, nombres, apellidos);
+            if ("EVALUADO".equals(tipo)) crearEvaluadoDesdeRegistro(em, request, nuevo);
 
             confirmarSiEsPropia(em, transaccionPropia);
             request.getSession(true).setAttribute("aptispace.usuario", usuario);
             request.getSession(true).setAttribute("aptispace.tipo", tipo);
             request.getSession(true).setAttribute("aptispace.admin", false);
-            response.sendRedirect(destino(request, tipo, false));
+            response.sendRedirect(destino(request, tipo));
         }
         catch (RuntimeException ex) {
             revertirSiEsPropia(em, transaccionPropia);
@@ -111,14 +111,12 @@ public class AuthServlet extends HttpServlet {
     }
 
     private void asegurarDatosBase(EntityManager em) {
-        if (buscarRol(em, "ADMINISTRADOR") != null && buscarRol(em, "PSICOLOGO") != null && buscarRol(em, "EVALUADO") != null) return;
+        if (buscarRol(em, "PSICOLOGO") != null && buscarRol(em, "EVALUADO") != null) return;
 
         boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
         try {
-            Rol admin = guardarRol(em, "ADMINISTRADOR", "Gestiona usuarios, pruebas y configuraciones.");
             guardarRol(em, "PSICOLOGO", "Registra evaluados, aplica pruebas y consulta resultados.");
             guardarRol(em, "EVALUADO", "Realiza la prueba asignada.");
-            admin.getNombreRol();
             confirmarSiEsPropia(em, transaccionPropia);
         }
         catch (RuntimeException ex) {
@@ -177,30 +175,25 @@ public class AuthServlet extends HttpServlet {
     }
 
     private boolean esCuentaDemo(String usuario, String contrasena) {
-        return ("admin".equals(usuario) && "admin123".equals(contrasena))
-            || ("evaluador".equals(usuario) && "evaluador123".equals(contrasena))
+        return ("evaluador".equals(usuario) && "evaluador123".equals(contrasena))
             || ("evaluado".equals(usuario) && "evaluado123".equals(contrasena));
     }
 
     private void asegurarCuentaDemo(EntityManager em, String usuario) {
         boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
         try {
-            insertarRolSiNoExiste(em, "ADMINISTRADOR", "Gestiona usuarios, pruebas y configuraciones.");
             insertarRolSiNoExiste(em, "PSICOLOGO", "Registra evaluados, aplica pruebas y consulta resultados.");
             insertarRolSiNoExiste(em, "EVALUADO", "Realiza la prueba asignada.");
 
-            if ("admin".equals(usuario)) {
-                insertarUsuarioSiNoExiste(em, "admin", "admin123", "Administrador", "AptiSpace", "admin@aptispace.local");
-                asignarRol(em, "admin", "ADMINISTRADOR");
-                asignarRol(em, "admin", "PSICOLOGO");
-            }
-            else if ("evaluador".equals(usuario)) {
+            if ("evaluador".equals(usuario)) {
                 insertarUsuarioSiNoExiste(em, "evaluador", "evaluador123", "Evaluador", "Demo", "evaluador@aptispace.local");
                 asignarRol(em, "evaluador", "PSICOLOGO");
             }
             else if ("evaluado".equals(usuario)) {
                 insertarUsuarioSiNoExiste(em, "evaluado", "evaluado123", "Persona", "Demo", "evaluado@aptispace.local");
                 asignarRol(em, "evaluado", "EVALUADO");
+                Usuario cuenta = buscarUsuario(em, "evaluado");
+                if (cuenta != null && cuenta.getEvaluado() == null) crearEvaluadoDemo(em, cuenta);
             }
 
             confirmarSiEsPropia(em, transaccionPropia);
@@ -242,9 +235,6 @@ public class AuthServlet extends HttpServlet {
     }
 
     private Usuario crearUsuarioDemoSiAplica(EntityManager em, String nombreUsuario, String contrasena) {
-        if ("admin".equals(nombreUsuario) && "admin123".equals(contrasena)) {
-            return crearUsuarioConRol(em, "admin", "admin123", "Administrador", "AptiSpace", "admin@aptispace.local", "ADMINISTRADOR", "PSICOLOGO");
-        }
         if ("evaluador".equals(nombreUsuario) && "evaluador123".equals(contrasena)) {
             return crearUsuarioConRol(em, "evaluador", "evaluador123", "Evaluador", "Demo", "evaluador@aptispace.local", "PSICOLOGO");
         }
@@ -278,21 +268,75 @@ public class AuthServlet extends HttpServlet {
         return usuario.getRoles().stream().anyMatch(rol -> tipo.equals(rol.getNombreRol()));
     }
 
-    private void crearEvaluadoDemo(EntityManager em, String nombres, String apellidos) {
+    private void crearEvaluadoDesdeRegistro(EntityManager em, HttpServletRequest request, Usuario usuario) {
+        String sexo = valor(request, "sexo");
+        String carrera = valor(request, "carrera");
+        Integer anioCarrera = enteroOpcional(valor(request, "anioCarrera"));
+        Integer edad = enteroOpcional(valor(request, "edad"));
+        String codigoEspacio = valor(request, "codigoEspacio").toUpperCase();
+
+        if (sexo.isEmpty()) throw new IllegalArgumentException("El sexo es obligatorio para la cuenta de evaluado.");
+        if (edad == null) throw new IllegalArgumentException("La edad es obligatoria para la cuenta de evaluado.");
+        if (edad < 10 || edad > 99) throw new IllegalArgumentException("La edad debe estar entre 10 y 99 anos.");
+
         Evaluado evaluado = new Evaluado();
-        evaluado.setNombres(nombres);
-        evaluado.setApellidos(apellidos);
+        evaluado.setUsuario(usuario);
+        evaluado.setNombres(usuario.getNombres());
+        evaluado.setApellidos(usuario.getApellidos());
+        evaluado.setFechaNacimiento(java.time.LocalDate.now().minusYears(edad).withDayOfYear(1));
+        evaluado.setEdad(edad);
+        evaluado.setSexo(Evaluado.Sexo.valueOf(sexo));
+        evaluado.setCarrera(carrera);
+        evaluado.setAnioCarrera(anioCarrera);
+        evaluado.setEstudiosRealizados(carrera.isEmpty() ? "Pendiente" : carrera);
+        evaluado.setProfesion(carrera);
+        em.persist(evaluado);
+
+        if (!codigoEspacio.isEmpty()) {
+            GrupoEvaluacion grupo = buscarGrupoPorCodigo(em, codigoEspacio);
+            if (grupo == null) throw new IllegalArgumentException("No existe un espacio con el codigo indicado.");
+            grupo.getEvaluados().add(evaluado);
+        }
+    }
+
+    private void crearEvaluadoDemo(EntityManager em, Usuario usuario) {
+        Evaluado evaluado = new Evaluado();
+        evaluado.setUsuario(usuario);
+        evaluado.setNombres(usuario.getNombres());
+        evaluado.setApellidos(usuario.getApellidos());
         evaluado.setFechaNacimiento(java.time.LocalDate.of(2000, 1, 1));
         evaluado.setEdad(26);
         evaluado.setSexo(Evaluado.Sexo.OTRO);
-        evaluado.setEstudiosRealizados("Pendiente");
-        evaluado.setProfesion("Pendiente");
+        evaluado.setCarrera("Demo");
+        evaluado.setAnioCarrera(1);
+        evaluado.setEstudiosRealizados("Demo");
+        evaluado.setProfesion("Demo");
         em.persist(evaluado);
     }
 
-    private String destino(HttpServletRequest request, String tipo, boolean administrador) {
+    private GrupoEvaluacion buscarGrupoPorCodigo(EntityManager em, String codigo) {
+        TypedQuery<GrupoEvaluacion> query = em.createQuery("select g from GrupoEvaluacion g where g.codigo = :codigo and g.activo = true", GrupoEvaluacion.class);
+        query.setParameter("codigo", codigo);
+        try {
+            return query.getSingleResult();
+        }
+        catch (NoResultException ex) {
+            return null;
+        }
+    }
+
+    private Integer enteroOpcional(String valor) {
+        if (valor == null || valor.isEmpty()) return null;
+        try {
+            return Integer.valueOf(valor);
+        }
+        catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("Hay un valor numerico invalido.");
+        }
+    }
+
+    private String destino(HttpServletRequest request, String tipo) {
         if ("EVALUADO".equals(tipo)) return request.getContextPath() + "/evaluado-home.jsp";
-        if (administrador) return request.getContextPath() + "/admin-home.jsp";
         return request.getContextPath() + "/evaluador-home.jsp";
     }
 

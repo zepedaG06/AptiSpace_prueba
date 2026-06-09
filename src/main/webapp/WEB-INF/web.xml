@@ -45,6 +45,24 @@
         <url-pattern>/mi-prueba</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>MiPerfilServlet</servlet-name>
+        <servlet-class>com.aptispace.web.MiPerfilServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MiPerfilServlet</servlet-name>
+        <url-pattern>/mi-perfil</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PlantillaWizardServlet</servlet-name>
+        <servlet-class>com.aptispace.web.PlantillaWizardServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PlantillaWizardServlet</servlet-name>
+        <url-pattern>/plantilla-wizard</url-pattern>
+    </servlet-mapping>
+
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>

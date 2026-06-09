@@ -1,21 +1,20 @@
-INSERT INTO rol (id, nombre_rol, descripcion) VALUES (1, 'ADMINISTRADOR', 'Gestiona usuarios, pruebas, configuraciones y reportes globales');
 INSERT INTO rol (id, nombre_rol, descripcion) VALUES (2, 'PSICOLOGO', 'Registra evaluados, asigna pruebas, consulta resultados y agrega observaciones');
 INSERT INTO rol (id, nombre_rol, descripcion) VALUES (3, 'EVALUADO', 'Realiza la prueba y consulta resultados autorizados');
 
-INSERT INTO usuario (id, nombre_usuario, contrasena, nombres, apellidos, correo, estado, fecha_creacion)
-VALUES (1, 'admin', 'admin123', 'Administrador', 'AptiSpace', 'admin@aptispace.local', 'ACTIVO', CURRENT_TIMESTAMP);
 INSERT INTO usuario (id, nombre_usuario, contrasena, nombres, apellidos, correo, estado, fecha_creacion)
 VALUES (2, 'evaluador', 'evaluador123', 'Evaluador', 'Demo', 'evaluador@aptispace.local', 'ACTIVO', CURRENT_TIMESTAMP);
 INSERT INTO usuario (id, nombre_usuario, contrasena, nombres, apellidos, correo, estado, fecha_creacion)
 VALUES (3, 'evaluado', 'evaluado123', 'Persona', 'Demo', 'evaluado@aptispace.local', 'ACTIVO', CURRENT_TIMESTAMP);
 
-INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (1, 1);
-INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (1, 2);
 INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (2, 2);
 INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (3, 3);
 
-INSERT INTO evaluado (id, nombres, apellidos, fecha_nacimiento, edad, sexo, estudios_realizados, profesion, fecha_registro)
-VALUES (1, 'Persona', 'Demo', DATE '2000-01-01', 26, 'OTRO', 'Secundaria completa', 'Demo', CURRENT_DATE);
+INSERT INTO evaluado (id, usuario_id, nombres, apellidos, fecha_nacimiento, edad, sexo, estudios_realizados, carrera, anio_carrera, profesion, fecha_registro)
+VALUES (1, 3, 'Persona', 'Demo', DATE '2000-01-01', 26, 'OTRO', 'Secundaria completa', 'Demo', 1, 'Demo', CURRENT_DATE);
+
+INSERT INTO grupo_evaluacion (id, nombre, codigo, psicologo_id, fecha_creacion, activo)
+VALUES (1, 'Espacio demo', 'DEMO2026', 2, CURRENT_DATE, TRUE);
+INSERT INTO grupo_evaluado (grupo_id, evaluado_id) VALUES (1, 1);
 
 INSERT INTO prueba (id, nombre, descripcion, tiempo_limite, cantidad_ejercicios, estado)
 VALUES (1, 'BFA Espacial - Desplazamiento S2', 'Banco precargado de ejercicios visuales. Al iniciar una aplicacion se eligen ejercicios aleatorios.', 30, 4, 'ACTIVA');

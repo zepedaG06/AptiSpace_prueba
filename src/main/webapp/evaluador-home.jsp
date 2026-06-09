@@ -6,37 +6,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>AptiSpace | Evaluador</title>
     <style>
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2937; background: #f4f7fb; }
-        header { padding: 34px 7vw; background: #163b4f; color: white; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2937; background: #eef3f7; }
+        header { padding: 30px 7vw 28px; background: #203a43; color: white; }
         header h1 { margin: 0 0 8px; font-size: 34px; letter-spacing: 0; }
-        header p { margin: 0; max-width: 760px; line-height: 1.5; color: #d8e5ee; }
-        main { max-width: 1000px; margin: 28px auto; padding: 0 20px; }
+        header p { margin: 0; max-width: 820px; line-height: 1.5; color: #dbe8ef; }
+        main { max-width: 1180px; margin: 24px auto 44px; padding: 0 20px; }
         .top { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 18px; }
         .top h2 { margin: 0; font-size: 22px; }
         .logout { color: #1f6f8b; font-weight: 700; text-decoration: none; }
-        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-        a.tile { display: block; min-height: 128px; padding: 18px; border: 1px solid #d9e2ec; border-radius: 8px; background: white; text-decoration: none; color: #1f2937; }
-        .tile strong { display: block; margin-bottom: 8px; font-size: 18px; color: #163b4f; }
-        .tile span { color: #52606d; line-height: 1.45; }
-        @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } .top { align-items: flex-start; flex-direction: column; } }
+        .layout { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; align-items: start; }
+        .panel { background: white; border: 1px solid #d7e0e7; border-radius: 8px; padding: 18px; }
+        .panel h3 { margin: 0 0 12px; color: #203a43; font-size: 19px; }
+        .steps { display: grid; gap: 12px; }
+        .step { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; border: 1px solid #d7e0e7; border-radius: 8px; padding: 14px; background: #f8fafc; }
+        .num { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #1f6f8b; color: white; font-weight: 700; }
+        .step strong { display: block; margin-bottom: 4px; color: #1f2937; }
+        .step span, .note { color: #52606d; line-height: 1.4; }
+        a.button { border-radius: 6px; padding: 10px 13px; background: #1f6f8b; color: white; font-weight: 700; text-decoration: none; white-space: nowrap; }
+        .secondary { background: #dfe7ee !important; color: #243441 !important; }
+        .quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .quick a { min-height: 96px; border: 1px solid #d7e0e7; border-radius: 8px; padding: 14px; text-decoration: none; color: #1f2937; background: #f8fafc; }
+        .quick strong { display: block; margin-bottom: 6px; color: #203a43; }
+        .code { margin-top: 14px; padding: 14px; border-radius: 8px; background: #f8fafc; border: 1px dashed #a9bac7; }
+        .code strong { color: #203a43; }
+        @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } .step { grid-template-columns: 42px 1fr; } .step a { grid-column: 2; width: fit-content; } }
+        @media (max-width: 620px) { .quick { grid-template-columns: 1fr; } .top { align-items: flex-start; flex-direction: column; } }
     </style>
 </head>
 <body>
     <header>
         <h1>Entorno del Evaluador</h1>
-        <p>Usa las plantillas preparadas por administracion para registrar evaluados, asignar aplicaciones y revisar resultados sin modificar el banco de ejercicios.</p>
+        <p>Controla el banco visual, organiza espacios por grupo, asigna pruebas y revisa resultados desde un flujo de trabajo unico.</p>
     </header>
     <main>
         <div class="top">
-            <h2>Operacion psicologica</h2>
+            <h2>Flujo principal</h2>
             <a class="logout" href="logout">Cerrar sesion</a>
         </div>
-        <section class="grid">
-            <a class="tile" href="m/Evaluado"><strong>Evaluados</strong><span>Registrar o consultar personas evaluadas.</span></a>
-            <a class="tile" href="m/AplicacionPrueba"><strong>Aplicaciones</strong><span>Asignar prueba, iniciar, finalizar y calcular resultados.</span></a>
-            <a class="tile" href="m/ResultadoPrueba"><strong>Resultados</strong><span>Consultar puntuacion S2, aciertos, errores y pendientes.</span></a>
-            <a class="tile" href="m/ObservacionPsicologica"><strong>Observaciones</strong><span>Agregar comentarios profesionales sobre una aplicacion.</span></a>
-        </section>
+        <div class="layout">
+            <section class="panel">
+                <h3>Proceso recomendado</h3>
+                <div class="steps">
+                    <div class="step">
+                        <span class="num">1</span>
+                        <div><strong>Crear plantilla visual</strong><span>Carga imagen modelo, opciones A-E y marca las respuestas correctas.</span></div>
+                        <a class="button" href="plantilla-wizard">Crear</a>
+                    </div>
+                    <div class="step">
+                        <span class="num">2</span>
+                        <div><strong>Crear grupo o espacio</strong><span>Genera un codigo para que los evaluados entren al espacio del psicologo.</span></div>
+                        <a class="button" href="m/GrupoEvaluacion">Grupos</a>
+                    </div>
+                    <div class="step">
+                        <span class="num">3</span>
+                        <div><strong>Revisar evaluados</strong><span>Confirma datos personales, sexo, carrera, año y edad antes de asignar prueba.</span></div>
+                        <a class="button" href="m/Evaluado">Evaluados</a>
+                    </div>
+                    <div class="step">
+                        <span class="num">4</span>
+                        <div><strong>Asignar e iniciar prueba</strong><span>Selecciona evaluado, prueba y usa iniciar para generar sus ejercicios.</span></div>
+                        <a class="button" href="m/AplicacionPrueba">Asignar</a>
+                    </div>
+                    <div class="step">
+                        <span class="num">5</span>
+                        <div><strong>Revisar resultados y observaciones</strong><span>Consulta S2, aciertos, errores y registra notas clinicas o academicas.</span></div>
+                        <a class="button" href="m/ResultadoPrueba">Resultados</a>
+                    </div>
+                </div>
+            </section>
+            <aside class="panel">
+                <h3>Accesos de gestion</h3>
+                <div class="quick">
+                    <a href="m/Prueba"><strong>Pruebas</strong><span class="note">Editar tiempo, cantidad y estado.</span></a>
+                    <a href="m/Ejercicio"><strong>Ejercicios</strong><span class="note">Ajustar imagen modelo y enunciado.</span></a>
+                    <a href="m/OpcionEjercicio"><strong>Opciones</strong><span class="note">Cambiar imagenes A-E y correctas.</span></a>
+                    <a href="m/ObservacionPsicologica"><strong>Observaciones</strong><span class="note">Agregar seguimiento profesional.</span></a>
+                </div>
+                <div class="code">
+                    <strong>Codigo del espacio</strong>
+                    <p class="note">Crea un grupo y comparte su codigo. Al registrarse, el evaluado lo escribe y queda dentro de ese espacio.</p>
+                </div>
+            </aside>
+        </div>
     </main>
 </body>
 </html>

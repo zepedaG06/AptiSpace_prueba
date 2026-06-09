@@ -9,7 +9,7 @@ import org.openxava.annotations.*;
 
 @Entity
 @Table(name = "usuario", uniqueConstraints = @UniqueConstraint(columnNames = "nombre_usuario"))
-@View(members = "datos [nombreUsuario, contrasena, estado, fechaCreacion]; persona [nombres, apellidos, correo]; roles")
+@View(members = "datos [nombreUsuario, contrasena, estado, fechaCreacion]; persona [nombres, apellidos, correo]; evaluado; roles")
 @Tab(properties = "nombreUsuario, nombres, apellidos, correo, estado, fechaCreacion")
 public class Usuario {
     public enum EstadoUsuario { ACTIVO, INACTIVO, BLOQUEADO }
@@ -49,6 +49,9 @@ public class Usuario {
     @JoinTable(name = "usuario_rol", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
     private Set<Rol> roles = new LinkedHashSet<>();
 
+    @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY)
+    private Evaluado evaluado;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombreUsuario() { return nombreUsuario; }
@@ -67,5 +70,7 @@ public class Usuario {
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
     public Set<Rol> getRoles() { return roles; }
     public void setRoles(Set<Rol> roles) { this.roles = roles; }
+    public Evaluado getEvaluado() { return evaluado; }
+    public void setEvaluado(Evaluado evaluado) { this.evaluado = evaluado; }
     public String toString() { return nombreUsuario; }
 }

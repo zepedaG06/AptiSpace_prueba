@@ -3,9 +3,8 @@
     String error = request.getParameter("error");
     String usuario = (String) session.getAttribute("aptispace.usuario");
     String tipo = (String) session.getAttribute("aptispace.tipo");
-    boolean administrador = Boolean.TRUE.equals(session.getAttribute("aptispace.admin"));
     if (usuario != null && tipo != null) {
-        response.sendRedirect("EVALUADO".equals(tipo) ? "evaluado-home.jsp" : (administrador ? "admin-home.jsp" : "evaluador-home.jsp"));
+        response.sendRedirect("EVALUADO".equals(tipo) ? "evaluado-home.jsp" : "evaluador-home.jsp");
         return;
     }
 %>
@@ -105,7 +104,7 @@
             font-weight: 700;
             color: #334155;
         }
-        input {
+        input, select {
             width: 100%;
             min-height: 42px;
             border: 1px solid #cbd5e1;
@@ -159,7 +158,7 @@
         <section class="grid">
             <article class="panel" id="panel-evaluador">
                 <h2>Evaluador</h2>
-                <p>Administra evaluados, inicia aplicaciones, revisa respuestas, calcula resultados y agrega observaciones.</p>
+                <p>Crea plantillas visuales, organiza grupos, asigna pruebas, revisa resultados y registra observaciones.</p>
                 <div class="tabs">
                     <button class="active" type="button" onclick="modo('panel-evaluador', false)">Iniciar</button>
                     <button type="button" onclick="modo('panel-evaluador', true)">Crear cuenta</button>
@@ -185,7 +184,7 @@
 
             <article class="panel" id="panel-evaluado">
                 <h2>Evaluado</h2>
-                <p>Accede a las respuestas asignadas, marca opciones de seleccion multiple y consulta el avance de la aplicacion.</p>
+                <p>Ingresa al espacio de tu psicologo, responde la prueba asignada y consulta tu informacion personal.</p>
                 <div class="tabs">
                     <button class="active" type="button" onclick="modo('panel-evaluado', false)">Iniciar</button>
                     <button type="button" onclick="modo('panel-evaluado', true)">Crear cuenta</button>
@@ -202,6 +201,18 @@
                     <input type="hidden" name="tipo" value="EVALUADO"/>
                     <label>Nombres <input name="nombres" required/></label>
                     <label>Apellidos <input name="apellidos" required/></label>
+                    <label>Sexo
+                        <select name="sexo" required>
+                            <option value="">Seleccionar</option>
+                            <option value="FEMENINO">Femenino</option>
+                            <option value="MASCULINO">Masculino</option>
+                            <option value="OTRO">Otro</option>
+                        </select>
+                    </label>
+                    <label>Edad <input name="edad" type="number" min="10" max="99" required/></label>
+                    <label>Carrera <input name="carrera" placeholder="Ej. Ingenieria, Arquitectura"/></label>
+                    <label>Año de la carrera <input name="anioCarrera" type="number" min="1" max="12"/></label>
+                    <label>Codigo de espacio <input name="codigoEspacio" placeholder="Opcional"/></label>
                     <label>Correo <input name="correo" type="email"/></label>
                     <label>Usuario <input name="usuario" autocomplete="username" required/></label>
                     <label>Contrasena <input name="contrasena" type="password" autocomplete="new-password" required minlength="6"/></label>

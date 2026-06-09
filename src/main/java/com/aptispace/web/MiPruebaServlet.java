@@ -75,21 +75,14 @@ public class MiPruebaServlet extends HttpServlet {
         String usuario = (String) request.getSession(true).getAttribute("aptispace.usuario");
         TypedQuery<AplicacionPrueba> query = em.createQuery(
             "select distinct a from AplicacionPrueba a left join fetch a.respuestas r left join fetch r.ejercicio e "
-                + "where lower(a.evaluado.nombres) = lower(:usuario) or lower(a.evaluado.apellidos) = lower(:usuario) "
+                + "where a.evaluado.usuario.nombreUsuario = :usuario "
+                + "and a.estado in :estados "
                 + "order by a.id desc",
             AplicacionPrueba.class);
         query.setParameter("usuario", usuario);
+        query.setParameter("estados", List.of(EstadoAplicacion.ASIGNADA, EstadoAplicacion.EN_PROCESO, EstadoAplicacion.FINALIZADA));
         query.setMaxResults(1);
         List<AplicacionPrueba> aplicaciones = query.getResultList();
-        if (aplicaciones.isEmpty()) {
-            aplicaciones = em.createQuery(
-                "select distinct a from AplicacionPrueba a left join fetch a.respuestas r left join fetch r.ejercicio e "
-                    + "where a.estado in :estados order by a.id desc",
-                AplicacionPrueba.class)
-                .setParameter("estados", List.of(EstadoAplicacion.ASIGNADA, EstadoAplicacion.EN_PROCESO, EstadoAplicacion.FINALIZADA))
-                .setMaxResults(1)
-                .getResultList();
-        }
         if (aplicaciones.isEmpty()) return null;
         AplicacionPrueba aplicacion = aplicaciones.get(0);
         aplicacion.getRespuestas().sort((a, b) -> a.getEjercicio().getNumero().compareTo(b.getEjercicio().getNumero()));
