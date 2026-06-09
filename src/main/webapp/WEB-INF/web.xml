@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    <display-name>AptiSpace</display-name>
+    <context-param>
+        <param-name>applicationName</param-name>
+        <param-value>AptiSpace</param-value>
+    </context-param>
+
+    <filter>
+        <filter-name>SesionAptiSpaceFilter</filter-name>
+        <filter-class>com.aptispace.web.SesionAptiSpaceFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>SesionAptiSpaceFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>AuthServlet</servlet-name>
+        <servlet-class>com.aptispace.web.AuthServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AuthServlet</servlet-name>
+        <url-pattern>/auth</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.aptispace.web.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+    <error-page><error-code>404</error-code><location>/WEB-INF/jsp/error404.jsp</location></error-page>
+    <error-page><error-code>500</error-code><location>/WEB-INF/jsp/error500.jsp</location></error-page>
+</web-app>
+

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="180" viewBox="0 0 360 180">
+  <rect width="360" height="180" fill="#f6f8fb"/>
+  <path d="M58 110h72V64h62" fill="none" stroke="#243b53" stroke-width="12" stroke-linecap="round"/>
+  <path d="M190 38l36 26-36 26z" fill="#2f80ed"/>
+  <circle cx="78" cy="110" r="18" fill="#f2994a"/>
+  <text x="28" y="28" font-family="Arial" font-size="16" fill="#243b53">Modelo 1</text>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="180" viewBox="0 0 360 180">
+  <rect width="360" height="180" fill="#f6f8fb"/>
+  <polygon points="88,122 124,50 160,122" fill="#9b51e0"/>
+  <path d="M190 120V56h72" fill="none" stroke="#243b53" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="276" cy="56" r="20" fill="#f2c94c"/>
+  <text x="28" y="28" font-family="Arial" font-size="16" fill="#243b53">Modelo 3</text>
+</svg>

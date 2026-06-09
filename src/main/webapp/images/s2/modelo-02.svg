@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="180" viewBox="0 0 360 180">
+  <rect width="360" height="180" fill="#f6f8fb"/>
+  <rect x="70" y="52" width="68" height="68" fill="#27ae60"/>
+  <path d="M164 86h78" stroke="#243b53" stroke-width="12" stroke-linecap="round"/>
+  <path d="M238 52l46 34-46 34z" fill="#eb5757"/>
+  <text x="28" y="28" font-family="Arial" font-size="16" fill="#243b53">Modelo 2</text>
+</svg>

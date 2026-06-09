@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE controllers SYSTEM "dtds/controllers.dtd">
+<controllers>
+    <controller name="AplicacionPrueba" extends="Typical">
+        <action name="iniciar" mode="detail" class="com.aptispace.acciones.IniciarPruebaAction" icon="play_arrow"/>
+        <action name="finalizar" mode="detail" class="com.aptispace.acciones.FinalizarPruebaAction" icon="stop"/>
+        <action name="calcularResultado" mode="detail" class="com.aptispace.acciones.CalcularResultadoAction" icon="calculate"/>
+    </controller>
+</controllers>
