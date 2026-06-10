@@ -12,11 +12,14 @@
         header h1 { margin: 0 0 8px; font-size: 34px; letter-spacing: 0; }
         header p { margin: 0; max-width: 760px; line-height: 1.5; color: #d8e5ee; }
         main { max-width: 980px; margin: 28px auto; padding: 0 20px; }
-        .top { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 18px; padding: 12px; border: 1px solid #d9e2ec; border-radius: 8px; background: white; }
+        .top { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 18px; padding: 12px; border: 1px solid #9cc9d8; border-radius: 8px; background: #e8f4f8; }
         .top h2 { margin: 0; font-size: 22px; }
-        .logout { border-radius: 6px; background: #e8f4f8; color: #1f4b5d; font-weight: 700; text-decoration: none; padding: 10px 13px; }
+        .logout { border-radius: 6px; background: #1f6f8b; color: white; font-weight: 700; text-decoration: none; padding: 10px 13px; }
+        .panel { background: #d9edf4; border: 1px solid #6aaec5; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 26px rgba(31, 111, 139, .12); }
+        .panel h3 { margin: 0; padding: 14px 18px; color: white; font-size: 19px; background: #1f6f8b; }
         .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-        a.tile { display: block; min-height: 128px; padding: 18px; border: 1px solid #d9e2ec; border-radius: 8px; background: white; text-decoration: none; color: #1f2937; box-shadow: 0 8px 20px rgba(31, 75, 93, .06); }
+        .panel .grid { padding: 18px; }
+        a.tile { display: block; min-height: 128px; padding: 18px; border: 1px solid #b9d5df; border-radius: 8px; background: #f6fbfd; text-decoration: none; color: #1f2937; box-shadow: 0 8px 20px rgba(31, 75, 93, .06); }
         a.tile:hover { border-color: #9cc9d8; box-shadow: 0 10px 24px rgba(31, 75, 93, .10); }
         .tile strong { display: block; margin-bottom: 8px; font-size: 18px; color: #1f4b5d; }
         .tile span { color: #52606d; line-height: 1.45; }
@@ -33,11 +36,14 @@
             <h2>Mi prueba</h2>
             <a class="logout" href="logout">Cerrar sesion</a>
         </div>
-        <section class="grid">
+        <section class="panel">
+            <h3>Accesos del evaluado</h3>
+            <div class="grid">
             <a class="tile" href="mi-prueba"><strong>Responder prueba</strong><span>Realiza la prueba una pregunta a la vez, con imagen modelo y opciones visuales.</span></a>
             <a class="tile" href="mi-prueba"><strong>Mi resultado</strong><span>Consulta el resultado cuando la prueba este finalizada.</span></a>
             <a class="tile" href="mi-perfil"><strong>Mi informacion</strong><span>Revisa o actualiza sexo, edad, carrera, año y datos de contacto.</span></a>
             <a class="tile" href="mi-perfil"><strong>Unirme a grupo</strong><span>Ingresa el codigo que te comparta tu evaluador para recibir una prueba.</span></a>
+            </div>
         </section>
     </main>
 </body>
