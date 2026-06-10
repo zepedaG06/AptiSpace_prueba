@@ -37,22 +37,29 @@ public class PlantillaWizardServlet extends HttpServlet {
             prueba.setCantidadEjercicios(entero(request, "cantidadEjercicios", 1));
             em.persist(prueba);
 
-            Ejercicio ejercicio = new Ejercicio();
-            ejercicio.setPrueba(prueba);
-            ejercicio.setNumero(1);
-            ejercicio.setEnunciado(valor(request, "enunciado"));
-            ejercicio.setImagenModelo(guardarArchivo(request, "imagenModelo"));
-            prueba.getEjercicios().add(ejercicio);
-            em.persist(ejercicio);
+            int cantidad = prueba.getCantidadEjercicios();
+            for (int numero = 1; numero <= cantidad; numero++) {
+                Ejercicio ejercicio = new Ejercicio();
+                ejercicio.setPrueba(prueba);
+                ejercicio.setNumero(numero);
+                ejercicio.setEnunciado(valor(request, "enunciado" + numero));
+                ejercicio.setImagenModelo(guardarArchivo(request, "imagenModelo" + numero));
+                prueba.getEjercicios().add(ejercicio);
+                em.persist(ejercicio);
 
-            for (LetraOpcion letra : LetraOpcion.values()) {
-                OpcionEjercicio opcion = new OpcionEjercicio();
-                opcion.setEjercicio(ejercicio);
-                opcion.setLetra(letra);
-                opcion.setImagenOpcion(guardarArchivo(request, "opcion" + letra.name()));
-                opcion.setEsCorrecta(request.getParameter("correcta" + letra.name()) != null);
-                ejercicio.getOpciones().add(opcion);
-                em.persist(opcion);
+                boolean tieneCorrecta = false;
+                for (LetraOpcion letra : LetraOpcion.values()) {
+                    OpcionEjercicio opcion = new OpcionEjercicio();
+                    opcion.setEjercicio(ejercicio);
+                    opcion.setLetra(letra);
+                    opcion.setImagenOpcion(guardarArchivo(request, "opcion" + numero + letra.name()));
+                    boolean correcta = request.getParameter("correcta" + numero + letra.name()) != null;
+                    opcion.setEsCorrecta(correcta);
+                    tieneCorrecta = tieneCorrecta || correcta;
+                    ejercicio.getOpciones().add(opcion);
+                    em.persist(opcion);
+                }
+                if (!tieneCorrecta) throw new IllegalArgumentException("El ejercicio " + numero + " debe tener al menos una opcion correcta.");
             }
 
             confirmarSiEsPropia(em, transaccionPropia);

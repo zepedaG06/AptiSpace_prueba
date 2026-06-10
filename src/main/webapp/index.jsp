@@ -166,7 +166,7 @@
                 <form class="login" method="post" action="auth">
                     <input type="hidden" name="accion" value="login"/>
                     <input type="hidden" name="tipo" value="PSICOLOGO"/>
-                    <label>Usuario <input name="usuario" autocomplete="username" required/></label>
+                    <label>Usuario o correo <input name="usuario" autocomplete="username" required/></label>
                     <label>Contrasena <input name="contrasena" type="password" autocomplete="current-password" required/></label>
                     <div class="actions"><button class="primary" type="submit">Entrar como evaluador</button></div>
                 </form>
@@ -176,7 +176,7 @@
                     <label>Nombres <input name="nombres" required/></label>
                     <label>Apellidos <input name="apellidos" required/></label>
                     <label>Correo <input name="correo" type="email"/></label>
-                    <label>Usuario <input name="usuario" autocomplete="username" required/></label>
+                    <label>Correo <input name="correo" type="email" required autocomplete="email"/></label>
                     <label>Contrasena <input name="contrasena" type="password" autocomplete="new-password" required minlength="6"/></label>
                     <div class="actions"><button class="primary" type="submit">Crear evaluador</button></div>
                 </form>
@@ -192,7 +192,7 @@
                 <form class="login" method="post" action="auth">
                     <input type="hidden" name="accion" value="login"/>
                     <input type="hidden" name="tipo" value="EVALUADO"/>
-                    <label>Usuario <input name="usuario" autocomplete="username" required/></label>
+                    <label>Usuario o correo <input name="usuario" autocomplete="username" required/></label>
                     <label>Contrasena <input name="contrasena" type="password" autocomplete="current-password" required/></label>
                     <div class="actions"><button class="primary" type="submit">Entrar como evaluado</button></div>
                 </form>
@@ -213,8 +213,7 @@
                     <label>Carrera <input name="carrera" placeholder="Ej. Ingenieria, Arquitectura"/></label>
                     <label>Año de la carrera <input name="anioCarrera" type="number" min="1" max="12"/></label>
                     <label>Codigo de espacio <input name="codigoEspacio" placeholder="Opcional"/></label>
-                    <label>Correo <input name="correo" type="email"/></label>
-                    <label>Usuario <input name="usuario" autocomplete="username" required/></label>
+                    <label>Correo <input name="correo" type="email" required autocomplete="email"/></label>
                     <label>Contrasena <input name="contrasena" type="password" autocomplete="new-password" required minlength="6"/></label>
                     <div class="actions"><button class="primary" type="submit">Crear evaluado</button></div>
                 </form>

@@ -1,8 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="com.aptispace.modelo.*" %>
+<%@ page import="java.util.*,com.aptispace.modelo.*" %>
 <%
     Usuario usuarioCuenta = (Usuario) request.getAttribute("usuarioCuenta");
     Evaluado evaluado = (Evaluado) request.getAttribute("evaluado");
+    List<GrupoEvaluacion> grupos = (List<GrupoEvaluacion>) request.getAttribute("grupos");
     String ok = request.getParameter("ok");
     String error = request.getParameter("error");
 %>
@@ -40,6 +41,8 @@
     </header>
     <main>
         <% if ("1".equals(ok)) { %><div class="notice">Informacion actualizada.</div><% } %>
+        <% if ("grupo".equals(ok)) { %><div class="notice">Te uniste al grupo correctamente.</div><% } %>
+        <% if ("ya-grupo".equals(ok)) { %><div class="notice">Ya estas dentro de ese grupo.</div><% } %>
         <% if (error != null && !error.isEmpty()) { %><div class="notice error"><%= error %></div><% } %>
         <section class="card">
             <% if (usuarioCuenta == null || evaluado == null) { %>
@@ -65,6 +68,24 @@
                     <div class="actions">
                         <a class="button secondary" href="<%= request.getContextPath() %>/evaluado-home.jsp">Cancelar</a>
                         <button class="primary" type="submit">Guardar cambios</button>
+                    </div>
+                </form>
+                <div style="margin-top:18px; padding-top:18px; border-top:1px solid #d9e2ec;">
+                    <h2>Mis grupos (<%= grupos == null ? 0 : grupos.size() %>)</h2>
+                    <% if (grupos == null || grupos.isEmpty()) { %>
+                        <p>Todavia no estas unido a ningun grupo.</p>
+                    <% } else { %>
+                        <% for (GrupoEvaluacion grupo : grupos) { %>
+                            <p><strong><%= grupo.getNombre() %></strong> <span style="color:#64748b;">Codigo: <%= grupo.getCodigo() %></span></p>
+                        <% } %>
+                    <% } %>
+                </div>
+                <form method="post" action="<%= request.getContextPath() %>/mi-perfil" style="margin-top:18px; padding-top:18px; border-top:1px solid #d9e2ec;">
+                    <input type="hidden" name="accion" value="unirGrupo"/>
+                    <label>Unirme a un grupo <input name="codigoEspacio" placeholder="Codigo del espacio"/></label>
+                    <div class="actions">
+                        <span></span>
+                        <button class="primary" type="submit">Unirme</button>
                     </div>
                 </form>
             <% } %>

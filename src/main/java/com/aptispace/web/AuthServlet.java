@@ -55,20 +55,20 @@ public class AuthServlet extends HttpServlet {
 
     private void registrar(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String tipo = valor(request, "tipo");
-        String usuario = valor(request, "usuario");
         String contrasena = valor(request, "contrasena");
         String nombres = valor(request, "nombres");
         String apellidos = valor(request, "apellidos");
         String correo = valor(request, "correo");
 
-        if (usuario.length() < 4) throw new IllegalArgumentException("El usuario debe tener al menos 4 caracteres.");
         if (contrasena.length() < 6) throw new IllegalArgumentException("La contrasena debe tener al menos 6 caracteres.");
         if (nombres.isEmpty() || apellidos.isEmpty()) throw new IllegalArgumentException("Nombres y apellidos son obligatorios.");
+        if (correo.isEmpty()) throw new IllegalArgumentException("El correo es obligatorio.");
 
         EntityManager em = XPersistence.getManager();
+        String usuario = generarNombreUsuario(em, correo, nombres, apellidos);
         boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
         try {
-            if (buscarUsuario(em, usuario) != null) throw new IllegalArgumentException("Ese usuario ya existe.");
+            if (buscarPorCorreo(em, correo) != null) throw new IllegalArgumentException("Ese correo ya esta registrado.");
 
             Usuario nuevo = new Usuario();
             nuevo.setNombreUsuario(usuario);
@@ -94,7 +94,7 @@ public class AuthServlet extends HttpServlet {
     }
 
     private Usuario buscarUsuario(EntityManager em, String nombreUsuario) {
-        TypedQuery<Usuario> query = em.createQuery("select u from Usuario u where u.nombreUsuario = :usuario", Usuario.class);
+        TypedQuery<Usuario> query = em.createQuery("select u from Usuario u where u.nombreUsuario = :usuario or u.correo = :usuario", Usuario.class);
         query.setParameter("usuario", nombreUsuario);
         try {
             return query.getSingleResult();
@@ -102,6 +102,29 @@ public class AuthServlet extends HttpServlet {
         catch (NoResultException ex) {
             return null;
         }
+    }
+
+    private Usuario buscarPorCorreo(EntityManager em, String correo) {
+        TypedQuery<Usuario> query = em.createQuery("select u from Usuario u where lower(u.correo) = lower(:correo)", Usuario.class);
+        query.setParameter("correo", correo);
+        try {
+            return query.getSingleResult();
+        }
+        catch (NoResultException ex) {
+            return null;
+        }
+    }
+
+    private String generarNombreUsuario(EntityManager em, String correo, String nombres, String apellidos) {
+        String base = correo.contains("@") ? correo.substring(0, correo.indexOf('@')) : nombres + "." + apellidos;
+        base = base.toLowerCase()
+            .replaceAll("[^a-z0-9]+", ".")
+            .replaceAll("^\\.+|\\.+$", "");
+        if (base.length() < 4) base = "usuario";
+        String candidato = base;
+        int consecutivo = 2;
+        while (buscarUsuario(em, candidato) != null) candidato = base + consecutivo++;
+        return candidato;
     }
 
     private Rol obtenerRol(EntityManager em, String tipo) {

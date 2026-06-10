@@ -1,6 +1,7 @@
 package com.aptispace.web;
 
 import java.io.IOException;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.openxava.jpa.XPersistence;
 import com.aptispace.modelo.Evaluado;
+import com.aptispace.modelo.GrupoEvaluacion;
 import com.aptispace.modelo.Usuario;
 
 public class MiPerfilServlet extends HttpServlet {
@@ -18,6 +20,7 @@ public class MiPerfilServlet extends HttpServlet {
         Usuario usuario = obtenerUsuarioActual(request);
         request.setAttribute("usuarioCuenta", usuario);
         request.setAttribute("evaluado", usuario == null ? null : usuario.getEvaluado());
+        request.setAttribute("grupos", usuario == null || usuario.getEvaluado() == null ? List.of() : gruposDelEvaluado(usuario.getEvaluado()));
         request.getRequestDispatcher("/WEB-INF/jsp/mi-perfil.jsp").forward(request, response);
     }
 
@@ -29,6 +32,13 @@ public class MiPerfilServlet extends HttpServlet {
         try {
             Usuario usuario = obtenerUsuarioActual(request);
             if (usuario == null || usuario.getEvaluado() == null) throw new IllegalStateException("No se encontro el perfil.");
+
+            if ("unirGrupo".equals(valor(request, "accion"))) {
+                boolean unido = unirAGrupo(em, usuario.getEvaluado(), valor(request, "codigoEspacio"));
+                confirmarSiEsPropia(em, transaccionPropia);
+                response.sendRedirect(request.getContextPath() + "/mi-perfil?ok=" + (unido ? "grupo" : "ya-grupo"));
+                return;
+            }
 
             Evaluado evaluado = usuario.getEvaluado();
             usuario.setNombres(valor(request, "nombres"));
@@ -66,6 +76,36 @@ public class MiPerfilServlet extends HttpServlet {
         catch (NoResultException ex) {
             return null;
         }
+    }
+
+    private boolean unirAGrupo(EntityManager em, Evaluado evaluado, String codigo) {
+        if (codigo == null || codigo.trim().isEmpty()) throw new IllegalArgumentException("Ingresa el codigo del grupo.");
+        TypedQuery<GrupoEvaluacion> query = em.createQuery(
+            "select distinct g from GrupoEvaluacion g left join fetch g.evaluados where g.codigo = :codigo and g.activo = true",
+            GrupoEvaluacion.class);
+        query.setParameter("codigo", codigo.trim().toUpperCase());
+        GrupoEvaluacion grupo;
+        try {
+            grupo = query.getSingleResult();
+        }
+        catch (NoResultException ex) {
+            throw new IllegalArgumentException("No existe un grupo activo con ese codigo.");
+        }
+        if (grupo.getEvaluados().stream().anyMatch(e -> e.getId().equals(evaluado.getId()))) {
+            return false;
+        }
+        grupo.getEvaluados().add(evaluado);
+        em.merge(grupo);
+        return true;
+    }
+
+    private List<GrupoEvaluacion> gruposDelEvaluado(Evaluado evaluado) {
+        EntityManager em = XPersistence.getManager();
+        TypedQuery<GrupoEvaluacion> query = em.createQuery(
+            "select g from GrupoEvaluacion g join g.evaluados e where e.id = :evaluadoId order by g.nombre",
+            GrupoEvaluacion.class);
+        query.setParameter("evaluadoId", evaluado.getId());
+        return query.getResultList();
     }
 
     private String valor(HttpServletRequest request, String nombre) {

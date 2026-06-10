@@ -1,6 +1,8 @@
 package com.aptispace.web;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -11,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.openxava.jpa.XPersistence;
 import com.aptispace.modelo.AplicacionPrueba;
 import com.aptispace.modelo.AplicacionPrueba.EstadoAplicacion;
+import com.aptispace.modelo.Ejercicio;
 import com.aptispace.modelo.OpcionEjercicio;
 import com.aptispace.modelo.RespuestaEvaluado;
 import com.aptispace.servicio.ServicioCorreccion;
@@ -85,11 +88,36 @@ public class MiPruebaServlet extends HttpServlet {
         List<AplicacionPrueba> aplicaciones = query.getResultList();
         if (aplicaciones.isEmpty()) return null;
         AplicacionPrueba aplicacion = aplicaciones.get(0);
+        prepararSiHaceFalta(em, aplicacion);
         aplicacion.getRespuestas().sort((a, b) -> a.getEjercicio().getNumero().compareTo(b.getEjercicio().getNumero()));
         for (RespuestaEvaluado respuesta : aplicacion.getRespuestas()) {
             respuesta.getEjercicio().getOpciones().size();
         }
         return aplicacion;
+    }
+
+    private void prepararSiHaceFalta(EntityManager em, AplicacionPrueba aplicacion) {
+        if (!aplicacion.getRespuestas().isEmpty() || aplicacion.getPrueba() == null) return;
+        aplicacion.getPrueba().getEjercicios().size();
+        if (aplicacion.getPrueba().getEjercicios().isEmpty()) return;
+        boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
+        try {
+            List<Ejercicio> ejercicios = new ArrayList<>(aplicacion.getPrueba().getEjercicios());
+            Collections.shuffle(ejercicios);
+            int cantidad = Math.min(aplicacion.getPrueba().getCantidadEjercicios(), ejercicios.size());
+            for (int i = 0; i < cantidad; i++) {
+                RespuestaEvaluado respuesta = new RespuestaEvaluado();
+                respuesta.setAplicacion(aplicacion);
+                respuesta.setEjercicio(ejercicios.get(i));
+                aplicacion.getRespuestas().add(respuesta);
+            }
+            em.merge(aplicacion);
+            confirmarSiEsPropia(em, transaccionPropia);
+        }
+        catch (RuntimeException ex) {
+            revertirSiEsPropia(em, transaccionPropia);
+            throw ex;
+        }
     }
 
     private int obtenerIndice(HttpServletRequest request, int total) {
@@ -105,11 +133,12 @@ public class MiPruebaServlet extends HttpServlet {
     }
 
     private void guardarSeleccion(HttpServletRequest request, RespuestaEvaluado respuesta) {
-        respuesta.setOpcionA(request.getParameter("A") != null);
-        respuesta.setOpcionB(request.getParameter("B") != null);
-        respuesta.setOpcionC(request.getParameter("C") != null);
-        respuesta.setOpcionD(request.getParameter("D") != null);
-        respuesta.setOpcionE(request.getParameter("E") != null);
+        String opcion = request.getParameter("opcion");
+        respuesta.setOpcionA("A".equals(opcion));
+        respuesta.setOpcionB("B".equals(opcion));
+        respuesta.setOpcionC("C".equals(opcion));
+        respuesta.setOpcionD("D".equals(opcion));
+        respuesta.setOpcionE("E".equals(opcion));
     }
 
     public static boolean seleccionada(RespuestaEvaluado respuesta, OpcionEjercicio.LetraOpcion letra) {

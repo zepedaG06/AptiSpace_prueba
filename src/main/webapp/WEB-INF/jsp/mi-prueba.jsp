@@ -34,7 +34,9 @@
         .options { display: grid; gap: 12px; }
         .option { display: grid; grid-template-columns: 42px 1fr; gap: 12px; align-items: center; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; cursor: pointer; background: white; }
         .option input { width: 20px; height: 20px; justify-self: center; }
-        .option img { width: 100%; max-height: 120px; object-fit: contain; display: block; }
+        .option img { width: 100%; max-height: 120px; object-fit: contain; display: block; transition: transform .18s ease; }
+        .image-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .image-tools button { padding: 8px 10px; background: #e2e8f0; color: #1f2937; }
         .actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
         button, .button { border: 0; border-radius: 6px; padding: 11px 16px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
         .secondary { background: #e2e8f0; color: #1f2937; }
@@ -99,11 +101,15 @@
                             <div class="options">
                                 <% for (OpcionEjercicio opcion : respuesta.getEjercicio().getOpciones()) { %>
                                     <label class="option">
-                                        <input type="checkbox" name="<%= opcion.getLetra().name() %>" <%= MiPruebaServlet.seleccionada(respuesta, opcion.getLetra()) ? "checked" : "" %>/>
+                                        <input type="radio" name="opcion" value="<%= opcion.getLetra().name() %>" <%= MiPruebaServlet.seleccionada(respuesta, opcion.getLetra()) ? "checked" : "" %>/>
                                         <span>
                                             <strong>Opcion <%= opcion.getLetra().name() %></strong>
                                             <% if (opcion.getImagenOpcion() != null) { %>
-                                                <img src="<%= request.getContextPath() %>/<%= opcion.getImagenOpcion() %>" alt="Opcion <%= opcion.getLetra().name() %>"/>
+                                                <img class="rotatable" data-rotation="0" src="<%= request.getContextPath() %>/<%= opcion.getImagenOpcion() %>" alt="Opcion <%= opcion.getLetra().name() %>"/>
+                                                <div class="image-tools">
+                                                    <button type="button" onclick="rotar(this, -90)">Izq.</button>
+                                                    <button type="button" onclick="rotar(this, 90)">Der.</button>
+                                                </div>
                                             <% } %>
                                         </span>
                                     </label>
@@ -123,5 +129,15 @@
             </section>
         <% } %>
     </main>
+    <script>
+        function rotar(button, grados) {
+            const box = button.closest('.model, .option');
+            const img = box.querySelector('.rotatable');
+            const actual = parseInt(img.dataset.rotation || '0', 10);
+            const nuevo = (actual + grados + 360) % 360;
+            img.dataset.rotation = nuevo;
+            img.style.transform = 'rotate(' + nuevo + 'deg)';
+        }
+    </script>
 </body>
 </html>

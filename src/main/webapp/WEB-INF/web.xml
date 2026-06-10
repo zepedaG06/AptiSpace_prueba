@@ -63,6 +63,20 @@
         <url-pattern>/plantilla-wizard</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>EvaluadorGestionServlet</servlet-name>
+        <servlet-class>com.aptispace.web.EvaluadorGestionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EvaluadorGestionServlet</servlet-name>
+        <url-pattern>/grupos</url-pattern>
+        <url-pattern>/evaluados</url-pattern>
+        <url-pattern>/asignaciones</url-pattern>
+        <url-pattern>/resultados</url-pattern>
+        <url-pattern>/catalogo</url-pattern>
+        <url-pattern>/observaciones</url-pattern>
+    </servlet-mapping>
+
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>

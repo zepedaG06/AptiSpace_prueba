@@ -56,32 +56,32 @@
                     <div class="step">
                         <span class="num">2</span>
                         <div><strong>Crear grupo o espacio</strong><span>Genera un codigo para que los evaluados entren al espacio del psicologo.</span></div>
-                        <a class="button" href="m/GrupoEvaluacion">Grupos</a>
+                        <a class="button" href="grupos">Grupos</a>
                     </div>
                     <div class="step">
                         <span class="num">3</span>
                         <div><strong>Revisar evaluados</strong><span>Confirma datos personales, sexo, carrera, año y edad antes de asignar prueba.</span></div>
-                        <a class="button" href="m/Evaluado">Evaluados</a>
+                        <a class="button" href="evaluados">Evaluados</a>
                     </div>
                     <div class="step">
                         <span class="num">4</span>
                         <div><strong>Asignar e iniciar prueba</strong><span>Selecciona evaluado, prueba y usa iniciar para generar sus ejercicios.</span></div>
-                        <a class="button" href="m/AplicacionPrueba">Asignar</a>
+                        <a class="button" href="asignaciones">Asignar</a>
                     </div>
                     <div class="step">
                         <span class="num">5</span>
                         <div><strong>Revisar resultados y observaciones</strong><span>Consulta S2, aciertos, errores y registra notas clinicas o academicas.</span></div>
-                        <a class="button" href="m/ResultadoPrueba">Resultados</a>
+                        <a class="button" href="resultados">Resultados</a>
                     </div>
                 </div>
             </section>
             <aside class="panel">
-                <h3>Accesos de gestion</h3>
+                <h3>Seguimiento de prueba</h3>
                 <div class="quick">
-                    <a href="m/Prueba"><strong>Pruebas</strong><span class="note">Editar tiempo, cantidad y estado.</span></a>
-                    <a href="m/Ejercicio"><strong>Ejercicios</strong><span class="note">Ajustar imagen modelo y enunciado.</span></a>
-                    <a href="m/OpcionEjercicio"><strong>Opciones</strong><span class="note">Cambiar imagenes A-E y correctas.</span></a>
-                    <a href="m/ObservacionPsicologica"><strong>Observaciones</strong><span class="note">Agregar seguimiento profesional.</span></a>
+                    <a href="asignaciones"><strong>Reaplicaciones</strong><span class="note">Autoriza o inicia de nuevo una prueba cuando haga falta.</span></a>
+                    <a href="grupos"><strong>Integrantes</strong><span class="note">Consulta quienes entraron con el codigo del espacio.</span></a>
+                    <a href="resultados"><strong>Resultados</strong><span class="note">Revisa S2 y respuestas por estudiante.</span></a>
+                    <a href="observaciones"><strong>Observaciones</strong><span class="note">Agregar seguimiento profesional.</span></a>
                 </div>
                 <div class="code">
                     <strong>Codigo del espacio</strong>
