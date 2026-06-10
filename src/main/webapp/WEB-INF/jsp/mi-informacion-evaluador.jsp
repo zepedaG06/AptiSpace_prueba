@@ -34,10 +34,13 @@
         form { display: grid; gap: 12px; }
         label { display: grid; gap: 6px; font-weight: 700; color: #334155; }
         input { width: 100%; border: 1px solid #cbd5df; border-radius: 6px; padding: 10px; font: inherit; background: white; }
+        input[type="file"] { padding: 8px; }
         .notice { margin-bottom: 14px; padding: 12px; border-radius: 8px; background: #e8f6ef; color: #166534; border: 1px solid #b9e2ca; }
         .error { margin-bottom: 14px; padding: 12px; border-radius: 8px; background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
         .profile-card { display: grid; gap: 12px; }
-        .avatar { width: 62px; height: 62px; border-radius: 8px; display: grid; place-items: center; background: #1f6f8b; color: white; font-size: 24px; font-weight: 800; }
+        .avatar { width: 82px; height: 82px; border-radius: 8px; display: grid; place-items: center; background: #1f6f8b; color: white; font-size: 28px; font-weight: 800; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .file-note { color: #64748b; font-size: 13px; font-weight: 400; line-height: 1.35; }
         .profile-row { border: 1px solid #e3e9ef; border-radius: 8px; background: #f8fafc; padding: 11px; }
         .profile-row span { display: block; color: #64748b; font-size: 12px; margin-bottom: 4px; }
         .profile-row strong { color: #203a43; }
@@ -59,16 +62,26 @@
         <section class="layout">
             <div class="panel">
                 <h2>Editar cuenta</h2>
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     <label>Nombres <input name="nombres" value="<%= h(usuario == null ? "" : usuario.getNombres()) %>" required/></label>
                     <label>Apellidos <input name="apellidos" value="<%= h(usuario == null ? "" : usuario.getApellidos()) %>" required/></label>
                     <label>Correo <input type="email" name="correo" value="<%= h(usuario == null ? "" : usuario.getCorreo()) %>" required/></label>
+                    <label>Foto de perfil
+                        <input type="file" name="fotoPerfil" accept="image/png,image/jpeg,image/gif,image/webp"/>
+                        <span class="file-note">PNG, JPG, GIF o WEBP. Si no seleccionas una nueva, se conserva la actual.</span>
+                    </label>
                     <label>Nueva contrasena <input type="password" name="nuevaContrasena" minlength="6" placeholder="Dejar vacio para conservar la actual"/></label>
                     <button class="button primary" type="submit">Guardar cambios</button>
                 </form>
             </div>
             <aside class="panel profile-card">
-                <div class="avatar"><%= usuario == null || usuario.getNombres() == null || usuario.getNombres().isBlank() ? "E" : h(usuario.getNombres().substring(0, 1).toUpperCase()) %></div>
+                <div class="avatar">
+                    <% if (usuario != null && usuario.getFotoPerfil() != null && !usuario.getFotoPerfil().isBlank()) { %>
+                        <img src="<%= request.getContextPath() %>/<%= h(usuario.getFotoPerfil()) %>" alt="Foto de perfil"/>
+                    <% } else { %>
+                        <%= usuario == null || usuario.getNombres() == null || usuario.getNombres().isBlank() ? "E" : h(usuario.getNombres().substring(0, 1).toUpperCase()) %>
+                    <% } %>
+                </div>
                 <div>
                     <h2><%= h(usuario == null ? "" : usuario.getNombres() + " " + usuario.getApellidos()) %></h2>
                     <p class="muted">Cuenta de evaluador activa para gestionar grupos, plantillas, asignaciones y resultados.</p>

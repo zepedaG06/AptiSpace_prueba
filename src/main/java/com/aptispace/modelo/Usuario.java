@@ -9,7 +9,7 @@ import org.openxava.annotations.*;
 
 @Entity
 @Table(name = "usuario", uniqueConstraints = @UniqueConstraint(columnNames = "nombre_usuario"))
-@View(members = "datos [nombreUsuario, contrasena, estado, fechaCreacion]; persona [nombres, apellidos, correo]; evaluado; roles")
+@View(members = "datos [nombreUsuario, contrasena, estado, fechaCreacion]; persona [nombres, apellidos, correo, fotoPerfil]; evaluado; roles")
 @Tab(properties = "nombreUsuario, nombres, apellidos, correo, estado, fechaCreacion")
 public class Usuario {
     public enum EstadoUsuario { ACTIVO, INACTIVO, BLOQUEADO }
@@ -36,6 +36,10 @@ public class Usuario {
     @Size(max = 120)
     @Column(name = "correo", length = 120)
     private String correo;
+
+    @Stereotype("PHOTO")
+    @Column(name = "foto_perfil", length = 255)
+    private String fotoPerfil;
 
     @Required @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
@@ -64,6 +68,8 @@ public class Usuario {
     public void setApellidos(String apellidos) { this.apellidos = apellidos; }
     public String getCorreo() { return correo; }
     public void setCorreo(String correo) { this.correo = correo; }
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
     public EstadoUsuario getEstado() { return estado; }
     public void setEstado(EstadoUsuario estado) { this.estado = estado; }
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
