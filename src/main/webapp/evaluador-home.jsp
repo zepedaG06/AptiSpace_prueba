@@ -25,7 +25,7 @@
         .step span, .note { color: #52606d; line-height: 1.4; }
         a.button { border-radius: 6px; padding: 10px 13px; background: #1f6f8b; color: white; font-weight: 700; text-decoration: none; white-space: nowrap; }
         .secondary { background: #dfe7ee !important; color: #243441 !important; }
-        .quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .quick { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .quick a { min-height: 96px; border: 1px solid #d7e0e7; border-radius: 8px; padding: 14px; text-decoration: none; color: #1f2937; background: #f8fafc; }
         .quick strong { display: block; margin-bottom: 6px; color: #203a43; }
         .code { margin-top: 14px; padding: 14px; border-radius: 8px; background: #f8fafc; border: 1px dashed #a9bac7; }
@@ -83,6 +83,7 @@
             <aside class="panel">
                 <h3>Seguimiento de prueba</h3>
                 <div class="quick">
+                    <a href="mi-informacion-evaluador"><strong>Mi informacion</strong><span class="note">Consulta y actualiza tus datos de cuenta de evaluador.</span></a>
                     <a href="asignaciones"><strong>Reaplicaciones</strong><span class="note">Autoriza o inicia de nuevo una prueba cuando haga falta.</span></a>
                     <a href="grupos"><strong>Integrantes</strong><span class="note">Consulta quienes entraron con el codigo del espacio.</span></a>
                     <a href="resultados"><strong>Resultados</strong><span class="note">Revisa S2 y respuestas por estudiante.</span></a>

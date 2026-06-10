@@ -73,6 +73,7 @@ public class SesionAptiSpaceFilter implements Filter {
     private boolean esRutaEvaluador(String path) {
         return path.equals("/admin-home.jsp")
             || path.equals("/evaluador-home.jsp")
+            || path.equals("/mi-informacion-evaluador")
             || path.equals("/plantilla-wizard")
             || path.equals("/grupos")
             || path.equals("/evaluados")

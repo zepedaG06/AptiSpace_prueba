@@ -55,6 +55,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>MiInformacionEvaluadorServlet</servlet-name>
+        <servlet-class>com.aptispace.web.MiInformacionEvaluadorServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MiInformacionEvaluadorServlet</servlet-name>
+        <url-pattern>/mi-informacion-evaluador</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>PlantillaWizardServlet</servlet-name>
         <servlet-class>com.aptispace.web.PlantillaWizardServlet</servlet-class>
     </servlet>
