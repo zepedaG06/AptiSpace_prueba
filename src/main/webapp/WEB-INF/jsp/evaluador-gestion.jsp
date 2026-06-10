@@ -38,9 +38,11 @@
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2937; background: #eef3f7; }
-        header { padding: 30px 7vw 28px; background: linear-gradient(135deg, rgba(20, 42, 71, .92), rgba(42, 92, 116, .86)), url("<%= request.getContextPath() %>/images/s2/modelo-01.svg"); background-size: cover; background-position: center; color: white; }
+        header { padding: 26px 7vw; background: #203a43; color: white; }
+        .header-inner { display: grid; grid-template-columns: minmax(0, 1fr) 180px; gap: 22px; align-items: center; }
         header h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: 0; }
         header p { margin: 0; color: #dbe8ef; line-height: 1.5; }
+        .evaluator-mark { min-height: 112px; border: 1px solid rgba(255,255,255,.22); border-radius: 8px; background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(219,232,239,.86)), url("<%= request.getContextPath() %>/images/s2/modelo-01.svg"); background-size: cover; background-position: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.34); }
         main { max-width: 1180px; margin: 22px auto 44px; padding: 0 20px; }
         nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
         nav a, .button { border: 0; border-radius: 6px; padding: 10px 13px; background: #dfe7ee; color: #243441; font-weight: 700; text-decoration: none; cursor: pointer; }
@@ -157,14 +159,20 @@
         .template-table td:nth-child(3) form { background: #f8fafc; border: 1px solid #d7e0e7; border-radius: 8px; padding: 12px; }
         .template-table td:nth-child(4) { align-self: end; }
         @media (max-width: 900px) { .grid, .assignment-layout, .observations-layout { grid-template-columns: 1fr; } .checks { grid-template-columns: 1fr; } .assignments-head, .observation-toolbar { align-items: stretch; flex-direction: column; } .assignments-head .button { width: 100%; } }
+        @media (max-width: 720px) { .header-inner { grid-template-columns: 1fr; } .evaluator-mark { min-height: 86px; } }
         @media (max-width: 980px) { .template-table tr { grid-template-columns: 1fr; } }
         @media (max-width: 700px) { .top { align-items: stretch; flex-direction: column; } .top a { width: 100%; } .template-head, .template-title { grid-template-columns: 1fr; display: grid; } .template-grid { grid-template-columns: 1fr; } .edit-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <header>
-        <h1>Entorno del Evaluador</h1>
-        <p>Gestion moderna por codigo de grupo, asignaciones, catalogo, resultados y observaciones.</p>
+        <div class="header-inner">
+            <div>
+                <h1>Entorno del Evaluador</h1>
+                <p>Gestion moderna por codigo de grupo, asignaciones, catalogo, resultados y observaciones.</p>
+            </div>
+            <div class="evaluator-mark" aria-hidden="true"></div>
+        </div>
     </header>
     <main>
         <div class="top">
