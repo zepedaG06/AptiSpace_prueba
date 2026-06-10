@@ -38,7 +38,7 @@
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2937; background: #eef3f7; }
-        header { padding: 26px 7vw; background: #203a43; color: white; }
+        header { padding: 30px 7vw 28px; background: linear-gradient(135deg, rgba(20, 42, 71, .92), rgba(42, 92, 116, .86)), url("<%= request.getContextPath() %>/images/s2/modelo-01.svg"); background-size: cover; background-position: center; color: white; }
         header h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: 0; }
         header p { margin: 0; color: #dbe8ef; line-height: 1.5; }
         main { max-width: 1180px; margin: 22px auto 44px; padding: 0 20px; }

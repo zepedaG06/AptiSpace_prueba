@@ -8,7 +8,7 @@
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2937; background: #eef3f7; }
-        header { padding: 30px 7vw 28px; background: #203a43; color: white; }
+        header { padding: 34px 7vw 32px; background: linear-gradient(135deg, rgba(20, 42, 71, .92), rgba(42, 92, 116, .86)), url("images/s2/modelo-01.svg"); background-size: cover; background-position: center; color: white; }
         header h1 { margin: 0 0 8px; font-size: 34px; letter-spacing: 0; }
         header p { margin: 0; max-width: 820px; line-height: 1.5; color: #dbe8ef; }
         main { max-width: 1180px; margin: 24px auto 44px; padding: 0 20px; }
