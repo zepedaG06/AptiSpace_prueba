@@ -45,8 +45,10 @@
         nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
         nav a, .button { border: 0; border-radius: 6px; padding: 10px 13px; background: #dfe7ee; color: #243441; font-weight: 700; text-decoration: none; cursor: pointer; }
         nav a.active, .button.primary { background: #1f6f8b; color: white; }
-        .top { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 16px; }
-        .top a { color: #1f6f8b; font-weight: 700; text-decoration: none; }
+        .top { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 16px; padding: 12px; background: white; border: 1px solid #d7e0e7; border-radius: 8px; }
+        .top a { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 6px; padding: 10px 13px; font-weight: 700; text-decoration: none; }
+        .top .back-link { background: #1f6f8b; color: white; }
+        .top .logout-link { background: #eef3f7; color: #203a43; border: 1px solid #cbd5df; }
         .grid { display: grid; grid-template-columns: .9fr 1.3fr; gap: 16px; align-items: start; }
         .panel { background: white; border: 1px solid #d7e0e7; border-radius: 8px; padding: 18px; }
         h2 { margin: 0 0 12px; color: #203a43; }
@@ -108,7 +110,7 @@
         .template-table td:nth-child(4) { align-self: end; }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .checks { grid-template-columns: 1fr; } }
         @media (max-width: 980px) { .template-table tr { grid-template-columns: 1fr; } }
-        @media (max-width: 700px) { .template-head, .template-title { grid-template-columns: 1fr; display: grid; } .template-grid { grid-template-columns: 1fr; } .edit-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 700px) { .top { align-items: stretch; flex-direction: column; } .top a { width: 100%; } .template-head, .template-title { grid-template-columns: 1fr; display: grid; } .template-grid { grid-template-columns: 1fr; } .edit-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -118,8 +120,8 @@
     </header>
     <main>
         <div class="top">
-            <a href="<%= request.getContextPath() %>/evaluador-home.jsp">Volver al panel</a>
-            <a href="<%= request.getContextPath() %>/logout">Cerrar sesion</a>
+            <a class="back-link" href="<%= request.getContextPath() %>/evaluador-home.jsp">Volver al panel</a>
+            <a class="logout-link" href="<%= request.getContextPath() %>/logout">Cerrar sesion</a>
         </div>
         <nav>
             <a class="<%= "grupos".equals(seccion) ? "active" : "" %>" href="grupos">Grupos</a>
