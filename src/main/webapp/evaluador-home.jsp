@@ -80,6 +80,7 @@
                 <div class="quick">
                     <a href="asignaciones"><strong>Reaplicaciones</strong><span class="note">Autoriza o inicia de nuevo una prueba cuando haga falta.</span></a>
                     <a href="grupos"><strong>Integrantes</strong><span class="note">Consulta quienes entraron con el codigo del espacio.</span></a>
+                    <a href="plantillas"><strong>Plantillas</strong><span class="note">Edita o borra plantillas guardadas.</span></a>
                     <a href="resultados"><strong>Resultados</strong><span class="note">Revisa S2 y respuestas por estudiante.</span></a>
                     <a href="observaciones"><strong>Observaciones</strong><span class="note">Agregar seguimiento profesional.</span></a>
                 </div>

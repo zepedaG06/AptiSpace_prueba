@@ -78,6 +78,7 @@ public class SesionAptiSpaceFilter implements Filter {
             || path.equals("/evaluados")
             || path.equals("/asignaciones")
             || path.equals("/resultados")
+            || path.equals("/plantillas")
             || path.equals("/catalogo")
             || path.equals("/observaciones")
             || path.startsWith("/m/Usuario")

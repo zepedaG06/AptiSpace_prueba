@@ -82,6 +82,7 @@
             <a class="<%= "grupos".equals(seccion) ? "active" : "" %>" href="grupos">Grupos</a>
             <a class="<%= "evaluados".equals(seccion) ? "active" : "" %>" href="evaluados">Evaluados</a>
             <a class="<%= "asignaciones".equals(seccion) ? "active" : "" %>" href="asignaciones">Asignaciones</a>
+            <a class="<%= "plantillas".equals(seccion) ? "active" : "" %>" href="plantillas">Plantillas</a>
             <a class="<%= "resultados".equals(seccion) ? "active" : "" %>" href="resultados">Resultados</a>
             <a class="<%= "observaciones".equals(seccion) ? "active" : "" %>" href="observaciones">Observaciones</a>
         </nav>
@@ -117,7 +118,7 @@
         <section class="panel table-wrap">
             <h2>Evaluados unidos a tus grupos</h2>
             <table><tr><th>Nombre</th><th>Correo</th><th>Edad</th><th>Sexo</th><th>Carrera</th><th>Grupos</th></tr>
-            <% for (Evaluado e : evaluados) { %><tr><td><%= nombre(e) %></td><td><%= e.getUsuario() == null ? "" : h(e.getUsuario().getCorreo()) %></td><td><%= h(e.getEdad()) %></td><td><%= h(e.getSexo()) %></td><td><%= h(e.getCarrera()) %><br/><span class="muted">Ano <%= h(e.getAnioCarrera()) %></span></td><td><% for (GrupoEvaluacion g : e.getGrupos()) { %><%= h(g.getNombre()) %><br/><% } %></td></tr><% } %>
+            <% for (Evaluado e : evaluados) { %><tr><td><%= nombre(e) %></td><td><%= e.getUsuario() == null ? "" : h(e.getUsuario().getCorreo()) %></td><td><%= h(e.getEdad()) %></td><td><%= h(e.getSexo()) %></td><td><%= h(e.getCarrera()) %><br/><span class="muted">Año <%= h(e.getAnioCarrera()) %></span></td><td><% for (GrupoEvaluacion g : e.getGrupos()) { %><%= h(g.getNombre()) %><br/><% } %></td></tr><% } %>
             </table>
         </section>
         <% } else if ("asignaciones".equals(seccion)) { %>
@@ -145,6 +146,49 @@
                 </td></tr><% } %>
                 </table>
             </div>
+        </section>
+        <% } else if ("plantillas".equals(seccion)) { %>
+        <section class="panel table-wrap">
+            <h2>Plantillas guardadas</h2>
+            <table><tr><th>Plantilla</th><th>Configuracion</th><th>Editar</th><th>Borrar</th></tr>
+            <% for (Prueba p : pruebas) { %>
+                <tr>
+                    <td>
+                        <strong><%= h(p.getNombre()) %></strong><br/>
+                        <span class="muted"><%= h(p.getDescripcion()) %></span>
+                    </td>
+                    <td>
+                        <%= h(p.getTiempoLimite()) %> min<br/>
+                        <%= h(p.getCantidadEjercicios()) %> ejercicios<br/>
+                        <%= p.getEjercicios().size() %> cargados<br/>
+                        <%= h(p.getEstado()) %>
+                    </td>
+                    <td>
+                        <form method="post">
+                            <input type="hidden" name="accion" value="actualizarPrueba"/>
+                            <input type="hidden" name="pruebaId" value="<%= p.getId() %>"/>
+                            <label>Nombre <input name="nombre" value="<%= h(p.getNombre()) %>" required/></label>
+                            <label>Descripcion <textarea name="descripcion"><%= h(p.getDescripcion()) %></textarea></label>
+                            <label>Tiempo <input type="number" min="1" max="180" name="tiempoLimite" value="<%= h(p.getTiempoLimite()) %>"/></label>
+                            <label>Cantidad <input type="number" min="1" max="200" name="cantidadEjercicios" value="<%= h(p.getCantidadEjercicios()) %>"/></label>
+                            <label>Estado <select name="estado">
+                                <option value="ACTIVA" <%= Prueba.EstadoPrueba.ACTIVA.equals(p.getEstado()) ? "selected" : "" %>>ACTIVA</option>
+                                <option value="INACTIVA" <%= Prueba.EstadoPrueba.INACTIVA.equals(p.getEstado()) ? "selected" : "" %>>INACTIVA</option>
+                                <option value="ARCHIVADA" <%= Prueba.EstadoPrueba.ARCHIVADA.equals(p.getEstado()) ? "selected" : "" %>>ARCHIVADA</option>
+                            </select></label>
+                            <button class="button primary" type="submit">Guardar</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" onsubmit="return confirm('Borrar esta plantilla solo si no fue asignada. ¿Continuar?');">
+                            <input type="hidden" name="accion" value="eliminarPrueba"/>
+                            <input type="hidden" name="pruebaId" value="<%= p.getId() %>"/>
+                            <button class="button" type="submit">Borrar</button>
+                        </form>
+                    </td>
+                </tr>
+            <% } %>
+            </table>
         </section>
         <% } else if ("resultados".equals(seccion)) { %>
         <section class="panel table-wrap">
@@ -206,28 +250,6 @@
                 <table><tr><th>Evaluado</th><th>Fecha</th><th>Comentario</th></tr>
                 <% for (ObservacionPsicologica o : observaciones) { %><tr><td><%= nombre(o.getAplicacion().getEvaluado()) %></td><td><%= h(o.getFechaObservacion()) %></td><td><%= h(o.getComentario()) %></td></tr><% } %>
                 </table>
-            </div>
-        </section>
-        <% } else { %>
-        <section class="grid">
-            <div class="panel">
-                <h2>Crear prueba</h2>
-                <form method="post">
-                    <input type="hidden" name="accion" value="crearPrueba"/>
-                    <label>Nombre <input name="nombre" required/></label>
-                    <label>Descripcion <textarea name="descripcion"></textarea></label>
-                    <label>Tiempo limite <input type="number" min="1" max="180" name="tiempoLimite" value="30"/></label>
-                    <label>Cantidad de ejercicios <input type="number" min="1" max="200" name="cantidadEjercicios" value="8"/></label>
-                    <label>Estado <select name="estado"><option>ACTIVA</option><option>INACTIVA</option><option>ARCHIVADA</option></select></label>
-                    <button class="button primary" type="submit">Guardar prueba</button>
-                </form>
-            </div>
-            <div class="panel table-wrap">
-                <h2>Pruebas y ejercicios</h2>
-                <table><tr><th>Prueba</th><th>Tiempo</th><th>Ejercicios</th><th>Estado</th></tr>
-                <% for (Prueba p : pruebas) { %><tr><td><%= h(p.getNombre()) %><br/><span class="muted"><%= h(p.getDescripcion()) %></span></td><td><%= h(p.getTiempoLimite()) %> min</td><td><%= p.getEjercicios().size() %></td><td><%= h(p.getEstado()) %></td></tr><% } %>
-                </table>
-                <p class="muted">Para cargar imagen modelo y opciones A-E usa Crear plantilla visual desde el panel.</p>
             </div>
         </section>
         <% } %>

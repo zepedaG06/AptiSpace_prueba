@@ -73,6 +73,7 @@
         <url-pattern>/evaluados</url-pattern>
         <url-pattern>/asignaciones</url-pattern>
         <url-pattern>/resultados</url-pattern>
+        <url-pattern>/plantillas</url-pattern>
         <url-pattern>/catalogo</url-pattern>
         <url-pattern>/observaciones</url-pattern>
     </servlet-mapping>

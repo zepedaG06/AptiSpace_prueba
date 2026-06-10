@@ -43,6 +43,8 @@ public class EvaluadorGestionServlet extends HttpServlet {
         String accion = valor(request, "accion");
         if ("crearGrupo".equals(accion)) crearGrupo(em, request);
         else if ("crearPrueba".equals(accion)) crearPrueba(em, request);
+        else if ("actualizarPrueba".equals(accion)) actualizarPrueba(em, request);
+        else if ("eliminarPrueba".equals(accion)) eliminarPrueba(em, request);
         else if ("asignarPrueba".equals(accion)) asignarPrueba(em, request);
         else if ("iniciarPrueba".equals(accion)) iniciarPrueba(em, request);
         else if ("iniciarTodas".equals(accion)) iniciarTodas(em, request);
@@ -75,6 +77,7 @@ public class EvaluadorGestionServlet extends HttpServlet {
         if (path.endsWith("/evaluados")) return "evaluados";
         if (path.endsWith("/asignaciones")) return "asignaciones";
         if (path.endsWith("/resultados")) return "resultados";
+        if (path.endsWith("/plantillas")) return "plantillas";
         if (path.endsWith("/observaciones")) return "observaciones";
         return "asignaciones";
     }
@@ -99,6 +102,29 @@ public class EvaluadorGestionServlet extends HttpServlet {
         prueba.setCantidadEjercicios(entero(request, "cantidadEjercicios", 8));
         prueba.setEstado(Prueba.EstadoPrueba.valueOf(valor(request, "estado", "ACTIVA")));
         em.persist(prueba);
+    }
+
+    private void actualizarPrueba(EntityManager em, HttpServletRequest request) {
+        Prueba prueba = em.find(Prueba.class, largo(request, "pruebaId"));
+        if (prueba == null) throw new IllegalArgumentException("No existe la plantilla indicada.");
+        prueba.setNombre(requerido(request, "nombre"));
+        prueba.setDescripcion(valor(request, "descripcion"));
+        prueba.setTiempoLimite(entero(request, "tiempoLimite", 30));
+        prueba.setCantidadEjercicios(entero(request, "cantidadEjercicios", 1));
+        prueba.setEstado(Prueba.EstadoPrueba.valueOf(valor(request, "estado", "ACTIVA")));
+        em.merge(prueba);
+    }
+
+    private void eliminarPrueba(EntityManager em, HttpServletRequest request) {
+        Prueba prueba = em.find(Prueba.class, largo(request, "pruebaId"));
+        if (prueba == null) throw new IllegalArgumentException("No existe la plantilla indicada.");
+        Long usos = em.createQuery("select count(a) from AplicacionPrueba a where a.prueba = :prueba", Long.class)
+            .setParameter("prueba", prueba)
+            .getSingleResult();
+        if (usos > 0) {
+            throw new IllegalArgumentException("No se puede borrar una plantilla que ya fue asignada. Cambiala a INACTIVA.");
+        }
+        em.remove(prueba);
     }
 
     private void asignarPrueba(EntityManager em, HttpServletRequest request) {
