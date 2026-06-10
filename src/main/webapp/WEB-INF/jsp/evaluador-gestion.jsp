@@ -65,7 +65,29 @@
         .metric strong { color: #203a43; font-size: 26px; }
         details { border: 1px solid #d7e0e7; border-radius: 8px; background: #f8fafc; padding: 10px 12px; margin-top: 8px; }
         summary { cursor: pointer; font-weight: 700; color: #203a43; }
+        .template-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+        .template-list { display: grid; gap: 14px; }
+        .template-card { border: 1px solid #d7e0e7; border-radius: 8px; background: white; padding: 16px; }
+        .template-title { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; }
+        .template-title h3 { margin: 0 0 6px; color: #203a43; }
+        .pill { display: inline-block; border-radius: 999px; padding: 5px 9px; background: #e2e8f0; color: #334155; font-weight: 700; font-size: 12px; }
+        .template-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+        .template-edit { background: #f8fafc; }
+        .template-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+        .edit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+        .template-table { display: block; border-collapse: separate; background: transparent; }
+        .template-table tbody { display: grid; gap: 14px; }
+        .template-table tr { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(180px, .6fr) minmax(280px, 1fr) auto; gap: 14px; border: 1px solid #d7e0e7; border-radius: 8px; background: white; padding: 16px; }
+        .template-table tr:first-child { display: none; }
+        .template-table td { border-bottom: 0; padding: 0; }
+        .template-table td:first-child strong { display: block; color: #203a43; font-size: 18px; margin-bottom: 6px; }
+        .template-table td:nth-child(2) { color: #475569; line-height: 1.7; }
+        .template-table td:nth-child(2)::before { content: "Configuración"; display: block; color: #203a43; font-weight: 700; margin-bottom: 4px; }
+        .template-table td:nth-child(3) form { background: #f8fafc; border: 1px solid #d7e0e7; border-radius: 8px; padding: 12px; }
+        .template-table td:nth-child(4) { align-self: end; }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .checks { grid-template-columns: 1fr; } }
+        @media (max-width: 980px) { .template-table tr { grid-template-columns: 1fr; } }
+        @media (max-width: 700px) { .template-head, .template-title { grid-template-columns: 1fr; display: grid; } .edit-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -148,9 +170,21 @@
             </div>
         </section>
         <% } else if ("plantillas".equals(seccion)) { %>
-        <section class="panel table-wrap">
-            <h2>Plantillas guardadas</h2>
-            <table><tr><th>Plantilla</th><th>Configuracion</th><th>Editar</th><th>Borrar</th></tr>
+        <section class="panel templates-panel">
+            <div class="template-head">
+                <div>
+                    <h2>Plantillas guardadas</h2>
+                    <p class="muted">Administra las pruebas visuales disponibles para asignar a tus grupos.</p>
+                </div>
+                <a class="button primary" href="<%= request.getContextPath() %>/plantilla-wizard">Crear nueva plantilla</a>
+            </div>
+            <div class="metrics">
+                <div class="metric"><span>Total</span><strong><%= pruebas.size() %></strong></div>
+                <div class="metric"><span>Activas</span><strong><%= pruebas.stream().filter(p -> Prueba.EstadoPrueba.ACTIVA.equals(p.getEstado())).count() %></strong></div>
+                <div class="metric"><span>Inactivas</span><strong><%= pruebas.stream().filter(p -> Prueba.EstadoPrueba.INACTIVA.equals(p.getEstado())).count() %></strong></div>
+                <div class="metric"><span>Archivadas</span><strong><%= pruebas.stream().filter(p -> Prueba.EstadoPrueba.ARCHIVADA.equals(p.getEstado())).count() %></strong></div>
+            </div>
+            <table class="template-table"><tr><th>Plantilla</th><th>Configuracion</th><th>Editar</th><th>Borrar</th></tr>
             <% for (Prueba p : pruebas) { %>
                 <tr>
                     <td>
