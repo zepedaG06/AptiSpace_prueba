@@ -68,6 +68,30 @@
         .error { margin-bottom: 14px; padding: 12px; border-radius: 8px; background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
         .row-actions { display: flex; flex-wrap: wrap; gap: 8px; }
         .row-actions form { display: inline; }
+        .assignment-layout { display: grid; grid-template-columns: minmax(290px, .8fr) minmax(0, 1.35fr); gap: 16px; align-items: start; }
+        .assignment-card { padding: 0; overflow: hidden; }
+        .assignment-hero { padding: 18px; background: #f8fafc; border-bottom: 1px solid #d7e0e7; }
+        .assignment-hero h2 { margin-bottom: 6px; }
+        .assignment-hero p { margin: 0; line-height: 1.45; }
+        .assignment-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+        .assignment-stat { border: 1px solid #d7e0e7; border-radius: 8px; background: white; padding: 11px; }
+        .assignment-stat span { display: block; color: #64748b; font-size: 12px; margin-bottom: 4px; }
+        .assignment-stat strong { color: #203a43; font-size: 22px; }
+        .assignment-form { padding: 18px; }
+        .assignment-form .field-note { color: #64748b; font-size: 13px; line-height: 1.35; margin-top: -2px; }
+        .assignment-toggle { border: 1px solid #d7e0e7; border-radius: 8px; background: #f8fafc; padding: 10px; }
+        .assignment-submit { width: 100%; min-height: 44px; }
+        .assignments-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 14px; }
+        .assignments-head h2 { margin-bottom: 4px; }
+        .assignments-head p { margin: 0; line-height: 1.4; }
+        .assignments-head form { margin: 0; }
+        .assignment-table { border-collapse: separate; border-spacing: 0 10px; background: transparent; }
+        .assignment-table th { border-bottom: 0; padding: 0 10px 2px; }
+        .assignment-table td { background: #f8fafc; border-top: 1px solid #d7e0e7; border-bottom: 1px solid #d7e0e7; padding: 12px 10px; }
+        .assignment-table td:first-child { border-left: 1px solid #d7e0e7; border-radius: 8px 0 0 8px; }
+        .assignment-table td:last-child { border-right: 1px solid #d7e0e7; border-radius: 0 8px 8px 0; }
+        .assignment-table strong { color: #203a43; }
+        .status-badge { display: inline-block; border-radius: 999px; padding: 5px 9px; background: #e2e8f0; color: #334155; font-weight: 700; font-size: 12px; }
         .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
         .metric { border: 1px solid #d7e0e7; border-radius: 8px; background: #f8fafc; padding: 14px; }
         .metric span { display: block; color: #64748b; margin-bottom: 6px; }
@@ -108,7 +132,7 @@
         .template-table td:nth-child(2)::before { content: "Configuración"; display: block; color: #203a43; font-weight: 700; margin-bottom: 4px; }
         .template-table td:nth-child(3) form { background: #f8fafc; border: 1px solid #d7e0e7; border-radius: 8px; padding: 12px; }
         .template-table td:nth-child(4) { align-self: end; }
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .checks { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { .grid, .assignment-layout { grid-template-columns: 1fr; } .checks { grid-template-columns: 1fr; } .assignments-head { align-items: stretch; flex-direction: column; } .assignments-head .button { width: 100%; } }
         @media (max-width: 980px) { .template-table tr { grid-template-columns: 1fr; } }
         @media (max-width: 700px) { .top { align-items: stretch; flex-direction: column; } .top a { width: 100%; } .template-head, .template-title { grid-template-columns: 1fr; display: grid; } .template-grid { grid-template-columns: 1fr; } .edit-grid { grid-template-columns: 1fr; } }
     </style>
@@ -167,25 +191,48 @@
             </table>
         </section>
         <% } else if ("asignaciones".equals(seccion)) { %>
-        <section class="grid">
-            <div class="panel">
-                <h2>Asignar prueba</h2>
-                <form method="post">
+        <section class="assignment-layout">
+            <div class="panel assignment-card">
+                <div class="assignment-hero">
+                    <h2>Asignar prueba</h2>
+                    <p class="muted">Selecciona una plantilla y el grupo que recibira la evaluacion.</p>
+                    <div class="assignment-stats">
+                        <div class="assignment-stat"><span>Plantillas</span><strong><%= pruebas.size() %></strong></div>
+                        <div class="assignment-stat"><span>Grupos</span><strong><%= grupos.size() %></strong></div>
+                    </div>
+                </div>
+                <form class="assignment-form" method="post">
                     <input type="hidden" name="accion" value="asignarPrueba"/>
-                    <label>Prueba <select name="pruebaId" required><% for (Prueba p : pruebas) { %><option value="<%= p.getId() %>"><%= h(p.getNombre()) %></option><% } %></select></label>
-                    <label>Grupo <select name="grupoId" required><option value="">Seleccionar grupo</option><% for (GrupoEvaluacion g : grupos) { %><option value="<%= g.getId() %>"><%= h(g.getNombre()) %> (<%= h(g.getCodigo()) %>) - <%= g.getEvaluados().size() %> unidos</option><% } %></select></label>
-                    <label class="inline"><input type="checkbox" name="reaplicacion"/> Autorizar reaplicacion</label>
-                    <button class="button primary" type="submit">Asignar</button>
+                    <label>Prueba
+                        <select name="pruebaId" required>
+                            <% for (Prueba p : pruebas) { %><option value="<%= p.getId() %>"><%= h(p.getNombre()) %> · <%= h(p.getCantidadEjercicios()) %> ejercicios · <%= h(p.getTiempoLimite()) %> min</option><% } %>
+                        </select>
+                        <span class="field-note">Usa una plantilla activa y con ejercicios cargados.</span>
+                    </label>
+                    <label>Grupo
+                        <select name="grupoId" required>
+                            <option value="">Seleccionar grupo</option>
+                            <% for (GrupoEvaluacion g : grupos) { %><option value="<%= g.getId() %>"><%= h(g.getNombre()) %> · <%= h(g.getCodigo()) %> · <%= g.getEvaluados().size() %> unidos</option><% } %>
+                        </select>
+                        <span class="field-note">La asignacion se creara para todos los evaluados unidos al grupo.</span>
+                    </label>
+                    <label class="inline assignment-toggle"><input type="checkbox" name="reaplicacion"/> Autorizar reaplicacion</label>
+                    <button class="button primary assignment-submit" type="submit">Asignar prueba al grupo</button>
                 </form>
             </div>
             <div class="panel table-wrap">
-                <h2>Asignaciones</h2>
-                <form method="post" style="margin-bottom:12px;">
-                    <input type="hidden" name="accion" value="iniciarTodas"/>
-                    <button class="button primary" type="submit">Iniciar todas las asignadas</button>
-                </form>
-                <table><tr><th>Evaluado</th><th>Prueba</th><th>Estado</th><th>Acciones</th></tr>
-                <% for (AplicacionPrueba a : aplicaciones) { %><tr><td><%= nombre(a.getEvaluado()) %></td><td><%= h(a.getPrueba()) %></td><td><%= h(a.getEstado()) %></td><td class="row-actions">
+                <div class="assignments-head">
+                    <div>
+                        <h2>Asignaciones</h2>
+                        <p class="muted">Controla el inicio y cierre de las pruebas preparadas.</p>
+                    </div>
+                    <form method="post">
+                        <input type="hidden" name="accion" value="iniciarTodas"/>
+                        <button class="button primary" type="submit">Iniciar todas</button>
+                    </form>
+                </div>
+                <table class="assignment-table"><tr><th>Evaluado</th><th>Prueba</th><th>Estado</th><th>Acciones</th></tr>
+                <% for (AplicacionPrueba a : aplicaciones) { %><tr><td><strong><%= nombre(a.getEvaluado()) %></strong></td><td><%= h(a.getPrueba()) %></td><td><span class="status-badge"><%= h(a.getEstado()) %></span></td><td class="row-actions">
                     <form method="post"><input type="hidden" name="accion" value="iniciarPrueba"/><input type="hidden" name="aplicacionId" value="<%= a.getId() %>"/><button class="button" type="submit">Iniciar</button></form>
                     <form method="post"><input type="hidden" name="accion" value="finalizarPrueba"/><input type="hidden" name="aplicacionId" value="<%= a.getId() %>"/><button class="button" type="submit">Finalizar</button></form>
                 </td></tr><% } %>
