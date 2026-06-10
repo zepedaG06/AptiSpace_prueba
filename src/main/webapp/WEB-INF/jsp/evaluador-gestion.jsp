@@ -6,6 +6,13 @@
         return String.valueOf(v).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
     String nombre(Evaluado e) { return e == null ? "" : h(e.getApellidos() + ", " + e.getNombres()); }
+    String imagenPortada(Prueba p) {
+        if (p == null || p.getEjercicios() == null) return "";
+        for (Ejercicio ejercicio : p.getEjercicios()) {
+            if (ejercicio.getImagenModelo() != null && !ejercicio.getImagenModelo().isBlank()) return h(ejercicio.getImagenModelo());
+        }
+        return "";
+    }
     boolean marcada(RespuestaEvaluado r, String letra) {
         if ("A".equals(letra)) return r.isOpcionA();
         if ("B".equals(letra)) return r.isOpcionB();
@@ -66,15 +73,29 @@
         details { border: 1px solid #d7e0e7; border-radius: 8px; background: #f8fafc; padding: 10px 12px; margin-top: 8px; }
         summary { cursor: pointer; font-weight: 700; color: #203a43; }
         .template-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
-        .template-list { display: grid; gap: 14px; }
-        .template-card { border: 1px solid #d7e0e7; border-radius: 8px; background: white; padding: 16px; }
-        .template-title { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; }
-        .template-title h3 { margin: 0 0 6px; color: #203a43; }
+        .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; align-items: start; }
+        .template-card { border: 1px solid #d7e0e7; border-radius: 8px; background: white; overflow: hidden; min-width: 0; }
+        .template-card:hover { border-color: #a7bac8; box-shadow: 0 8px 22px rgba(32, 58, 67, .10); }
+        .template-preview { height: 150px; background: #f1f5f9; display: grid; place-items: center; border-bottom: 1px solid #e3e9ef; overflow: hidden; }
+        .template-preview img { width: 100%; height: 100%; object-fit: contain; padding: 14px; background: #f8fafc; }
+        .template-placeholder { width: 74px; height: 56px; border: 2px solid #c7d4df; border-radius: 7px; display: grid; place-items: center; color: #597184; font-size: 22px; font-weight: 800; background: white; }
+        .template-body { padding: 13px; display: grid; gap: 11px; }
+        .template-title { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+        .template-title h3 { margin: 0 0 5px; color: #203a43; font-size: 16px; line-height: 1.25; overflow-wrap: anywhere; }
+        .template-title p { margin: 0; font-size: 13px; line-height: 1.35; }
         .pill { display: inline-block; border-radius: 999px; padding: 5px 9px; background: #e2e8f0; color: #334155; font-weight: 700; font-size: 12px; }
-        .template-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-        .template-edit { background: #f8fafc; }
-        .template-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
-        .edit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+        .pill.active { background: #dcfce7; color: #166534; }
+        .pill.inactive { background: #fef3c7; color: #92400e; }
+        .pill.archived { background: #e2e8f0; color: #475569; }
+        .template-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .template-meta span { border: 1px solid #e2e8f0; border-radius: 7px; background: #f8fafc; padding: 8px 7px; color: #64748b; font-size: 12px; line-height: 1.2; }
+        .template-meta strong { display: block; color: #203a43; font-size: 15px; margin-bottom: 2px; }
+        .template-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .template-actions form { display: inline; }
+        .template-edit { border-top: 1px solid #e3e9ef; border-radius: 0; background: #f8fafc; margin: 0; }
+        .template-edit summary { padding: 11px 13px; }
+        .template-edit form { padding: 0 13px 13px; }
+        .edit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         .template-table { display: block; border-collapse: separate; background: transparent; }
         .template-table tbody { display: grid; gap: 14px; }
         .template-table tr { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(180px, .6fr) minmax(280px, 1fr) auto; gap: 14px; border: 1px solid #d7e0e7; border-radius: 8px; background: white; padding: 16px; }
@@ -87,7 +108,7 @@
         .template-table td:nth-child(4) { align-self: end; }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .checks { grid-template-columns: 1fr; } }
         @media (max-width: 980px) { .template-table tr { grid-template-columns: 1fr; } }
-        @media (max-width: 700px) { .template-head, .template-title { grid-template-columns: 1fr; display: grid; } .edit-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 700px) { .template-head, .template-title { grid-template-columns: 1fr; display: grid; } .template-grid { grid-template-columns: 1fr; } .edit-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -184,27 +205,51 @@
                 <div class="metric"><span>Inactivas</span><strong><%= pruebas.stream().filter(p -> Prueba.EstadoPrueba.INACTIVA.equals(p.getEstado())).count() %></strong></div>
                 <div class="metric"><span>Archivadas</span><strong><%= pruebas.stream().filter(p -> Prueba.EstadoPrueba.ARCHIVADA.equals(p.getEstado())).count() %></strong></div>
             </div>
-            <table class="template-table"><tr><th>Plantilla</th><th>Configuracion</th><th>Editar</th><th>Borrar</th></tr>
-            <% for (Prueba p : pruebas) { %>
-                <tr>
-                    <td>
-                        <strong><%= h(p.getNombre()) %></strong><br/>
-                        <span class="muted"><%= h(p.getDescripcion()) %></span>
-                    </td>
-                    <td>
-                        <%= h(p.getTiempoLimite()) %> min<br/>
-                        <%= h(p.getCantidadEjercicios()) %> ejercicios<br/>
-                        <%= p.getEjercicios().size() %> cargados<br/>
-                        <%= h(p.getEstado()) %>
-                    </td>
-                    <td>
+            <div class="template-grid">
+            <% for (Prueba p : pruebas) {
+                String portada = imagenPortada(p);
+                String estadoClase = Prueba.EstadoPrueba.ACTIVA.equals(p.getEstado()) ? "active" : (Prueba.EstadoPrueba.INACTIVA.equals(p.getEstado()) ? "inactive" : "archived");
+            %>
+                <article class="template-card">
+                    <div class="template-preview">
+                        <% if (!portada.isEmpty()) { %>
+                            <img src="<%= request.getContextPath() %>/<%= portada %>" alt="Vista previa de <%= h(p.getNombre()) %>"/>
+                        <% } else { %>
+                            <div class="template-placeholder">S2</div>
+                        <% } %>
+                    </div>
+                    <div class="template-body">
+                        <div class="template-title">
+                            <div>
+                                <h3><%= h(p.getNombre()) %></h3>
+                                <p class="muted"><%= h(p.getDescripcion()) %></p>
+                            </div>
+                            <span class="pill <%= estadoClase %>"><%= h(p.getEstado()) %></span>
+                        </div>
+                        <div class="template-meta">
+                            <span><strong><%= h(p.getTiempoLimite()) %></strong>min</span>
+                            <span><strong><%= h(p.getCantidadEjercicios()) %></strong>indicados</span>
+                            <span><strong><%= p.getEjercicios().size() %></strong>cargados</span>
+                        </div>
+                        <div class="template-actions">
+                            <form method="post" onsubmit="return confirm('Borrar esta plantilla solo si no fue asignada. ¿Continuar?');">
+                                <input type="hidden" name="accion" value="eliminarPrueba"/>
+                                <input type="hidden" name="pruebaId" value="<%= p.getId() %>"/>
+                                <button class="button" type="submit">Borrar</button>
+                            </form>
+                        </div>
+                    </div>
+                    <details class="template-edit">
+                        <summary>Editar plantilla</summary>
                         <form method="post">
                             <input type="hidden" name="accion" value="actualizarPrueba"/>
                             <input type="hidden" name="pruebaId" value="<%= p.getId() %>"/>
                             <label>Nombre <input name="nombre" value="<%= h(p.getNombre()) %>" required/></label>
                             <label>Descripcion <textarea name="descripcion"><%= h(p.getDescripcion()) %></textarea></label>
-                            <label>Tiempo <input type="number" min="1" max="180" name="tiempoLimite" value="<%= h(p.getTiempoLimite()) %>"/></label>
-                            <label>Cantidad <input type="number" min="1" max="200" name="cantidadEjercicios" value="<%= h(p.getCantidadEjercicios()) %>"/></label>
+                            <div class="edit-grid">
+                                <label>Tiempo <input type="number" min="1" max="180" name="tiempoLimite" value="<%= h(p.getTiempoLimite()) %>"/></label>
+                                <label>Cantidad <input type="number" min="1" max="200" name="cantidadEjercicios" value="<%= h(p.getCantidadEjercicios()) %>"/></label>
+                            </div>
                             <label>Estado <select name="estado">
                                 <option value="ACTIVA" <%= Prueba.EstadoPrueba.ACTIVA.equals(p.getEstado()) ? "selected" : "" %>>ACTIVA</option>
                                 <option value="INACTIVA" <%= Prueba.EstadoPrueba.INACTIVA.equals(p.getEstado()) ? "selected" : "" %>>INACTIVA</option>
@@ -212,17 +257,10 @@
                             </select></label>
                             <button class="button primary" type="submit">Guardar</button>
                         </form>
-                    </td>
-                    <td>
-                        <form method="post" onsubmit="return confirm('Borrar esta plantilla solo si no fue asignada. ¿Continuar?');">
-                            <input type="hidden" name="accion" value="eliminarPrueba"/>
-                            <input type="hidden" name="pruebaId" value="<%= p.getId() %>"/>
-                            <button class="button" type="submit">Borrar</button>
-                        </form>
-                    </td>
-                </tr>
+                    </details>
+                </article>
             <% } %>
-            </table>
+            </div>
         </section>
         <% } else if ("resultados".equals(seccion)) { %>
         <section class="panel table-wrap">
