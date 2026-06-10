@@ -92,6 +92,30 @@
         .assignment-table td:last-child { border-right: 1px solid #d7e0e7; border-radius: 0 8px 8px 0; }
         .assignment-table strong { color: #203a43; }
         .status-badge { display: inline-block; border-radius: 999px; padding: 5px 9px; background: #e2e8f0; color: #334155; font-weight: 700; font-size: 12px; }
+        .observations-layout { display: grid; grid-template-columns: minmax(300px, .85fr) minmax(0, 1.25fr); gap: 16px; align-items: start; }
+        .observation-compose { padding: 0; overflow: hidden; }
+        .observation-head { padding: 18px; background: #f8fafc; border-bottom: 1px solid #d7e0e7; }
+        .observation-head h2 { margin-bottom: 6px; }
+        .observation-head p { margin: 0; line-height: 1.45; }
+        .observation-form { padding: 18px; }
+        .observation-form textarea { min-height: 190px; line-height: 1.45; }
+        .observation-context { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+        .observation-context div { border: 1px solid #d7e0e7; border-radius: 8px; background: white; padding: 11px; }
+        .observation-context span { display: block; color: #64748b; font-size: 12px; margin-bottom: 4px; }
+        .observation-context strong { color: #203a43; font-size: 22px; }
+        .observation-board { display: grid; gap: 14px; }
+        .observation-toolbar { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+        .observation-toolbar h2 { margin-bottom: 4px; }
+        .observation-toolbar p { margin: 0; line-height: 1.4; }
+        .observation-count { border: 1px solid #d7e0e7; border-radius: 8px; background: #f8fafc; padding: 10px 12px; color: #203a43; font-weight: 800; white-space: nowrap; }
+        .observation-list { display: grid; gap: 12px; }
+        .observation-card { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; border: 1px solid #d7e0e7; border-radius: 8px; background: #f8fafc; padding: 14px; }
+        .observation-avatar { width: 44px; height: 44px; border-radius: 8px; display: grid; place-items: center; background: #1f6f8b; color: white; font-weight: 800; }
+        .observation-card-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+        .observation-card h3 { margin: 0 0 3px; color: #203a43; font-size: 16px; line-height: 1.25; }
+        .observation-card p { margin: 0; line-height: 1.45; }
+        .observation-note { background: white; border: 1px solid #e3e9ef; border-radius: 8px; padding: 11px; color: #334155; overflow-wrap: anywhere; }
+        .observation-empty { border: 1px dashed #a9bac7; border-radius: 8px; background: #f8fafc; padding: 18px; color: #64748b; text-align: center; }
         .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
         .metric { border: 1px solid #d7e0e7; border-radius: 8px; background: #f8fafc; padding: 14px; }
         .metric span { display: block; color: #64748b; margin-bottom: 6px; }
@@ -132,7 +156,7 @@
         .template-table td:nth-child(2)::before { content: "Configuración"; display: block; color: #203a43; font-weight: 700; margin-bottom: 4px; }
         .template-table td:nth-child(3) form { background: #f8fafc; border: 1px solid #d7e0e7; border-radius: 8px; padding: 12px; }
         .template-table td:nth-child(4) { align-self: end; }
-        @media (max-width: 900px) { .grid, .assignment-layout { grid-template-columns: 1fr; } .checks { grid-template-columns: 1fr; } .assignments-head { align-items: stretch; flex-direction: column; } .assignments-head .button { width: 100%; } }
+        @media (max-width: 900px) { .grid, .assignment-layout, .observations-layout { grid-template-columns: 1fr; } .checks { grid-template-columns: 1fr; } .assignments-head, .observation-toolbar { align-items: stretch; flex-direction: column; } .assignments-head .button { width: 100%; } }
         @media (max-width: 980px) { .template-table tr { grid-template-columns: 1fr; } }
         @media (max-width: 700px) { .top { align-items: stretch; flex-direction: column; } .top a { width: 100%; } .template-head, .template-title { grid-template-columns: 1fr; display: grid; } .template-grid { grid-template-columns: 1fr; } .edit-grid { grid-template-columns: 1fr; } }
     </style>
@@ -356,21 +380,60 @@
             </table>
         </section>
         <% } else if ("observaciones".equals(seccion)) { %>
-        <section class="grid">
-            <div class="panel">
-                <h2>Nueva observacion</h2>
-                <form method="post">
+        <section class="observations-layout">
+            <div class="panel observation-compose">
+                <div class="observation-head">
+                    <h2>Registrar observacion</h2>
+                    <p class="muted">Documenta hallazgos, seguimiento o incidencias vinculadas a una aplicacion concreta.</p>
+                    <div class="observation-context">
+                        <div><span>Aplicaciones</span><strong><%= aplicaciones.size() %></strong></div>
+                        <div><span>Notas</span><strong><%= observaciones.size() %></strong></div>
+                    </div>
+                </div>
+                <form class="observation-form" method="post">
                     <input type="hidden" name="accion" value="crearObservacion"/>
-                    <label>Asignacion <select name="aplicacionId" required><% for (AplicacionPrueba a : aplicaciones) { %><option value="<%= a.getId() %>"><%= nombre(a.getEvaluado()) %> - <%= h(a.getPrueba()) %></option><% } %></select></label>
-                    <label>Comentario <textarea name="comentario" required></textarea></label>
-                    <button class="button primary" type="submit">Guardar observacion</button>
+                    <label>Aplicacion
+                        <select name="aplicacionId" required>
+                            <% for (AplicacionPrueba a : aplicaciones) { %><option value="<%= a.getId() %>"><%= nombre(a.getEvaluado()) %> · <%= h(a.getPrueba()) %> · <%= h(a.getEstado()) %></option><% } %>
+                        </select>
+                    </label>
+                    <label>Observacion <textarea name="comentario" required placeholder="Escribe una nota clara para seguimiento del evaluado..."></textarea></label>
+                    <button class="button primary assignment-submit" type="submit">Guardar observacion</button>
                 </form>
             </div>
-            <div class="panel table-wrap">
-                <h2>Historial</h2>
-                <table><tr><th>Evaluado</th><th>Fecha</th><th>Comentario</th></tr>
-                <% for (ObservacionPsicologica o : observaciones) { %><tr><td><%= nombre(o.getAplicacion().getEvaluado()) %></td><td><%= h(o.getFechaObservacion()) %></td><td><%= h(o.getComentario()) %></td></tr><% } %>
-                </table>
+            <div class="panel observation-board">
+                <div class="observation-toolbar">
+                    <div>
+                        <h2>Historial de observaciones</h2>
+                        <p class="muted">Consulta las notas recientes con contexto de estudiante, prueba y estado.</p>
+                    </div>
+                    <div class="observation-count"><%= observaciones.size() %> registradas</div>
+                </div>
+                <div class="observation-list">
+                    <% if (observaciones.isEmpty()) { %>
+                        <div class="observation-empty">Todavia no hay observaciones registradas.</div>
+                    <% } %>
+                    <% for (ObservacionPsicologica o : observaciones) {
+                        AplicacionPrueba app = o.getAplicacion();
+                        Evaluado evaluado = app == null ? null : app.getEvaluado();
+                        String inicial = evaluado == null || evaluado.getNombres() == null || evaluado.getNombres().isBlank() ? "?" : h(evaluado.getNombres().substring(0, 1).toUpperCase());
+                    %>
+                        <article class="observation-card">
+                            <div class="observation-avatar"><%= inicial %></div>
+                            <div>
+                                <div class="observation-card-head">
+                                    <div>
+                                        <h3><%= nombre(evaluado) %></h3>
+                                        <p class="muted"><%= app == null ? "" : h(app.getPrueba()) %></p>
+                                    </div>
+                                    <span class="status-badge"><%= app == null ? "" : h(app.getEstado()) %></span>
+                                </div>
+                                <p class="muted"><%= h(o.getFechaObservacion()) %></p>
+                                <div class="observation-note"><%= h(o.getComentario()) %></div>
+                            </div>
+                        </article>
+                    <% } %>
+                </div>
             </div>
         </section>
         <% } %>
