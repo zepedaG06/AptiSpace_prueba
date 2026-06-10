@@ -16,19 +16,20 @@
         .top h2 { margin: 0; font-size: 22px; }
         .logout { color: #1f6f8b; font-weight: 700; text-decoration: none; }
         .layout { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; align-items: start; }
-        .panel { background: white; border: 1px solid #d7e0e7; border-radius: 8px; padding: 18px; }
-        .panel h3 { margin: 0 0 12px; color: #203a43; font-size: 19px; }
+        .panel { background: #d9edf4; border: 1px solid #6aaec5; border-radius: 8px; padding: 0; overflow: hidden; box-shadow: 0 10px 26px rgba(31, 111, 139, .12); }
+        .panel h3 { margin: 0; padding: 14px 18px; color: white; font-size: 19px; background: #1f6f8b; }
         .steps { display: grid; gap: 12px; }
-        .step { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; border: 1px solid #d7e0e7; border-radius: 8px; padding: 14px; background: #f8fafc; }
+        .steps, .quick, .code { margin: 18px; }
+        .step { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; border: 1px solid #b9d5df; border-radius: 8px; padding: 14px; background: #f6fbfd; }
         .num { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #1f6f8b; color: white; font-weight: 700; }
         .step strong { display: block; margin-bottom: 4px; color: #1f2937; }
         .step span, .note { color: #52606d; line-height: 1.4; }
         a.button { border-radius: 6px; padding: 10px 13px; background: #1f6f8b; color: white; font-weight: 700; text-decoration: none; white-space: nowrap; }
         .secondary { background: #dfe7ee !important; color: #243441 !important; }
         .quick { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        .quick a { min-height: 96px; border: 1px solid #d7e0e7; border-radius: 8px; padding: 14px; text-decoration: none; color: #1f2937; background: #f8fafc; }
+        .quick a { min-height: 96px; border: 1px solid #b9d5df; border-radius: 8px; padding: 14px; text-decoration: none; color: #1f2937; background: #f6fbfd; }
         .quick strong { display: block; margin-bottom: 6px; color: #203a43; }
-        .code { margin-top: 14px; padding: 14px; border-radius: 8px; background: #f8fafc; border: 1px dashed #a9bac7; }
+        .code { padding: 14px; border-radius: 8px; background: #eaf5f9; border: 1px dashed #6aaec5; }
         .code strong { color: #203a43; }
         @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } .step { grid-template-columns: 42px 1fr; } .step a { grid-column: 2; width: fit-content; } }
         @media (max-width: 620px) { .quick { grid-template-columns: 1fr; } .top { align-items: flex-start; flex-direction: column; } }
