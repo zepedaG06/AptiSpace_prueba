@@ -8,11 +8,9 @@
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2937; background: #eef3f7; }
-        header { padding: 28px 7vw; background: #203a43; color: white; }
-        .header-inner { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 24px; align-items: center; }
+        header { padding: 34px 7vw 32px; background: linear-gradient(135deg, rgba(20, 42, 71, .93), rgba(31, 111, 139, .82)), url("images/s2/modelo-03.svg"); background-size: cover; background-position: center; color: white; }
         header h1 { margin: 0 0 8px; font-size: 34px; letter-spacing: 0; }
         header p { margin: 0; max-width: 820px; line-height: 1.5; color: #dbe8ef; }
-        .evaluator-mark { min-height: 132px; border: 1px solid rgba(255,255,255,.22); border-radius: 8px; background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(219,232,239,.86)), url("images/s2/modelo-01.svg"); background-size: cover; background-position: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.34); }
         main { max-width: 1180px; margin: 24px auto 44px; padding: 0 20px; }
         .top { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 18px; }
         .top h2 { margin: 0; font-size: 22px; }
@@ -33,19 +31,13 @@
         .code { margin-top: 14px; padding: 14px; border-radius: 8px; background: #f8fafc; border: 1px dashed #a9bac7; }
         .code strong { color: #203a43; }
         @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } .step { grid-template-columns: 42px 1fr; } .step a { grid-column: 2; width: fit-content; } }
-        @media (max-width: 720px) { .header-inner { grid-template-columns: 1fr; } .evaluator-mark { min-height: 96px; } }
         @media (max-width: 620px) { .quick { grid-template-columns: 1fr; } .top { align-items: flex-start; flex-direction: column; } }
     </style>
 </head>
 <body>
     <header>
-        <div class="header-inner">
-            <div>
-                <h1>Entorno del Evaluador</h1>
-                <p>Controla el banco visual, organiza espacios por grupo, asigna pruebas y revisa resultados desde un flujo de trabajo unico.</p>
-            </div>
-            <div class="evaluator-mark" aria-hidden="true"></div>
-        </div>
+        <h1>Entorno del Evaluador</h1>
+        <p>Controla el banco visual, organiza espacios por grupo, asigna pruebas y revisa resultados desde un flujo de trabajo unico.</p>
     </header>
     <main>
         <div class="top">
