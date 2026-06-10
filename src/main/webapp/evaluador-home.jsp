@@ -55,21 +55,26 @@
                     </div>
                     <div class="step">
                         <span class="num">2</span>
+                        <div><strong>Gestionar plantillas</strong><span>Revisa las plantillas guardadas, edita sus datos o borra las que no fueron asignadas.</span></div>
+                        <a class="button" href="plantillas">Plantillas</a>
+                    </div>
+                    <div class="step">
+                        <span class="num">3</span>
                         <div><strong>Crear grupo o espacio</strong><span>Genera un codigo para que los evaluados entren al espacio del psicologo.</span></div>
                         <a class="button" href="grupos">Grupos</a>
                     </div>
                     <div class="step">
-                        <span class="num">3</span>
+                        <span class="num">4</span>
                         <div><strong>Revisar evaluados</strong><span>Confirma datos personales, sexo, carrera, año y edad antes de asignar prueba.</span></div>
                         <a class="button" href="evaluados">Evaluados</a>
                     </div>
                     <div class="step">
-                        <span class="num">4</span>
+                        <span class="num">5</span>
                         <div><strong>Asignar e iniciar prueba</strong><span>Selecciona evaluado, prueba y usa iniciar para generar sus ejercicios.</span></div>
                         <a class="button" href="asignaciones">Asignar</a>
                     </div>
                     <div class="step">
-                        <span class="num">5</span>
+                        <span class="num">6</span>
                         <div><strong>Revisar resultados y observaciones</strong><span>Consulta S2, aciertos, errores y registra notas clinicas o academicas.</span></div>
                         <a class="button" href="resultados">Resultados</a>
                     </div>
@@ -80,7 +85,6 @@
                 <div class="quick">
                     <a href="asignaciones"><strong>Reaplicaciones</strong><span class="note">Autoriza o inicia de nuevo una prueba cuando haga falta.</span></a>
                     <a href="grupos"><strong>Integrantes</strong><span class="note">Consulta quienes entraron con el codigo del espacio.</span></a>
-                    <a href="plantillas"><strong>Plantillas</strong><span class="note">Edita o borra plantillas guardadas.</span></a>
                     <a href="resultados"><strong>Resultados</strong><span class="note">Revisa S2 y respuestas por estudiante.</span></a>
                     <a href="observaciones"><strong>Observaciones</strong><span class="note">Agregar seguimiento profesional.</span></a>
                 </div>
