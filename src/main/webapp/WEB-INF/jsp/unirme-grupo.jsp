@@ -16,7 +16,7 @@
         body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #eef3f7; color: #1f2937; }
         header { padding: 24px 6vw; background: linear-gradient(135deg, rgba(31, 75, 93, .94), rgba(45, 156, 219, .76)), url("<%= request.getContextPath() %>/images/s2/modelo-06.svg"); background-size: cover; background-position: center; color: white; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
         header h1 { margin: 0; font-size: 24px; letter-spacing: 0; }
-        header a { color: #d8e5ee; text-decoration: none; font-weight: 700; }
+        header a { border-radius: 6px; background: #1f6f8b; color: white; text-decoration: none; font-weight: 700; padding: 10px 13px; }
         main { max-width: 860px; margin: 24px auto 40px; padding: 0 18px; }
         .panel { background: #d9edf4; border: 1px solid #6aaec5; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 26px rgba(31, 111, 139, .12); }
         .panel h2 { margin: 0; padding: 14px 18px; color: white; font-size: 20px; background: #1f6f8b; }
@@ -29,11 +29,11 @@
         input { width: 100%; min-height: 44px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px 11px; font: inherit; text-transform: uppercase; }
         .actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
         .button, button { border: 0; border-radius: 6px; padding: 11px 16px; font-weight: 700; cursor: pointer; text-decoration: none; }
-        .secondary { background: #e2e8f0; color: #1f2937; }
+        .secondary { background: #1f4b5d; color: white; border: 1px solid #17384d; }
         .primary { background: #1f6f8b; color: white; }
         .muted { color: #52606d; line-height: 1.45; }
         .group-list { display: grid; gap: 8px; }
-        .group-item { border: 1px solid #b9d5df; border-radius: 8px; background: #f6fbfd; padding: 12px; }
+        .group-item { display: block; border: 1px solid #b9d5df; border-radius: 8px; background: #f6fbfd; padding: 12px; color: #1f2937; text-decoration: none; }
         .group-item strong { color: #1f4b5d; }
         @media (max-width: 680px) { header { align-items: flex-start; flex-direction: column; } }
     </style>
@@ -65,7 +65,7 @@
                     <% } else { %>
                         <div class="group-list">
                         <% for (GrupoEvaluacion grupo : grupos) { %>
-                            <div class="group-item"><strong><%= grupo.getNombre() %></strong><br/><span class="muted">Codigo: <%= grupo.getCodigo() %></span></div>
+                            <a class="group-item" href="<%= request.getContextPath() %>/mi-grupo?id=<%= grupo.getId() %>"><strong><%= grupo.getNombre() %></strong><br/><span class="muted">Codigo: <%= grupo.getCodigo() %></span></a>
                         <% } %>
                         </div>
                     <% } %>

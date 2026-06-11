@@ -53,6 +53,7 @@
         <servlet-name>MiPerfilServlet</servlet-name>
         <url-pattern>/mi-perfil</url-pattern>
         <url-pattern>/unirme-grupo</url-pattern>
+        <url-pattern>/mi-grupo</url-pattern>
     </servlet-mapping>
 
     <servlet>

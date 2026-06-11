@@ -20,7 +20,7 @@
         body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #eef3f7; color: #1f2937; }
         header { padding: 22px 6vw; background: linear-gradient(135deg, rgba(31, 75, 93, .94), rgba(45, 156, 219, .76)), url("<%= request.getContextPath() %>/images/s2/modelo-06.svg"); background-size: cover; background-position: center; color: white; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
         header h1 { margin: 0; font-size: 24px; letter-spacing: 0; }
-        header a { color: #d8e5ee; text-decoration: none; font-weight: 700; }
+        header a { border-radius: 6px; background: #1f6f8b; color: white; text-decoration: none; font-weight: 700; padding: 10px 13px; }
         main { max-width: 1180px; margin: 24px auto 40px; padding: 0 18px; }
         .status { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 16px; color: #1f4b5d; background: #e8f4f8; border: 1px solid #9cc9d8; border-radius: 8px; padding: 12px; }
         .bar { height: 8px; background: #d9e2ec; border-radius: 999px; overflow: hidden; margin-bottom: 18px; }
@@ -39,7 +39,7 @@
         .image-tools button { padding: 8px 10px; background: #e2e8f0; color: #1f2937; }
         .actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
         button, .button { border: 0; border-radius: 6px; padding: 11px 16px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
-        .secondary { background: #e2e8f0; color: #1f2937; }
+        .secondary { background: #1f4b5d; color: white; border: 1px solid #17384d; }
         .primary { background: #1f6f8b; color: white; }
         .danger { background: #b42318; color: white; }
         .empty { max-width: 760px; }

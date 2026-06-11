@@ -14,7 +14,7 @@
         main { max-width: 1180px; margin: 24px auto 44px; padding: 0 20px; }
         .top { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 18px; }
         .top h2 { margin: 0; font-size: 22px; }
-        .logout { color: #1f6f8b; font-weight: 700; text-decoration: none; }
+        .logout { border-radius: 6px; background: #1f6f8b; color: white; font-weight: 700; text-decoration: none; padding: 10px 13px; }
         .layout { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; align-items: start; }
         .panel { background: #d9edf4; border: 1px solid #6aaec5; border-radius: 8px; padding: 0; overflow: hidden; box-shadow: 0 10px 26px rgba(31, 111, 139, .12); }
         .panel h3 { margin: 0; padding: 14px 18px; color: white; font-size: 19px; background: #1f6f8b; }

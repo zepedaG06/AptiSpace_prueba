@@ -21,6 +21,11 @@ public class MiPerfilServlet extends HttpServlet {
         request.setAttribute("usuarioCuenta", usuario);
         request.setAttribute("evaluado", usuario == null ? null : usuario.getEvaluado());
         request.setAttribute("grupos", usuario == null || usuario.getEvaluado() == null ? List.of() : gruposDelEvaluado(usuario.getEvaluado()));
+        if (request.getServletPath().endsWith("/mi-grupo")) {
+            request.setAttribute("grupo", grupoDelEvaluado(usuario == null ? null : usuario.getEvaluado(), largoOpcional(request, "id")));
+            request.getRequestDispatcher("/WEB-INF/jsp/mi-grupo.jsp").forward(request, response);
+            return;
+        }
         if (request.getServletPath().endsWith("/unirme-grupo")) {
             request.getRequestDispatcher("/WEB-INF/jsp/unirme-grupo.jsp").forward(request, response);
             return;
@@ -112,6 +117,22 @@ public class MiPerfilServlet extends HttpServlet {
         return query.getResultList();
     }
 
+    private GrupoEvaluacion grupoDelEvaluado(Evaluado evaluado, Long grupoId) {
+        if (evaluado == null || grupoId == null) return null;
+        EntityManager em = XPersistence.getManager();
+        TypedQuery<GrupoEvaluacion> query = em.createQuery(
+            "select distinct g from GrupoEvaluacion g left join fetch g.evaluados left join fetch g.psicologo where g.id = :grupoId and exists (select e from g.evaluados e where e.id = :evaluadoId)",
+            GrupoEvaluacion.class);
+        query.setParameter("grupoId", grupoId);
+        query.setParameter("evaluadoId", evaluado.getId());
+        try {
+            return query.getSingleResult();
+        }
+        catch (NoResultException ex) {
+            return null;
+        }
+    }
+
     private String valor(HttpServletRequest request, String nombre) {
         String valor = request.getParameter(nombre);
         return valor == null ? "" : valor.trim();
@@ -131,6 +152,17 @@ public class MiPerfilServlet extends HttpServlet {
         }
         catch (NumberFormatException ex) {
             throw new IllegalArgumentException("El campo " + nombre + " debe ser numerico.");
+        }
+    }
+
+    private Long largoOpcional(HttpServletRequest request, String nombre) {
+        String valor = valor(request, nombre);
+        if (valor.isEmpty()) return null;
+        try {
+            return Long.valueOf(valor);
+        }
+        catch (NumberFormatException ex) {
+            return null;
         }
     }
 
