@@ -36,7 +36,7 @@ Para variar la cantidad aplicada, editar la prueba y cambiar `cantidadEjercicios
 Cada nueva aplicacion toma una muestra aleatoria diferente del banco disponible.
 
 ## Ejecutar
-Desde `C:\Users\Casa\AptiSpace`:
+Desde ``:
 
 ```powershell
 mvn cargo:run
