@@ -45,7 +45,7 @@ mvn cargo:run
 URL local:
 
 ```text
-http://localhost:8080/AptiSpace
+
 ```
 
 Usuarios de prueba:
