@@ -21,6 +21,10 @@ public class MiPerfilServlet extends HttpServlet {
         request.setAttribute("usuarioCuenta", usuario);
         request.setAttribute("evaluado", usuario == null ? null : usuario.getEvaluado());
         request.setAttribute("grupos", usuario == null || usuario.getEvaluado() == null ? List.of() : gruposDelEvaluado(usuario.getEvaluado()));
+        if (request.getServletPath().endsWith("/unirme-grupo")) {
+            request.getRequestDispatcher("/WEB-INF/jsp/unirme-grupo.jsp").forward(request, response);
+            return;
+        }
         request.getRequestDispatcher("/WEB-INF/jsp/mi-perfil.jsp").forward(request, response);
     }
 
@@ -36,7 +40,7 @@ public class MiPerfilServlet extends HttpServlet {
             if ("unirGrupo".equals(valor(request, "accion"))) {
                 boolean unido = unirAGrupo(em, usuario.getEvaluado(), valor(request, "codigoEspacio"));
                 confirmarSiEsPropia(em, transaccionPropia);
-                response.sendRedirect(request.getContextPath() + "/mi-perfil?ok=" + (unido ? "grupo" : "ya-grupo"));
+                response.sendRedirect(request.getContextPath() + "/unirme-grupo?ok=" + (unido ? "grupo" : "ya-grupo"));
                 return;
             }
 

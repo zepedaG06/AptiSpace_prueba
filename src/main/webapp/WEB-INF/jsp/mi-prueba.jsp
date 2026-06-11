@@ -17,22 +17,22 @@
     <title>AptiSpace | Mi prueba</title>
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f4f7fb; color: #1f2937; }
-        header { padding: 22px 6vw; background: #17384d; color: white; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #eef3f7; color: #1f2937; }
+        header { padding: 22px 6vw; background: linear-gradient(135deg, rgba(31, 75, 93, .94), rgba(45, 156, 219, .76)), url("<%= request.getContextPath() %>/images/s2/modelo-06.svg"); background-size: cover; background-position: center; color: white; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
         header h1 { margin: 0; font-size: 24px; letter-spacing: 0; }
         header a { color: #d8e5ee; text-decoration: none; font-weight: 700; }
         main { max-width: 1180px; margin: 24px auto 40px; padding: 0 18px; }
-        .status { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 16px; color: #52606d; }
+        .status { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 16px; color: #1f4b5d; background: #e8f4f8; border: 1px solid #9cc9d8; border-radius: 8px; padding: 12px; }
         .bar { height: 8px; background: #d9e2ec; border-radius: 999px; overflow: hidden; margin-bottom: 18px; }
         .bar span { display: block; height: 100%; background: #1f6f8b; width: <%= total == 0 ? 0 : ((indice + 1) * 100 / total) %>%; }
-        .card { background: white; border: 1px solid #d9e2ec; border-radius: 8px; padding: 20px; box-shadow: 0 10px 28px rgba(31, 41, 55, .08); }
+        .card { background: #d9edf4; border: 1px solid #6aaec5; border-radius: 8px; padding: 20px; box-shadow: 0 10px 26px rgba(31, 111, 139, .12); }
         .question { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr); gap: 20px; align-items: start; }
-        .model { border: 1px solid #d9e2ec; border-radius: 8px; background: #f8fafc; padding: 16px; }
+        .model { border: 1px solid #b9d5df; border-radius: 8px; background: #f6fbfd; padding: 16px; }
         .model img { width: 100%; display: block; max-height: 430px; object-fit: contain; }
         .model h2 { margin: 0 0 12px; font-size: 20px; }
         .model p { margin: 0 0 14px; color: #52606d; line-height: 1.45; }
         .options { display: grid; gap: 12px; }
-        .option { display: grid; grid-template-columns: 42px 1fr; gap: 12px; align-items: center; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; cursor: pointer; background: white; }
+        .option { display: grid; grid-template-columns: 42px 1fr; gap: 12px; align-items: center; border: 1px solid #b9d5df; border-radius: 8px; padding: 10px; cursor: pointer; background: #f6fbfd; }
         .option input { width: 20px; height: 20px; justify-self: center; }
         .option img { width: 100%; max-height: 120px; object-fit: contain; display: block; transition: transform .18s ease; }
         .image-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
@@ -44,7 +44,7 @@
         .danger { background: #b42318; color: white; }
         .empty { max-width: 760px; }
         .result { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
-        .metric { border: 1px solid #d9e2ec; border-radius: 8px; padding: 14px; background: #f8fafc; }
+        .metric { border: 1px solid #b9d5df; border-radius: 8px; padding: 14px; background: #f6fbfd; }
         .metric strong { display: block; font-size: 24px; color: #17384d; }
         @media (max-width: 900px) { .question { grid-template-columns: 1fr; } .result { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 560px) { header { align-items: flex-start; flex-direction: column; } .result { grid-template-columns: 1fr; } }
