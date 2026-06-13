@@ -46,7 +46,7 @@ public class PlantillaWizardServlet extends HttpServlet {
                 ejercicio.setEnunciado(valor(request, "enunciado" + numero));
                 TipoRespuesta tipoRespuesta = TipoRespuesta.valueOf(valor(request, "tipoRespuesta" + numero, "UNICA"));
                 ejercicio.setTipoRespuesta(tipoRespuesta);
-                ejercicio.setImagenModelo(guardarArchivo(request, "imagenModelo" + numero));
+                ejercicio.setImagenModelo(guardarArchivoRequerido(request, "imagenModelo" + numero, "imagen modelo del ejercicio " + numero));
                 prueba.getEjercicios().add(ejercicio);
                 em.persist(ejercicio);
 
@@ -55,7 +55,7 @@ public class PlantillaWizardServlet extends HttpServlet {
                     OpcionEjercicio opcion = new OpcionEjercicio();
                     opcion.setEjercicio(ejercicio);
                     opcion.setLetra(letra);
-                    opcion.setImagenOpcion(guardarArchivo(request, "opcion" + numero + letra.name()));
+                    opcion.setImagenOpcion(guardarArchivoRequerido(request, "opcion" + numero + letra.name(), "imagen de opcion " + letra.name() + " del ejercicio " + numero));
                     boolean correcta = esCorrecta(request, numero, letra);
                     opcion.setEsCorrecta(correcta);
                     if (correcta) correctas++;
@@ -96,6 +96,12 @@ public class PlantillaWizardServlet extends HttpServlet {
         Files.createDirectories(carpeta);
         part.write(carpeta.resolve(nombreArchivo).toString());
         return "uploads/s2/" + nombreArchivo;
+    }
+
+    private String guardarArchivoRequerido(HttpServletRequest request, String nombreParte, String etiqueta) throws IOException, ServletException {
+        String ruta = guardarArchivo(request, nombreParte);
+        if (ruta == null) throw new IllegalArgumentException("Falta la " + etiqueta + ".");
+        return ruta;
     }
 
     private String extension(String nombre) {

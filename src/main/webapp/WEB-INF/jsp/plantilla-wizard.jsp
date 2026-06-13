@@ -25,7 +25,8 @@
         h2 { margin: 0 0 14px; font-size: 20px; color: #203a43; }
         .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
         .options { display: grid; grid-template-columns: repeat(5, minmax(135px, 1fr)); gap: 12px; }
-        .exercise { display: grid; gap: 16px; margin-top: 16px; padding: 16px; border: 1px solid #c5d8e2; border-left: 5px solid #1f6f8b; border-radius: 8px; background: white; }
+        .exercise { display: none; gap: 16px; margin-top: 16px; padding: 16px; border: 1px solid #c5d8e2; border-left: 5px solid #1f6f8b; border-radius: 8px; background: white; }
+        .exercise.active { display: grid; }
         .exercise:first-child { margin-top: 0; }
         .exercise h2 { margin: 0; padding-bottom: 8px; border-bottom: 1px solid #d7e0e7; }
         label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: #344453; }
@@ -53,7 +54,10 @@
         .preview { display: grid; border: 1px solid #d7e0e7; border-radius: 8px; background: #ffffff; height: 108px; padding: 8px; place-items: center; color: #6b7f8c; font-size: 12px; }
         .preview:empty::before { content: "Vista previa"; }
         .preview img { width: 100%; height: 100%; object-fit: contain; display: block; }
-        .model-preview { height: 160px; }
+        .model-preview { height: 132px; max-width: 360px; }
+        .exercise-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; padding: 12px; border: 1px solid #c5d8e2; border-radius: 8px; background: #edf5f8; }
+        .exercise-nav strong { color: #203a43; }
+        .exercise-nav div { display: flex; gap: 8px; flex-wrap: wrap; }
         @media (max-width: 900px) { .grid, .options { grid-template-columns: 1fr; } header { align-items: flex-start; flex-direction: column; } }
         @media (max-width: 560px) { .mode-control { grid-template-columns: 1fr; } }
     </style>
@@ -80,6 +84,13 @@
             <section>
                 <h2>2. Ejercicios de la prueba</h2>
                 <div id="ejercicios"></div>
+                <div class="exercise-nav">
+                    <strong id="exercise-counter">Ejercicio 1 de 1</strong>
+                    <div>
+                        <button class="secondary" type="button" id="prevExercise">Anterior</button>
+                        <button class="primary" type="button" id="nextExercise">Siguiente</button>
+                    </div>
+                </div>
             </section>
             <div class="actions">
                 <a class="button secondary" href="<%= request.getContextPath() %>/evaluador-home.jsp">Cancelar</a>
@@ -92,7 +103,7 @@
             <h2>Ejercicio __N__</h2>
             <div class="grid">
                 <label>Enunciado <textarea name="enunciado__N__" required>Seleccione las figuras que corresponden al desplazamiento indicado.</textarea></label>
-                <label>Imagen modelo <input name="imagenModelo__N__" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview model-preview"></span></label>
+                <label>Imagen modelo <input name="imagenModelo__N__" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview model-preview"></span></label>
                 <label class="answer-mode">Tipo de respuesta
                     <select name="tipoRespuesta__N__" onchange="actualizarModoRespuesta(__N__)">
                         <option value="UNICA">Solo una opcion correcta</option>
@@ -105,11 +116,11 @@
                 </label>
             </div>
             <div class="options">
-                <div class="option"><label>Opcion A <input name="opcion__N__A" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="A"/> Correcta</label></div>
-                <div class="option"><label>Opcion B <input name="opcion__N__B" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="B"/> Correcta</label></div>
-                <div class="option"><label>Opcion C <input name="opcion__N__C" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="C"/> Correcta</label></div>
-                <div class="option"><label>Opcion D <input name="opcion__N__D" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="D"/> Correcta</label></div>
-                <div class="option"><label>Opcion E <input name="opcion__N__E" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="E"/> Correcta</label></div>
+                <div class="option"><label>Opcion A <input name="opcion__N__A" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="A"/> Correcta</label></div>
+                <div class="option"><label>Opcion B <input name="opcion__N__B" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="B"/> Correcta</label></div>
+                <div class="option"><label>Opcion C <input name="opcion__N__C" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="C"/> Correcta</label></div>
+                <div class="option"><label>Opcion D <input name="opcion__N__D" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="D"/> Correcta</label></div>
+                <div class="option"><label>Opcion E <input name="opcion__N__E" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="E"/> Correcta</label></div>
             </div>
         </div>
     </template>
@@ -117,6 +128,10 @@
         const cantidad = document.getElementById('cantidadEjercicios');
         const contenedor = document.getElementById('ejercicios');
         const template = document.getElementById('tpl-ejercicio').innerHTML;
+        const counter = document.getElementById('exercise-counter');
+        const prevExercise = document.getElementById('prevExercise');
+        const nextExercise = document.getElementById('nextExercise');
+        let ejercicioActivo = 1;
         function renderEjercicios() {
             const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));
             const actuales = {};
@@ -135,6 +150,19 @@
             contenedor.querySelectorAll('input[name^="correcta"]').forEach(el => {
                 el.checked = actuales[el.name + ':' + el.value] === true || actuales[el.name + '[]:' + el.value] === true;
             });
+            ejercicioActivo = Math.min(ejercicioActivo, total);
+            mostrarEjercicio(ejercicioActivo);
+        }
+        function mostrarEjercicio(numero) {
+            const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));
+            ejercicioActivo = Math.max(1, Math.min(numero, total));
+            contenedor.querySelectorAll('.exercise').forEach((el, index) => {
+                el.classList.toggle('active', index + 1 === ejercicioActivo);
+            });
+            counter.textContent = 'Ejercicio ' + ejercicioActivo + ' de ' + total;
+            prevExercise.disabled = ejercicioActivo === 1;
+            nextExercise.textContent = ejercicioActivo === total ? 'Ultimo ejercicio' : 'Siguiente';
+            nextExercise.disabled = ejercicioActivo === total;
         }
         function actualizarModoRespuesta(numero) {
             const modo = document.querySelector('[name="tipoRespuesta' + numero + '"]');
@@ -175,6 +203,8 @@
         }
         cantidad.addEventListener('change', renderEjercicios);
         cantidad.addEventListener('input', renderEjercicios);
+        prevExercise.addEventListener('click', () => mostrarEjercicio(ejercicioActivo - 1));
+        nextExercise.addEventListener('click', () => mostrarEjercicio(ejercicioActivo + 1));
         renderEjercicios();
         document.getElementById('plantillaForm').addEventListener('submit', function (event) {
             const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));
@@ -185,15 +215,25 @@
                 if (marcadas.length === 0) errores.push('Ejercicio ' + i + ' sin respuesta correcta');
                 if (modo === 'UNICA' && marcadas.length !== 1) errores.push('Ejercicio ' + i + ' debe tener una sola correcta');
                 if (modo === 'MULTIPLE' && marcadas.length < 2) errores.push('Ejercicio ' + i + ' debe tener dos o mas correctas');
+                if (!archivoSeleccionado('imagenModelo' + i)) errores.push('Ejercicio ' + i + ' sin imagen modelo');
+                ['A', 'B', 'C', 'D', 'E'].forEach(letra => {
+                    if (!archivoSeleccionado('opcion' + i + letra)) errores.push('Ejercicio ' + i + ' sin imagen de opcion ' + letra);
+                });
             }
             if (errores.length) {
                 event.preventDefault();
+                const primerError = errores[0].match(/Ejercicio (\d+)/);
+                if (primerError) mostrarEjercicio(parseInt(primerError[1], 10));
                 const error = document.getElementById('client-error');
                 error.textContent = errores.join(', ') + '.';
                 error.style.display = 'block';
                 error.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
+        function archivoSeleccionado(nombre) {
+            const input = document.querySelector('[name="' + nombre + '"]');
+            return input && input.files && input.files.length > 0;
+        }
     </script>
 </body>
 </html>
