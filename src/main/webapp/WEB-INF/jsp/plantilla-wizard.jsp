@@ -51,10 +51,10 @@
         .mode-control button span { display: block; color: #52606d; font-size: 12px; line-height: 1.25; }
         .mode-control button.active { background: #1f6f8b; border-color: #1f6f8b; color: white; box-shadow: 0 6px 14px rgba(31, 111, 139, .20); }
         .mode-control button.active strong, .mode-control button.active span { color: white; }
-        .preview { display: grid; border: 1px solid #d7e0e7; border-radius: 8px; background: #ffffff; height: 108px; padding: 8px; place-items: center; color: #6b7f8c; font-size: 12px; }
+        .preview { display: grid; border: 1px solid #d7e0e7; border-radius: 8px; background: #ffffff; width: 100%; height: 108px; padding: 8px; place-items: center; color: #6b7f8c; font-size: 12px; overflow: hidden; }
         .preview:empty::before { content: "Vista previa"; }
-        .preview img { width: 100%; height: 100%; object-fit: contain; display: block; }
-        .model-preview { height: 132px; max-width: 360px; }
+        .preview img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+        .model-preview { width: 220px; max-width: 100%; height: 118px; justify-self: start; }
         .exercise-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; padding: 12px; border: 1px solid #c5d8e2; border-radius: 8px; background: #edf5f8; }
         .exercise-nav strong { color: #203a43; }
         .exercise-nav div { display: flex; gap: 8px; flex-wrap: wrap; }
