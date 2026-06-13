@@ -175,7 +175,6 @@
                     <input type="hidden" name="tipo" value="PSICOLOGO"/>
                     <label>Nombres <input name="nombres" required/></label>
                     <label>Apellidos <input name="apellidos" required/></label>
-                    <label>Correo <input name="correo" type="email"/></label>
                     <label>Correo <input name="correo" type="email" required autocomplete="email"/></label>
                     <label>Contrasena <input name="contrasena" type="password" autocomplete="new-password" required minlength="6"/></label>
                     <div class="actions"><button class="primary" type="submit">Crear evaluador</button></div>

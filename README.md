@@ -42,6 +42,28 @@ Desde ``:
 mvn cargo:run
 ```
 
+## PostgreSQL local
+La app esta configurada para guardar en PostgreSQL:
+
+```text
+Base: aptispace
+Usuario: aptispace
+Clave: aptispace123
+URL: jdbc:postgresql://localhost:5432/aptispace
+```
+
+Crear la base y el usuario con la clave del superusuario `postgres`:
+
+```powershell
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -f sql\postgresql_setup.sql
+```
+
+Si quieres crear el esquema manualmente:
+
+```powershell
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U aptispace -d aptispace -f sql\postgresql_schema.sql
+```
+
 URL local:
 
 ```text

@@ -47,9 +47,7 @@ public class AuthServlet extends HttpServlet {
             throw new IllegalArgumentException("La cuenta no pertenece al entorno seleccionado.");
         }
 
-        request.getSession(true).setAttribute("aptispace.usuario", encontrado.getNombreUsuario());
-        request.getSession(true).setAttribute("aptispace.tipo", tipo);
-        request.getSession(true).setAttribute("aptispace.admin", false);
+        guardarSesion(request, encontrado.getNombreUsuario(), tipo);
         response.sendRedirect(destino(request, tipo));
     }
 
@@ -82,9 +80,7 @@ public class AuthServlet extends HttpServlet {
             if ("EVALUADO".equals(tipo)) crearEvaluadoDesdeRegistro(em, request, nuevo);
 
             confirmarSiEsPropia(em, transaccionPropia);
-            request.getSession(true).setAttribute("aptispace.usuario", usuario);
-            request.getSession(true).setAttribute("aptispace.tipo", tipo);
-            request.getSession(true).setAttribute("aptispace.admin", false);
+            guardarSesion(request, usuario, tipo);
             response.sendRedirect(destino(request, tipo));
         }
         catch (RuntimeException ex) {
@@ -228,33 +224,25 @@ public class AuthServlet extends HttpServlet {
     }
 
     private void insertarRolSiNoExiste(EntityManager em, String nombre, String descripcion) {
-        em.createNativeQuery(
-            "merge into rol (nombre_rol, descripcion) key(nombre_rol) values (?, ?)")
-            .setParameter(1, nombre)
-            .setParameter(2, descripcion)
-            .executeUpdate();
+        guardarRol(em, nombre, descripcion);
     }
 
     private void insertarUsuarioSiNoExiste(EntityManager em, String usuario, String contrasena, String nombres, String apellidos, String correo) {
-        em.createNativeQuery(
-            "merge into usuario (nombre_usuario, contrasena, nombres, apellidos, correo, estado, fecha_creacion) "
-                + "key(nombre_usuario) values (?, ?, ?, ?, ?, 'ACTIVO', CURRENT_TIMESTAMP)")
-            .setParameter(1, usuario)
-            .setParameter(2, contrasena)
-            .setParameter(3, nombres)
-            .setParameter(4, apellidos)
-            .setParameter(5, correo)
-            .executeUpdate();
+        if (buscarUsuario(em, usuario) != null) return;
+        Usuario nuevo = new Usuario();
+        nuevo.setNombreUsuario(usuario);
+        nuevo.setContrasena(contrasena);
+        nuevo.setNombres(nombres);
+        nuevo.setApellidos(apellidos);
+        nuevo.setCorreo(correo);
+        em.persist(nuevo);
     }
 
     private void asignarRol(EntityManager em, String usuario, String rol) {
-        em.createNativeQuery(
-            "merge into usuario_rol (usuario_id, rol_id) key(usuario_id, rol_id) "
-                + "select u.id, r.id from usuario u, rol r "
-                + "where u.nombre_usuario = ? and r.nombre_rol = ?")
-            .setParameter(1, usuario)
-            .setParameter(2, rol)
-            .executeUpdate();
+        Usuario cuenta = buscarUsuario(em, usuario);
+        Rol rolEntidad = buscarRol(em, rol);
+        if (cuenta == null || rolEntidad == null) return;
+        cuenta.getRoles().add(rolEntidad);
     }
 
     private Usuario crearUsuarioDemoSiAplica(EntityManager em, String nombreUsuario, String contrasena) {
@@ -361,6 +349,13 @@ public class AuthServlet extends HttpServlet {
     private String destino(HttpServletRequest request, String tipo) {
         if ("EVALUADO".equals(tipo)) return request.getContextPath() + "/evaluado-home.jsp";
         return request.getContextPath() + "/evaluador-home.jsp";
+    }
+
+    private void guardarSesion(HttpServletRequest request, String usuario, String tipo) {
+        request.getSession(true).setAttribute("aptispace.usuario." + tipo, usuario);
+        request.getSession(true).setAttribute("aptispace.usuario", usuario);
+        request.getSession(true).setAttribute("aptispace.tipo", tipo);
+        request.getSession(true).setAttribute("aptispace.admin", false);
     }
 
     private String valor(HttpServletRequest request, String nombre) {

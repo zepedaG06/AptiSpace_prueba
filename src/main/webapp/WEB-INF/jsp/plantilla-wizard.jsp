@@ -11,30 +11,48 @@
     <title>AptiSpace | Crear plantilla</title>
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2937; background: #eef3f7; }
-        header { padding: 24px 6vw; background: #203a43; color: white; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
-        header h1 { margin: 0; font-size: 26px; letter-spacing: 0; }
-        header a { color: #dbe8ef; text-decoration: none; font-weight: 700; }
-        main { max-width: 1120px; margin: 24px auto 42px; padding: 0 18px; }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2937; background: #e8f0f5; }
+        header { padding: 28px 6vw; background: linear-gradient(135deg, #203a43 0%, #1f6f8b 100%); color: white; display: flex; justify-content: space-between; gap: 16px; align-items: center; border-bottom: 4px solid #6aaec5; }
+        header h1 { margin: 0; font-size: 28px; letter-spacing: 0; }
+        header a { color: white; text-decoration: none; font-weight: 700; border: 1px solid rgba(255,255,255,.35); border-radius: 6px; padding: 10px 13px; background: rgba(255,255,255,.10); }
+        main { max-width: 1180px; margin: 24px auto 42px; padding: 0 18px; }
         .notice { padding: 12px 14px; border-radius: 8px; margin-bottom: 14px; border: 1px solid #badbcc; background: #edf8f1; color: #0f5132; }
         .error { border-color: #f2b8b5; background: #fff1f0; color: #8a1f17; }
-        form { display: grid; gap: 16px; }
-        section { background: white; border: 1px solid #d7e0e7; border-radius: 8px; padding: 18px; }
+        form { display: grid; gap: 18px; }
+        section { background: #f8fbfd; border: 1px solid #c5d8e2; border-radius: 8px; padding: 0; overflow: hidden; box-shadow: 0 10px 26px rgba(32, 58, 67, .08); }
+        section > h2 { margin: 0; padding: 14px 18px; font-size: 20px; color: white; background: #203a43; border-bottom: 3px solid #1f6f8b; }
+        section > .grid, section > #ejercicios { padding: 18px; }
         h2 { margin: 0 0 14px; font-size: 20px; color: #203a43; }
         .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
         .options { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 12px; }
-        .exercise { display: grid; gap: 14px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #d7e0e7; }
+        .exercise { display: grid; gap: 16px; margin-top: 16px; padding: 16px; border: 1px solid #c5d8e2; border-left: 5px solid #1f6f8b; border-radius: 8px; background: white; }
+        .exercise:first-child { margin-top: 0; }
+        .exercise h2 { margin: 0; padding-bottom: 8px; border-bottom: 1px solid #d7e0e7; }
         label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: #344453; }
-        input, textarea { width: 100%; min-height: 42px; border: 1px solid #c5d0da; border-radius: 6px; padding: 9px 11px; font: inherit; background: white; }
+        input, textarea { width: 100%; min-height: 42px; border: 1px solid #b7c9d4; border-radius: 6px; padding: 9px 11px; font: inherit; background: white; }
+        input:focus, textarea:focus { outline: 2px solid rgba(31, 111, 139, .22); border-color: #1f6f8b; }
         textarea { min-height: 84px; resize: vertical; }
-        .option { border: 1px solid #d7e0e7; border-radius: 8px; padding: 12px; background: #f8fafc; }
+        .option { border: 1px solid #c5d8e2; border-radius: 8px; padding: 12px; background: #f3f8fb; display: grid; align-content: space-between; }
+        .option:hover { border-color: #6aaec5; background: #eef7fa; }
         .check { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-weight: 700; }
         .check input { width: 18px; min-height: 18px; }
         .actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
         .button, button { border: 0; border-radius: 6px; padding: 11px 16px; font-weight: 700; text-decoration: none; cursor: pointer; }
         .secondary { background: #dfe7ee; color: #243441; }
         .primary { background: #1f6f8b; color: white; }
+        .answer-mode { max-width: 420px; }
+        .answer-mode select { display: none; }
+        .mode-control { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; border: 1px solid #b7c9d4; border-radius: 8px; padding: 6px; background: #e8f0f5; }
+        .mode-control button { min-height: 52px; padding: 9px 10px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #344453; text-align: left; }
+        .mode-control button strong { display: block; color: #203a43; font-size: 14px; margin-bottom: 2px; }
+        .mode-control button span { display: block; color: #52606d; font-size: 12px; line-height: 1.25; }
+        .mode-control button.active { background: #1f6f8b; border-color: #1f6f8b; color: white; box-shadow: 0 6px 14px rgba(31, 111, 139, .20); }
+        .mode-control button.active strong, .mode-control button.active span { color: white; }
+        .preview { display: none; margin-top: 8px; border: 1px solid #d7e0e7; border-radius: 8px; background: white; min-height: 94px; padding: 8px; place-items: center; }
+        .preview img { width: 100%; max-height: 150px; object-fit: contain; display: block; }
+        .model-preview img { max-height: 220px; }
         @media (max-width: 900px) { .grid, .options { grid-template-columns: 1fr; } header { align-items: flex-start; flex-direction: column; } }
+        @media (max-width: 560px) { .mode-control { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -71,14 +89,24 @@
             <h2>Ejercicio __N__</h2>
             <div class="grid">
                 <label>Enunciado <textarea name="enunciado__N__" required>Seleccione las figuras que corresponden al desplazamiento indicado.</textarea></label>
-                <label>Imagen modelo <input name="imagenModelo__N__" type="file" accept="image/*" required/></label>
+                <label>Imagen modelo <input name="imagenModelo__N__" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview model-preview"></span></label>
+                <label class="answer-mode">Tipo de respuesta
+                    <select name="tipoRespuesta__N__" onchange="actualizarModoRespuesta(__N__)">
+                        <option value="UNICA">Solo una opcion correcta</option>
+                        <option value="MULTIPLE">Varias opciones correctas</option>
+                    </select>
+                    <span class="mode-control">
+                        <button class="active" type="button" data-mode="UNICA" onclick="seleccionarTipo(this, __N__, 'UNICA')"><strong>Unica</strong><span>Una respuesta correcta</span></button>
+                        <button type="button" data-mode="MULTIPLE" onclick="seleccionarTipo(this, __N__, 'MULTIPLE')"><strong>Multiple</strong><span>Dos o mas correctas</span></button>
+                    </span>
+                </label>
             </div>
             <div class="options">
-                <div class="option"><label>Opcion A <input name="opcion__N__A" type="file" accept="image/*" required/></label><label class="check"><input type="checkbox" name="correcta__N__A"/> Correcta</label></div>
-                <div class="option"><label>Opcion B <input name="opcion__N__B" type="file" accept="image/*" required/></label><label class="check"><input type="checkbox" name="correcta__N__B"/> Correcta</label></div>
-                <div class="option"><label>Opcion C <input name="opcion__N__C" type="file" accept="image/*" required/></label><label class="check"><input type="checkbox" name="correcta__N__C"/> Correcta</label></div>
-                <div class="option"><label>Opcion D <input name="opcion__N__D" type="file" accept="image/*" required/></label><label class="check"><input type="checkbox" name="correcta__N__D"/> Correcta</label></div>
-                <div class="option"><label>Opcion E <input name="opcion__N__E" type="file" accept="image/*" required/></label><label class="check"><input type="checkbox" name="correcta__N__E"/> Correcta</label></div>
+                <div class="option"><label>Opcion A <input name="opcion__N__A" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="A"/> Correcta</label></div>
+                <div class="option"><label>Opcion B <input name="opcion__N__B" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="B"/> Correcta</label></div>
+                <div class="option"><label>Opcion C <input name="opcion__N__C" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="C"/> Correcta</label></div>
+                <div class="option"><label>Opcion D <input name="opcion__N__D" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="D"/> Correcta</label></div>
+                <div class="option"><label>Opcion E <input name="opcion__N__E" type="file" accept="image/*" required onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="E"/> Correcta</label></div>
             </div>
         </div>
     </template>
@@ -90,13 +118,57 @@
             const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));
             const actuales = {};
             contenedor.querySelectorAll('textarea').forEach(el => actuales[el.name] = el.value);
-            contenedor.querySelectorAll('input[type="checkbox"]').forEach(el => actuales[el.name] = el.checked);
+            contenedor.querySelectorAll('select').forEach(el => actuales[el.name] = el.value);
+            contenedor.querySelectorAll('input[name^="correcta"]').forEach(el => {
+                if (el.checked) actuales[el.name + ':' + el.value] = true;
+            });
             contenedor.innerHTML = '';
             for (let i = 1; i <= total; i++) {
                 contenedor.insertAdjacentHTML('beforeend', template.replaceAll('__N__', i));
             }
             contenedor.querySelectorAll('textarea').forEach(el => { if (actuales[el.name] !== undefined) el.value = actuales[el.name]; });
-            contenedor.querySelectorAll('input[type="checkbox"]').forEach(el => { if (actuales[el.name] !== undefined) el.checked = actuales[el.name]; });
+            contenedor.querySelectorAll('select').forEach(el => { if (actuales[el.name] !== undefined) el.value = actuales[el.name]; });
+            for (let i = 1; i <= total; i++) actualizarModoRespuesta(i);
+            contenedor.querySelectorAll('input[name^="correcta"]').forEach(el => {
+                el.checked = actuales[el.name + ':' + el.value] === true || actuales[el.name + '[]:' + el.value] === true;
+            });
+        }
+        function actualizarModoRespuesta(numero) {
+            const modo = document.querySelector('[name="tipoRespuesta' + numero + '"]');
+            const multiple = modo && modo.value === 'MULTIPLE';
+            document.querySelectorAll('[name="correcta' + numero + '"], [name="correcta' + numero + '[]"]').forEach(el => {
+                const marcado = el.checked;
+                el.type = multiple ? 'checkbox' : 'radio';
+                el.name = multiple ? 'correcta' + numero + '[]' : 'correcta' + numero;
+                el.checked = marcado;
+            });
+            sincronizarControlModo(numero);
+        }
+        function seleccionarTipo(button, numero, modo) {
+            const select = document.querySelector('[name="tipoRespuesta' + numero + '"]');
+            if (!select) return;
+            select.value = modo;
+            actualizarModoRespuesta(numero);
+        }
+        function sincronizarControlModo(numero) {
+            const select = document.querySelector('[name="tipoRespuesta' + numero + '"]');
+            const control = select ? select.parentElement.querySelector('.mode-control') : null;
+            if (!select || !control) return;
+            control.querySelectorAll('button').forEach(button => {
+                button.classList.toggle('active', button.dataset.mode === select.value);
+            });
+        }
+        function previsualizar(input) {
+            const preview = input.parentElement.querySelector('.preview');
+            if (!preview) return;
+            if (!input.files || !input.files[0]) {
+                preview.innerHTML = '';
+                preview.style.display = 'none';
+                return;
+            }
+            const url = URL.createObjectURL(input.files[0]);
+            preview.innerHTML = '<img src="' + url + '" alt="Vista previa"/>';
+            preview.style.display = 'grid';
         }
         cantidad.addEventListener('change', renderEjercicios);
         cantidad.addEventListener('input', renderEjercicios);
@@ -105,16 +177,16 @@
             const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));
             const errores = [];
             for (let i = 1; i <= total; i++) {
-                const marcada = ['A', 'B', 'C', 'D', 'E'].some(letra => {
-                    const check = document.querySelector('[name="correcta' + i + letra + '"]');
-                    return check && check.checked;
-                });
-                if (!marcada) errores.push('Ejercicio ' + i);
+                const modo = document.querySelector('[name="tipoRespuesta' + i + '"]').value;
+                const marcadas = document.querySelectorAll('[name="correcta' + i + '"]:checked, [name="correcta' + i + '[]"]:checked');
+                if (marcadas.length === 0) errores.push('Ejercicio ' + i + ' sin respuesta correcta');
+                if (modo === 'UNICA' && marcadas.length !== 1) errores.push('Ejercicio ' + i + ' debe tener una sola correcta');
+                if (modo === 'MULTIPLE' && marcadas.length < 2) errores.push('Ejercicio ' + i + ' debe tener dos o mas correctas');
             }
             if (errores.length) {
                 event.preventDefault();
                 const error = document.getElementById('client-error');
-                error.textContent = errores.join(', ') + ': marca al menos una opcion correcta antes de guardar.';
+                error.textContent = errores.join(', ') + '.';
                 error.style.display = 'block';
                 error.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }

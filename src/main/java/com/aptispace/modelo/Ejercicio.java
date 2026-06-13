@@ -13,6 +13,8 @@ import org.openxava.annotations.*;
 @View(members = "datos [prueba, numero, imagenModelo, enunciado]; opciones")
 @Tab(properties = "prueba.nombre, numero, enunciado")
 public class Ejercicio {
+    public enum TipoRespuesta { UNICA, MULTIPLE }
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Hidden
     private Long id;
 
@@ -31,6 +33,10 @@ public class Ejercicio {
     @Stereotype("MEMO") @Size(max = 300)
     @Column(name = "enunciado", length = 300)
     private String enunciado;
+
+    @Required @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_respuesta", nullable = false, length = 20)
+    private TipoRespuesta tipoRespuesta = TipoRespuesta.UNICA;
 
     @OneToMany(mappedBy = "ejercicio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("letra ASC")
@@ -52,6 +58,8 @@ public class Ejercicio {
     public void setImagenModelo(String imagenModelo) { this.imagenModelo = imagenModelo; }
     public String getEnunciado() { return enunciado; }
     public void setEnunciado(String enunciado) { this.enunciado = enunciado; }
+    public TipoRespuesta getTipoRespuesta() { return tipoRespuesta; }
+    public void setTipoRespuesta(TipoRespuesta tipoRespuesta) { this.tipoRespuesta = tipoRespuesta; }
     public List<OpcionEjercicio> getOpciones() { return opciones; }
     public void setOpciones(List<OpcionEjercicio> opciones) { this.opciones = opciones; }
     public String toString() { return "Ejercicio " + numero; }

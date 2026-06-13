@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import org.openxava.jpa.XPersistence;
 import com.aptispace.modelo.Ejercicio;
+import com.aptispace.modelo.Ejercicio.TipoRespuesta;
 import com.aptispace.modelo.OpcionEjercicio;
 import com.aptispace.modelo.OpcionEjercicio.LetraOpcion;
 import com.aptispace.modelo.Prueba;
@@ -43,23 +44,30 @@ public class PlantillaWizardServlet extends HttpServlet {
                 ejercicio.setPrueba(prueba);
                 ejercicio.setNumero(numero);
                 ejercicio.setEnunciado(valor(request, "enunciado" + numero));
+                TipoRespuesta tipoRespuesta = TipoRespuesta.valueOf(valor(request, "tipoRespuesta" + numero, "UNICA"));
+                ejercicio.setTipoRespuesta(tipoRespuesta);
                 ejercicio.setImagenModelo(guardarArchivo(request, "imagenModelo" + numero));
                 prueba.getEjercicios().add(ejercicio);
                 em.persist(ejercicio);
 
-                boolean tieneCorrecta = false;
+                int correctas = 0;
                 for (LetraOpcion letra : LetraOpcion.values()) {
                     OpcionEjercicio opcion = new OpcionEjercicio();
                     opcion.setEjercicio(ejercicio);
                     opcion.setLetra(letra);
                     opcion.setImagenOpcion(guardarArchivo(request, "opcion" + numero + letra.name()));
-                    boolean correcta = request.getParameter("correcta" + numero + letra.name()) != null;
+                    boolean correcta = esCorrecta(request, numero, letra);
                     opcion.setEsCorrecta(correcta);
-                    tieneCorrecta = tieneCorrecta || correcta;
+                    if (correcta) correctas++;
                     ejercicio.getOpciones().add(opcion);
                     em.persist(opcion);
                 }
-                if (!tieneCorrecta) throw new IllegalArgumentException("El ejercicio " + numero + " debe tener al menos una opcion correcta.");
+                if (TipoRespuesta.UNICA.equals(tipoRespuesta) && correctas != 1) {
+                    throw new IllegalArgumentException("El ejercicio " + numero + " debe tener una sola opcion correcta.");
+                }
+                if (TipoRespuesta.MULTIPLE.equals(tipoRespuesta) && correctas < 2) {
+                    throw new IllegalArgumentException("El ejercicio " + numero + " debe tener dos o mas opciones correctas.");
+                }
             }
 
             confirmarSiEsPropia(em, transaccionPropia);
@@ -112,6 +120,20 @@ public class PlantillaWizardServlet extends HttpServlet {
     private String valor(HttpServletRequest request, String nombre) {
         String valor = request.getParameter(nombre);
         return valor == null ? "" : valor.trim();
+    }
+
+    private String valor(HttpServletRequest request, String nombre, String defecto) {
+        String valor = valor(request, nombre);
+        return valor.isEmpty() ? defecto : valor;
+    }
+
+    private boolean esCorrecta(HttpServletRequest request, int numero, LetraOpcion letra) {
+        String unica = request.getParameter("correcta" + numero);
+        if (letra.name().equals(unica)) return true;
+        String[] multiples = request.getParameterValues("correcta" + numero + "[]");
+        if (multiples == null) return false;
+        for (String valor : multiples) if (letra.name().equals(valor)) return true;
+        return false;
     }
 
     private boolean iniciarTransaccionSiHaceFalta(EntityManager em) {

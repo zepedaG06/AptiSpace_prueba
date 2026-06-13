@@ -26,25 +26,11 @@ public class SesionAptiSpaceFilter implements Filter {
             return;
         }
 
-        String usuario = (String) http.getSession(true).getAttribute("aptispace.usuario");
-        String tipo = (String) http.getSession(true).getAttribute("aptispace.tipo");
+        String tipoRequerido = tipoRequerido(path);
+        String usuario = usuarioParaRuta(http, tipoRequerido);
+        String tipo = tipoRequerido != null ? tipoRequerido : (String) http.getSession(true).getAttribute("aptispace.tipo");
         if (usuario == null) {
             res.sendRedirect(http.getContextPath() + "/index.jsp");
-            return;
-        }
-
-        if ("EVALUADO".equals(tipo) && esRutaEvaluador(path)) {
-            res.sendRedirect(http.getContextPath() + "/evaluado-home.jsp");
-            return;
-        }
-
-        if ("EVALUADO".equals(tipo) && path.startsWith("/m/") && !esModuloEvaluado(path)) {
-            res.sendRedirect(http.getContextPath() + "/m/RespuestaEvaluado");
-            return;
-        }
-
-        if ("PSICOLOGO".equals(tipo) && path.equals("/admin-home.jsp")) {
-            res.sendRedirect(http.getContextPath() + "/evaluador-home.jsp");
             return;
         }
 
@@ -66,8 +52,30 @@ public class SesionAptiSpaceFilter implements Filter {
             || path.startsWith("/js/");
     }
 
+    private String tipoRequerido(String path) {
+        if (esRutaEvaluador(path)) return "PSICOLOGO";
+        if (esRutaEvaluado(path)) return "EVALUADO";
+        return null;
+    }
+
+    private String usuarioParaRuta(HttpServletRequest request, String tipoRequerido) {
+        if (tipoRequerido != null) {
+            return (String) request.getSession(true).getAttribute("aptispace.usuario." + tipoRequerido);
+        }
+        return (String) request.getSession(true).getAttribute("aptispace.usuario");
+    }
+
     private boolean esModuloEvaluado(String path) {
         return path.startsWith("/m/RespuestaEvaluado") || path.startsWith("/m/ResultadoPrueba");
+    }
+
+    private boolean esRutaEvaluado(String path) {
+        return path.equals("/evaluado-home.jsp")
+            || path.equals("/mi-prueba")
+            || path.equals("/mi-perfil")
+            || path.equals("/unirme-grupo")
+            || path.equals("/mi-grupo")
+            || esModuloEvaluado(path);
     }
 
     private boolean esRutaEvaluador(String path) {

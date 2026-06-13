@@ -73,7 +73,7 @@ public class MiPerfilServlet extends HttpServlet {
     }
 
     private Usuario obtenerUsuarioActual(HttpServletRequest request) {
-        String nombreUsuario = (String) request.getSession(true).getAttribute("aptispace.usuario");
+        String nombreUsuario = (String) request.getSession(true).getAttribute("aptispace.usuario.EVALUADO");
         EntityManager em = XPersistence.getManager();
         TypedQuery<Usuario> query = em.createQuery(
             "select u from Usuario u left join fetch u.evaluado where u.nombreUsuario = :usuario",

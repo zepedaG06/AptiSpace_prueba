@@ -19,12 +19,12 @@ INSERT INTO grupo_evaluado (grupo_id, evaluado_id) VALUES (1, 1);
 INSERT INTO prueba (id, nombre, descripcion, tiempo_limite, cantidad_ejercicios, estado)
 VALUES (1, 'BFA Espacial - Desplazamiento S2', 'Banco precargado de ejercicios visuales. Al iniciar una aplicacion se eligen ejercicios aleatorios.', 30, 4, 'ACTIVA');
 
-INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado) VALUES (1, 1, 1, 'images/s2/modelo-01.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.');
-INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado) VALUES (2, 1, 2, 'images/s2/modelo-02.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.');
-INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado) VALUES (3, 1, 3, 'images/s2/modelo-03.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.');
-INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado) VALUES (4, 1, 4, 'images/s2/modelo-04.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.');
-INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado) VALUES (5, 1, 5, 'images/s2/modelo-05.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.');
-INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado) VALUES (6, 1, 6, 'images/s2/modelo-06.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.');
+INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado, tipo_respuesta) VALUES (1, 1, 1, 'images/s2/modelo-01.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.', 'MULTIPLE');
+INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado, tipo_respuesta) VALUES (2, 1, 2, 'images/s2/modelo-02.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.', 'MULTIPLE');
+INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado, tipo_respuesta) VALUES (3, 1, 3, 'images/s2/modelo-03.svg', 'Seleccione la figura que corresponde al desplazamiento indicado.', 'UNICA');
+INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado, tipo_respuesta) VALUES (4, 1, 4, 'images/s2/modelo-04.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.', 'MULTIPLE');
+INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado, tipo_respuesta) VALUES (5, 1, 5, 'images/s2/modelo-05.svg', 'Seleccione las figuras que corresponden al desplazamiento indicado.', 'MULTIPLE');
+INSERT INTO ejercicio (id, prueba_id, numero, imagen_modelo, enunciado, tipo_respuesta) VALUES (6, 1, 6, 'images/s2/modelo-06.svg', 'Seleccione la figura que corresponde al desplazamiento indicado.', 'UNICA');
 
 INSERT INTO opcion_ejercicio (ejercicio_id, letra, imagen_opcion, es_correcta) VALUES (1, 'A', 'images/s2/opcion-a.svg', TRUE);
 INSERT INTO opcion_ejercicio (ejercicio_id, letra, imagen_opcion, es_correcta) VALUES (1, 'B', 'images/s2/opcion-b.svg', FALSE);

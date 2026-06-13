@@ -1,6 +1,8 @@
 package com.aptispace.web;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,11 +31,13 @@ public class MiPruebaServlet extends HttpServlet {
             return;
         }
 
-        int indice = obtenerIndice(request, aplicacion.getRespuestas().size());
+        int total = aplicacion.getRespuestas().size();
+        int indice = obtenerIndice(request, total);
         request.setAttribute("aplicacion", aplicacion);
-        request.setAttribute("respuesta", aplicacion.getRespuestas().get(indice));
+        if (total > 0) request.setAttribute("respuesta", aplicacion.getRespuestas().get(indice));
         request.setAttribute("indice", indice);
-        request.setAttribute("total", aplicacion.getRespuestas().size());
+        request.setAttribute("total", total);
+        request.setAttribute("segundosRestantes", segundosRestantes(aplicacion));
         request.getRequestDispatcher("/WEB-INF/jsp/mi-prueba.jsp").forward(request, response);
     }
 
@@ -42,6 +46,10 @@ public class MiPruebaServlet extends HttpServlet {
         EntityManager em = XPersistence.getManager();
         AplicacionPrueba aplicacion = obtenerAplicacionActual(em, request);
         if (aplicacion == null) {
+            response.sendRedirect(request.getContextPath() + "/mi-prueba");
+            return;
+        }
+        if (aplicacion.getRespuestas().isEmpty() || EstadoAplicacion.FINALIZADA.equals(aplicacion.getEstado())) {
             response.sendRedirect(request.getContextPath() + "/mi-prueba");
             return;
         }
@@ -75,7 +83,7 @@ public class MiPruebaServlet extends HttpServlet {
     }
 
     private AplicacionPrueba obtenerAplicacionActual(EntityManager em, HttpServletRequest request) {
-        String usuario = (String) request.getSession(true).getAttribute("aptispace.usuario");
+        String usuario = (String) request.getSession(true).getAttribute("aptispace.usuario.EVALUADO");
         TypedQuery<AplicacionPrueba> query = em.createQuery(
             "select distinct a from AplicacionPrueba a left join fetch a.respuestas r left join fetch r.ejercicio e "
                 + "where a.evaluado.usuario.nombreUsuario = :usuario "
@@ -89,6 +97,7 @@ public class MiPruebaServlet extends HttpServlet {
         if (aplicaciones.isEmpty()) return null;
         AplicacionPrueba aplicacion = aplicaciones.get(0);
         prepararSiHaceFalta(em, aplicacion);
+        finalizarSiTiempoVencido(em, aplicacion);
         aplicacion.getRespuestas().sort((a, b) -> a.getEjercicio().getNumero().compareTo(b.getEjercicio().getNumero()));
         for (RespuestaEvaluado respuesta : aplicacion.getRespuestas()) {
             respuesta.getEjercicio().getOpciones().size();
@@ -133,12 +142,52 @@ public class MiPruebaServlet extends HttpServlet {
     }
 
     private void guardarSeleccion(HttpServletRequest request, RespuestaEvaluado respuesta) {
-        String opcion = request.getParameter("opcion");
-        respuesta.setOpcionA("A".equals(opcion));
-        respuesta.setOpcionB("B".equals(opcion));
-        respuesta.setOpcionC("C".equals(opcion));
-        respuesta.setOpcionD("D".equals(opcion));
-        respuesta.setOpcionE("E".equals(opcion));
+        boolean multiple = Ejercicio.TipoRespuesta.MULTIPLE.equals(respuesta.getEjercicio().getTipoRespuesta());
+        List<String> opciones = multiple
+            ? valores(request.getParameterValues("opciones"))
+            : valores(request.getParameter("opcion"));
+        respuesta.setOpcionA(opciones.contains("A"));
+        respuesta.setOpcionB(opciones.contains("B"));
+        respuesta.setOpcionC(opciones.contains("C"));
+        respuesta.setOpcionD(opciones.contains("D"));
+        respuesta.setOpcionE(opciones.contains("E"));
+    }
+
+    private void finalizarSiTiempoVencido(EntityManager em, AplicacionPrueba aplicacion) {
+        if (!EstadoAplicacion.EN_PROCESO.equals(aplicacion.getEstado()) || aplicacion.getFechaInicio() == null || aplicacion.getPrueba() == null) return;
+        int limiteSegundos = aplicacion.getPrueba().getTiempoLimite() * 60;
+        long usados = Duration.between(aplicacion.getFechaInicio(), LocalDateTime.now()).getSeconds();
+        if (usados < limiteSegundos) return;
+        boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
+        try {
+            aplicacion.finalizar();
+            ServicioCorreccion.corregir(aplicacion);
+            em.merge(aplicacion);
+            confirmarSiEsPropia(em, transaccionPropia);
+        }
+        catch (RuntimeException ex) {
+            revertirSiEsPropia(em, transaccionPropia);
+            throw ex;
+        }
+    }
+
+    private int segundosRestantes(AplicacionPrueba aplicacion) {
+        if (aplicacion == null || aplicacion.getPrueba() == null || aplicacion.getFechaInicio() == null || !EstadoAplicacion.EN_PROCESO.equals(aplicacion.getEstado())) return 0;
+        int limiteSegundos = aplicacion.getPrueba().getTiempoLimite() * 60;
+        long usados = Duration.between(aplicacion.getFechaInicio(), LocalDateTime.now()).getSeconds();
+        return Math.max(0, limiteSegundos - (int) usados);
+    }
+
+    private List<String> valores(String valor) {
+        if (valor == null || valor.isBlank()) return List.of();
+        return List.of(valor);
+    }
+
+    private List<String> valores(String[] valores) {
+        if (valores == null) return List.of();
+        List<String> lista = new ArrayList<>();
+        for (String valor : valores) if (valor != null && !valor.isBlank()) lista.add(valor);
+        return lista;
     }
 
     public static boolean seleccionada(RespuestaEvaluado respuesta, OpcionEjercicio.LetraOpcion letra) {

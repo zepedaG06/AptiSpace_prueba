@@ -211,7 +211,7 @@ public class EvaluadorGestionServlet extends HttpServlet {
     }
 
     private Usuario usuarioActual(EntityManager em, HttpServletRequest request) {
-        String nombreUsuario = (String) request.getSession(true).getAttribute("aptispace.usuario");
+        String nombreUsuario = (String) request.getSession(true).getAttribute("aptispace.usuario.PSICOLOGO");
         TypedQuery<Usuario> query = em.createQuery("select u from Usuario u where u.nombreUsuario = :usuario", Usuario.class);
         query.setParameter("usuario", nombreUsuario);
         return query.getSingleResult();

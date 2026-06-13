@@ -7,6 +7,7 @@
     RespuestaEvaluado respuesta = (RespuestaEvaluado) request.getAttribute("respuesta");
     int indice = request.getAttribute("indice") == null ? 0 : (Integer) request.getAttribute("indice");
     int total = request.getAttribute("total") == null ? 0 : (Integer) request.getAttribute("total");
+    int segundosRestantes = request.getAttribute("segundosRestantes") == null ? 0 : (Integer) request.getAttribute("segundosRestantes");
     boolean finalizada = aplicacion != null && AplicacionPrueba.EstadoAplicacion.FINALIZADA.equals(aplicacion.getEstado());
 %>
 <!DOCTYPE html>
@@ -23,6 +24,8 @@
         header a { border-radius: 6px; background: #1f6f8b; color: white; text-decoration: none; font-weight: 700; padding: 10px 13px; }
         main { max-width: 1180px; margin: 24px auto 40px; padding: 0 18px; }
         .status { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 16px; color: #1f4b5d; background: #e8f4f8; border: 1px solid #9cc9d8; border-radius: 8px; padding: 12px; }
+        .timer { display: inline-flex; align-items: center; justify-content: center; min-width: 96px; border-radius: 6px; background: #17384d; color: white; padding: 8px 10px; font-weight: 800; }
+        .timer.warn { background: #b42318; }
         .bar { height: 8px; background: #d9e2ec; border-radius: 999px; overflow: hidden; margin-bottom: 18px; }
         .bar span { display: block; height: 100%; background: #1f6f8b; width: <%= total == 0 ? 0 : ((indice + 1) * 100 / total) %>%; }
         .card { background: #d9edf4; border: 1px solid #6aaec5; border-radius: 8px; padding: 20px; box-shadow: 0 10px 26px rgba(31, 111, 139, .12); }
@@ -34,9 +37,7 @@
         .options { display: grid; gap: 12px; }
         .option { display: grid; grid-template-columns: 42px 1fr; gap: 12px; align-items: center; border: 1px solid #b9d5df; border-radius: 8px; padding: 10px; cursor: pointer; background: #f6fbfd; }
         .option input { width: 20px; height: 20px; justify-self: center; }
-        .option img { width: 100%; max-height: 120px; object-fit: contain; display: block; transition: transform .18s ease; }
-        .image-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .image-tools button { padding: 8px 10px; background: #e2e8f0; color: #1f2937; }
+        .option img { width: 100%; max-height: 120px; object-fit: contain; display: block; }
         .actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
         button, .button { border: 0; border-radius: 6px; padding: 11px 16px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
         .secondary { background: #1f4b5d; color: white; border: 1px solid #17384d; }
@@ -72,6 +73,7 @@
             <div class="status">
                 <span><%= aplicacion.getPrueba().getNombre() %></span>
                 <strong>Pregunta <%= indice + 1 %> de <%= total %></strong>
+                <% if (!finalizada) { %><span id="contador" class="timer" data-seconds="<%= segundosRestantes %>">--:--</span><% } %>
             </div>
             <div class="bar"><span></span></div>
             <section class="card">
@@ -99,17 +101,14 @@
                                 <% } %>
                             </div>
                             <div class="options">
+                                <% boolean multiple = Ejercicio.TipoRespuesta.MULTIPLE.equals(respuesta.getEjercicio().getTipoRespuesta()); %>
                                 <% for (OpcionEjercicio opcion : respuesta.getEjercicio().getOpciones()) { %>
                                     <label class="option">
-                                        <input type="radio" name="opcion" value="<%= opcion.getLetra().name() %>" <%= MiPruebaServlet.seleccionada(respuesta, opcion.getLetra()) ? "checked" : "" %>/>
+                                        <input type="<%= multiple ? "checkbox" : "radio" %>" name="<%= multiple ? "opciones" : "opcion" %>" value="<%= opcion.getLetra().name() %>" <%= MiPruebaServlet.seleccionada(respuesta, opcion.getLetra()) ? "checked" : "" %>/>
                                         <span>
                                             <strong>Opcion <%= opcion.getLetra().name() %></strong>
                                             <% if (opcion.getImagenOpcion() != null) { %>
-                                                <img class="rotatable" data-rotation="0" src="<%= request.getContextPath() %>/<%= opcion.getImagenOpcion() %>" alt="Opcion <%= opcion.getLetra().name() %>"/>
-                                                <div class="image-tools">
-                                                    <button type="button" onclick="rotar(this, -90)">Izq.</button>
-                                                    <button type="button" onclick="rotar(this, 90)">Der.</button>
-                                                </div>
+                                                <img src="<%= request.getContextPath() %>/<%= opcion.getImagenOpcion() %>" alt="Opcion <%= opcion.getLetra().name() %>"/>
                                             <% } %>
                                         </span>
                                     </label>
@@ -130,13 +129,28 @@
         <% } %>
     </main>
     <script>
-        function rotar(button, grados) {
-            const box = button.closest('.model, .option');
-            const img = box.querySelector('.rotatable');
-            const actual = parseInt(img.dataset.rotation || '0', 10);
-            const nuevo = (actual + grados + 360) % 360;
-            img.dataset.rotation = nuevo;
-            img.style.transform = 'rotate(' + nuevo + 'deg)';
+        const contador = document.getElementById('contador');
+        if (contador) {
+            let restantes = parseInt(contador.dataset.seconds || '0', 10);
+            const form = document.querySelector('form[action$="/mi-prueba"]');
+            function pintarContador() {
+                const minutos = Math.floor(Math.max(0, restantes) / 60);
+                const segundos = Math.max(0, restantes) % 60;
+                contador.textContent = String(minutos).padStart(2, '0') + ':' + String(segundos).padStart(2, '0');
+                contador.classList.toggle('warn', restantes <= 60);
+                if (restantes <= 0 && form) {
+                    const accion = document.createElement('input');
+                    accion.type = 'hidden';
+                    accion.name = 'accion';
+                    accion.value = 'finalizar';
+                    form.appendChild(accion);
+                    form.submit();
+                    return;
+                }
+                restantes--;
+                window.setTimeout(pintarContador, 1000);
+            }
+            pintarContador();
         }
     </script>
 </body>
