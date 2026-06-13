@@ -24,7 +24,7 @@
         section > .grid, section > #ejercicios { padding: 18px; }
         h2 { margin: 0 0 14px; font-size: 20px; color: #203a43; }
         .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-        .options { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 12px; }
+        .options { display: grid; grid-template-columns: repeat(5, minmax(135px, 1fr)); gap: 12px; }
         .exercise { display: grid; gap: 16px; margin-top: 16px; padding: 16px; border: 1px solid #c5d8e2; border-left: 5px solid #1f6f8b; border-radius: 8px; background: white; }
         .exercise:first-child { margin-top: 0; }
         .exercise h2 { margin: 0; padding-bottom: 8px; border-bottom: 1px solid #d7e0e7; }
@@ -32,9 +32,11 @@
         input, textarea { width: 100%; min-height: 42px; border: 1px solid #b7c9d4; border-radius: 6px; padding: 9px 11px; font: inherit; background: white; }
         input:focus, textarea:focus { outline: 2px solid rgba(31, 111, 139, .22); border-color: #1f6f8b; }
         textarea { min-height: 84px; resize: vertical; }
-        .option { border: 1px solid #c5d8e2; border-radius: 8px; padding: 12px; background: #f3f8fb; display: grid; align-content: space-between; }
+        .option { border: 1px solid #c5d8e2; border-radius: 8px; padding: 0; background: #f3f8fb; display: grid; overflow: hidden; }
         .option:hover { border-color: #6aaec5; background: #eef7fa; }
-        .check { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-weight: 700; }
+        .option label:first-child { padding: 10px; gap: 8px; }
+        .option input[type="file"] { min-height: 36px; padding: 6px; font-size: 12px; background: white; }
+        .check { display: flex; gap: 8px; align-items: center; margin: 0; padding: 10px; font-weight: 700; border-top: 1px solid #cfe0e9; background: white; }
         .check input { width: 18px; min-height: 18px; }
         .actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
         .button, button { border: 0; border-radius: 6px; padding: 11px 16px; font-weight: 700; text-decoration: none; cursor: pointer; }
@@ -48,9 +50,10 @@
         .mode-control button span { display: block; color: #52606d; font-size: 12px; line-height: 1.25; }
         .mode-control button.active { background: #1f6f8b; border-color: #1f6f8b; color: white; box-shadow: 0 6px 14px rgba(31, 111, 139, .20); }
         .mode-control button.active strong, .mode-control button.active span { color: white; }
-        .preview { display: none; margin-top: 8px; border: 1px solid #d7e0e7; border-radius: 8px; background: white; min-height: 94px; padding: 8px; place-items: center; }
-        .preview img { width: 100%; max-height: 150px; object-fit: contain; display: block; }
-        .model-preview img { max-height: 220px; }
+        .preview { display: grid; border: 1px solid #d7e0e7; border-radius: 8px; background: #ffffff; height: 108px; padding: 8px; place-items: center; color: #6b7f8c; font-size: 12px; }
+        .preview:empty::before { content: "Vista previa"; }
+        .preview img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .model-preview { height: 160px; }
         @media (max-width: 900px) { .grid, .options { grid-template-columns: 1fr; } header { align-items: flex-start; flex-direction: column; } }
         @media (max-width: 560px) { .mode-control { grid-template-columns: 1fr; } }
     </style>
@@ -163,7 +166,7 @@
             if (!preview) return;
             if (!input.files || !input.files[0]) {
                 preview.innerHTML = '';
-                preview.style.display = 'none';
+                preview.style.display = 'grid';
                 return;
             }
             const url = URL.createObjectURL(input.files[0]);
