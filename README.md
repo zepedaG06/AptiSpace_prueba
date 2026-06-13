@@ -5,7 +5,7 @@ Proyecto web Java/OpenXava para evaluación de aptitud espacial - desplazamiento
 ## Abrir en IntelliJ IDEA
 1. Abrir IntelliJ IDEA.
 2. Seleccionar `Open`.
-3. Elegir la carpeta `C:\Users\Casa\AptiSpace`.
+3. Elegir la carpeta ``.
 4. Importar como proyecto Maven.
 
 ## Estructura
@@ -49,7 +49,7 @@ La app esta configurada para guardar en PostgreSQL:
 Base: aptispace
 Usuario: aptispace
 Clave: aptispace123
-URL: jdbc:postgresql://localhost:5432/aptispace
+URL: 
 ```
 
 Crear la base y el usuario con la clave del superusuario `postgres`:
