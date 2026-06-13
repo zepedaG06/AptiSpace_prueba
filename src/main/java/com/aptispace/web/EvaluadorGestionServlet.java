@@ -49,6 +49,7 @@ public class EvaluadorGestionServlet extends HttpServlet {
         else if ("iniciarPrueba".equals(accion)) iniciarPrueba(em, request);
         else if ("iniciarTodas".equals(accion)) iniciarTodas(em, request);
         else if ("finalizarPrueba".equals(accion)) finalizarPrueba(em, request);
+        else if ("autorizarReaplicacion".equals(accion)) autorizarReaplicacion(em, request);
         else if ("calcularResultado".equals(accion)) ServicioCorreccion.corregirYGuardar(largo(request, "aplicacionId"));
         else if ("crearObservacion".equals(accion)) crearObservacion(em, request);
         else throw new IllegalArgumentException("Accion no reconocida.");
@@ -95,8 +96,10 @@ public class EvaluadorGestionServlet extends HttpServlet {
     }
 
     private void crearPrueba(EntityManager em, HttpServletRequest request) {
+        String nombre = requerido(request, "nombre");
+        if (existePruebaConNombre(em, nombre, null)) throw new IllegalArgumentException("Ya existe una plantilla con ese nombre.");
         Prueba prueba = new Prueba();
-        prueba.setNombre(requerido(request, "nombre"));
+        prueba.setNombre(nombre);
         prueba.setDescripcion(valor(request, "descripcion"));
         prueba.setTiempoLimite(entero(request, "tiempoLimite", 30));
         prueba.setCantidadEjercicios(entero(request, "cantidadEjercicios", 8));
@@ -107,7 +110,9 @@ public class EvaluadorGestionServlet extends HttpServlet {
     private void actualizarPrueba(EntityManager em, HttpServletRequest request) {
         Prueba prueba = em.find(Prueba.class, largo(request, "pruebaId"));
         if (prueba == null) throw new IllegalArgumentException("No existe la plantilla indicada.");
-        prueba.setNombre(requerido(request, "nombre"));
+        String nombre = requerido(request, "nombre");
+        if (existePruebaConNombre(em, nombre, prueba.getId())) throw new IllegalArgumentException("Ya existe otra plantilla con ese nombre.");
+        prueba.setNombre(nombre);
         prueba.setDescripcion(valor(request, "descripcion"));
         prueba.setTiempoLimite(entero(request, "tiempoLimite", 30));
         prueba.setCantidadEjercicios(entero(request, "cantidadEjercicios", 1));
@@ -142,6 +147,9 @@ public class EvaluadorGestionServlet extends HttpServlet {
         for (Long id : new java.util.LinkedHashSet<>(evaluadoIds)) {
             Evaluado evaluado = em.find(Evaluado.class, id);
             if (evaluado == null) continue;
+            if (existeAsignacion(em, evaluado, prueba)) {
+                throw new IllegalArgumentException("La prueba ya esta asignada a " + evaluado.getNombres() + " " + evaluado.getApellidos() + ". Usa autorizar repetir si necesita otro intento.");
+            }
             AplicacionPrueba aplicacion = new AplicacionPrueba();
             aplicacion.setEvaluado(evaluado);
             aplicacion.setPrueba(prueba);
@@ -184,6 +192,17 @@ public class EvaluadorGestionServlet extends HttpServlet {
         em.merge(aplicacion);
     }
 
+    private void autorizarReaplicacion(EntityManager em, HttpServletRequest request) {
+        AplicacionPrueba aplicacion = em.find(AplicacionPrueba.class, largo(request, "aplicacionId"));
+        if (aplicacion == null) throw new IllegalArgumentException("No existe la asignacion.");
+        Usuario psicologo = usuarioActual(em, request);
+        if (aplicacion.getPsicologo() == null || !aplicacion.getPsicologo().getId().equals(psicologo.getId())) {
+            throw new IllegalArgumentException("Esa asignacion no pertenece a tu cuenta.");
+        }
+        aplicacion.setAutorizadaReaplicacion(Boolean.TRUE);
+        em.merge(aplicacion);
+    }
+
     private void crearObservacion(EntityManager em, HttpServletRequest request) {
         AplicacionPrueba aplicacion = em.find(AplicacionPrueba.class, largo(request, "aplicacionId"));
         if (aplicacion == null) throw new IllegalArgumentException("Selecciona una asignacion valida.");
@@ -222,6 +241,26 @@ public class EvaluadorGestionServlet extends HttpServlet {
         query.setParameter("codigo", codigo);
         try { return query.getSingleResult(); }
         catch (NoResultException ex) { return null; }
+    }
+
+    private boolean existePruebaConNombre(EntityManager em, String nombre, Long idActual) {
+        String jpql = "select count(p) from Prueba p where lower(p.nombre) = lower(:nombre)";
+        if (idActual != null) jpql += " and p.id <> :idActual";
+        TypedQuery<Long> query = em.createQuery(jpql, Long.class).setParameter("nombre", nombre);
+        if (idActual != null) query.setParameter("idActual", idActual);
+        Long total = query.getSingleResult();
+        return total > 0;
+    }
+
+    private boolean existeAsignacion(EntityManager em, Evaluado evaluado, Prueba prueba) {
+        Long total = em.createQuery(
+            "select count(a) from AplicacionPrueba a where a.evaluado = :evaluado and a.prueba = :prueba and a.estado <> :cancelada",
+            Long.class)
+            .setParameter("evaluado", evaluado)
+            .setParameter("prueba", prueba)
+            .setParameter("cancelada", AplicacionPrueba.EstadoAplicacion.CANCELADA)
+            .getSingleResult();
+        return total > 0;
     }
 
     private <T> List<T> lista(EntityManager em, String jpql, Class<T> tipo) {

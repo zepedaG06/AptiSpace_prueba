@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.*" %>
 <%@ page import="com.aptispace.modelo.*" %>
 <%@ page import="com.aptispace.web.MiPruebaServlet" %>
 <%
@@ -8,7 +9,28 @@
     int indice = request.getAttribute("indice") == null ? 0 : (Integer) request.getAttribute("indice");
     int total = request.getAttribute("total") == null ? 0 : (Integer) request.getAttribute("total");
     int segundosRestantes = request.getAttribute("segundosRestantes") == null ? 0 : (Integer) request.getAttribute("segundosRestantes");
+    List<AplicacionPrueba> historial = (List<AplicacionPrueba>) request.getAttribute("historial");
+    if (historial == null) historial = Collections.emptyList();
     boolean finalizada = aplicacion != null && AplicacionPrueba.EstadoAplicacion.FINALIZADA.equals(aplicacion.getEstado());
+    String error = request.getParameter("error");
+%>
+<%!
+    java.time.format.DateTimeFormatter fechaCorta = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    int intento(AplicacionPrueba actual, List<AplicacionPrueba> aplicaciones) {
+        if (actual == null || actual.getEvaluado() == null || actual.getPrueba() == null) return 1;
+        int intento = 1;
+        for (AplicacionPrueba otra : aplicaciones) {
+            if (otra == null || otra.getId() == null || actual.getId() == null) continue;
+            if (otra.getId() >= actual.getId()) continue;
+            if (otra.getEvaluado() != null && otra.getPrueba() != null
+                && otra.getEvaluado().getId().equals(actual.getEvaluado().getId())
+                && otra.getPrueba().getId().equals(actual.getPrueba().getId())) intento++;
+        }
+        return intento;
+    }
+    String f(java.time.LocalDateTime fecha) {
+        return fecha == null ? "" : fecha.format(fechaCorta);
+    }
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -44,11 +66,19 @@
         .primary { background: #1f6f8b; color: white; }
         .danger { background: #b42318; color: white; }
         .empty { max-width: 760px; }
+        .notice { margin-bottom: 14px; padding: 12px; border-radius: 8px; border: 1px solid #f2b8b5; background: #fff1f0; color: #8a1f17; }
         .result { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
         .metric { border: 1px solid #b9d5df; border-radius: 8px; padding: 14px; background: #f6fbfd; }
         .metric strong { display: block; font-size: 24px; color: #17384d; }
+        .history { margin-top: 18px; }
+        .history h2 { margin: 0 0 12px; color: #17384d; }
+        .history-list { display: grid; gap: 10px; }
+        .history-item { display: grid; grid-template-columns: minmax(0, 1.2fr) auto; gap: 12px; align-items: center; border: 1px solid #b9d5df; border-radius: 8px; background: #f6fbfd; padding: 12px; }
+        .history-item strong { display: block; color: #17384d; margin-bottom: 4px; }
+        .history-meta { color: #52606d; line-height: 1.4; }
+        .badge { display: inline-block; border-radius: 999px; padding: 5px 9px; background: #d9e2ec; color: #334155; font-weight: 700; font-size: 12px; }
         @media (max-width: 900px) { .question { grid-template-columns: 1fr; } .result { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 560px) { header { align-items: flex-start; flex-direction: column; } .result { grid-template-columns: 1fr; } }
+        @media (max-width: 560px) { header { align-items: flex-start; flex-direction: column; } .result { grid-template-columns: 1fr; } .history-item { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -57,6 +87,7 @@
         <a href="<%= request.getContextPath() %>/logout">Cerrar sesion</a>
     </header>
     <main>
+        <% if (error != null && !error.isEmpty()) { %><div class="notice"><%= error %></div><% } %>
         <% if (Boolean.TRUE.equals(sinPrueba)) { %>
             <section class="card empty">
                 <h2>No hay una prueba asignada</h2>
@@ -88,6 +119,11 @@
                     </div>
                     <div class="actions">
                         <a class="button secondary" href="<%= request.getContextPath() %>/evaluado-home.jsp">Volver</a>
+                        <% if (Boolean.TRUE.equals(aplicacion.getAutorizadaReaplicacion())) { %>
+                            <form method="post" action="<%= request.getContextPath() %>/mi-prueba">
+                                <button class="primary" type="submit" name="accion" value="reaplicar">Volver a hacer</button>
+                            </form>
+                        <% } %>
                     </div>
                 <% } else { %>
                     <form method="post" action="<%= request.getContextPath() %>/mi-prueba">
@@ -125,6 +161,28 @@
                         </div>
                     </form>
                 <% } %>
+            </section>
+        <% } %>
+        <% if (!historial.isEmpty()) { %>
+            <section class="card history">
+                <h2>Historial de intentos</h2>
+                <div class="history-list">
+                    <% for (AplicacionPrueba item : historial) { ResultadoPrueba r = item.getResultado(); %>
+                        <article class="history-item">
+                            <div>
+                                <strong><%= item.getPrueba() == null ? "Prueba" : item.getPrueba().getNombre() %> · Intento <%= intento(item, historial) %></strong>
+                                <div class="history-meta">
+                                    Inicio: <%= item.getFechaInicio() == null ? "Sin iniciar" : f(item.getFechaInicio()) %><br/>
+                                    Fin: <%= item.getFechaFin() == null ? "Pendiente" : f(item.getFechaFin()) %>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="badge"><%= item.getEstado() %></span>
+                                <% if (r != null) { %><span class="badge">S2: <%= r.getPuntuacionS2() %></span><% } %>
+                            </div>
+                        </article>
+                    <% } %>
+                </div>
             </section>
         <% } %>
     </main>

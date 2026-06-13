@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.*,com.aptispace.modelo.*" %>
 <%!
+    java.time.format.DateTimeFormatter fechaCorta = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     String h(Object v) {
         if (v == null) return "";
         return String.valueOf(v).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
@@ -19,6 +20,39 @@
         if ("C".equals(letra)) return r.isOpcionC();
         if ("D".equals(letra)) return r.isOpcionD();
         return r.isOpcionE();
+    }
+    int intento(AplicacionPrueba actual, List<AplicacionPrueba> aplicaciones) {
+        if (actual == null || actual.getEvaluado() == null || actual.getPrueba() == null) return 1;
+        int intento = 1;
+        for (AplicacionPrueba otra : aplicaciones) {
+            if (otra == null || otra.getId() == null || actual.getId() == null) continue;
+            if (otra.getId() >= actual.getId()) continue;
+            if (otra.getEvaluado() != null && otra.getPrueba() != null
+                && otra.getEvaluado().getId().equals(actual.getEvaluado().getId())
+                && otra.getPrueba().getId().equals(actual.getPrueba().getId())) intento++;
+        }
+        return intento;
+    }
+    String fechaAplicacion(AplicacionPrueba a) {
+        if (a == null) return "";
+        if (a.getFechaInicio() != null) return f(a.getFechaInicio());
+        return "Sin iniciar";
+    }
+    String f(java.time.LocalDateTime fecha) {
+        return fecha == null ? "" : fecha.format(fechaCorta);
+    }
+    List<Evaluado> unicos(Collection<Evaluado> origen) {
+        List<Evaluado> salida = new ArrayList<>();
+        Set<String> vistos = new LinkedHashSet<>();
+        if (origen == null) return salida;
+        for (Evaluado e : origen) {
+            if (e == null) continue;
+            String clave = e.getUsuario() != null && e.getUsuario().getCorreo() != null && !e.getUsuario().getCorreo().isBlank()
+                ? "correo:" + e.getUsuario().getCorreo().toLowerCase()
+                : "id:" + e.getId();
+            if (vistos.add(clave)) salida.add(e);
+        }
+        return salida;
     }
 %>
 <%
@@ -50,11 +84,13 @@
         .top .back-link { background: #1f6f8b; color: white; }
         .top .logout-link { background: #eef3f7; color: #203a43; border: 1px solid #cbd5df; }
         .grid { display: grid; grid-template-columns: .9fr 1.3fr; gap: 16px; align-items: start; }
-        .panel { background: white; border: 1px solid #d7e0e7; border-radius: 8px; padding: 18px; }
+        .panel { background: white; border: 1px solid #c5d8e2; border-radius: 8px; padding: 18px; box-shadow: 0 10px 24px rgba(31, 75, 93, .08); }
+        .panel > h2:first-child { margin: -18px -18px 16px; padding: 14px 18px; color: white; background: #1f6f8b; border-radius: 8px 8px 0 0; }
         h2 { margin: 0 0 12px; color: #203a43; }
         form { display: grid; gap: 12px; }
         label { display: grid; gap: 6px; font-weight: 700; color: #334155; }
-        input, select, textarea { width: 100%; border: 1px solid #cbd5df; border-radius: 6px; padding: 10px; font: inherit; background: white; }
+        input, select, textarea { width: 100%; border: 1px solid #b7c9d4; border-radius: 6px; padding: 10px; font: inherit; background: white; }
+        input:focus, select:focus, textarea:focus { outline: 2px solid rgba(31, 111, 139, .20); border-color: #1f6f8b; }
         textarea { min-height: 96px; resize: vertical; }
         .checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-height: 260px; overflow: auto; border: 1px solid #d7e0e7; border-radius: 8px; padding: 10px; }
         .checks label, label.inline { display: flex; gap: 8px; align-items: center; font-weight: 400; }
@@ -62,15 +98,22 @@
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; background: white; }
         th, td { padding: 11px 10px; border-bottom: 1px solid #e3e9ef; text-align: left; vertical-align: top; }
-        th { color: #203a43; font-size: 13px; text-transform: uppercase; }
+        th { color: #203a43; font-size: 13px; text-transform: uppercase; background: #eef7fa; }
+        tr[data-search]:hover td { background: #f6fbfd; }
         .muted { color: #64748b; }
+        .section-toolbar { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-bottom: 14px; }
+        .section-toolbar h2 { margin: 0 0 4px; }
+        .section-toolbar p { margin: 0; }
+        .search-box { min-width: 260px; max-width: 360px; position: relative; }
+        .search-box input { background: #f8fbfd; }
+        .empty-filter { display: none; padding: 14px; border: 1px dashed #9cc9d8; border-radius: 8px; color: #64748b; background: #f8fbfd; text-align: center; }
         .notice { margin-bottom: 14px; padding: 12px; border-radius: 8px; background: #e8f6ef; color: #166534; border: 1px solid #b9e2ca; }
         .error { margin-bottom: 14px; padding: 12px; border-radius: 8px; background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
         .row-actions { display: flex; flex-wrap: wrap; gap: 8px; }
         .row-actions form { display: inline; }
         .assignment-layout { display: grid; grid-template-columns: minmax(290px, .8fr) minmax(0, 1.35fr); gap: 16px; align-items: start; }
         .assignment-card { padding: 0; overflow: hidden; }
-        .assignment-hero { padding: 18px; background: #f8fafc; border-bottom: 1px solid #d7e0e7; }
+        .assignment-hero { padding: 18px; background: linear-gradient(135deg, #f8fbfd, #e8f4f8); border-bottom: 1px solid #c5d8e2; }
         .assignment-hero h2 { margin-bottom: 6px; }
         .assignment-hero p { margin: 0; line-height: 1.45; }
         .assignment-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
@@ -94,7 +137,7 @@
         .status-badge { display: inline-block; border-radius: 999px; padding: 5px 9px; background: #e2e8f0; color: #334155; font-weight: 700; font-size: 12px; }
         .observations-layout { display: grid; grid-template-columns: minmax(300px, .85fr) minmax(0, 1.25fr); gap: 16px; align-items: start; }
         .observation-compose { padding: 0; overflow: hidden; }
-        .observation-head { padding: 18px; background: #f8fafc; border-bottom: 1px solid #d7e0e7; }
+        .observation-head { padding: 18px; background: linear-gradient(135deg, #f8fbfd, #e8f4f8); border-bottom: 1px solid #c5d8e2; }
         .observation-head h2 { margin-bottom: 6px; }
         .observation-head p { margin: 0; line-height: 1.45; }
         .observation-form { padding: 18px; }
@@ -197,13 +240,13 @@
             <div class="panel table-wrap">
                 <h2>Grupos creados</h2>
                 <table><tr><th>Grupo</th><th>Codigo</th><th>Unidos</th><th>Estado</th></tr>
-                <% for (GrupoEvaluacion g : grupos) { %><tr><td><%= h(g.getNombre()) %>
+                <% for (GrupoEvaluacion g : grupos) { List<Evaluado> miembros = unicos(g.getEvaluados()); %><tr data-filter-item="grupos-list" data-search="<%= h(g.getNombre()) %> <%= h(g.getCodigo()) %> <% for (Evaluado e : miembros) { %> <%= nombre(e) %> <%= e.getUsuario() == null ? "" : h(e.getUsuario().getCorreo()) %><% } %>"><td><%= h(g.getNombre()) %>
                     <details>
                         <summary>Ver integrantes</summary>
-                        <% if (g.getEvaluados().isEmpty()) { %><p class="muted">Todavia no hay evaluados unidos.</p><% } %>
-                        <% for (Evaluado e : g.getEvaluados()) { %><p><%= nombre(e) %> <span class="muted"><%= h(e.getCarrera()) %></span></p><% } %>
+                        <% if (miembros.isEmpty()) { %><p class="muted">Todavia no hay evaluados unidos.</p><% } %>
+                        <% for (Evaluado e : miembros) { %><p><%= nombre(e) %> <span class="muted"><%= h(e.getCarrera()) %></span></p><% } %>
                     </details>
-                </td><td><strong><%= h(g.getCodigo()) %></strong></td><td><%= g.getEvaluados().size() %></td><td><%= Boolean.TRUE.equals(g.getActivo()) ? "Activo" : "Inactivo" %></td></tr><% } %>
+                </td><td><strong><%= h(g.getCodigo()) %></strong></td><td><%= miembros.size() %></td><td><%= Boolean.TRUE.equals(g.getActivo()) ? "Activo" : "Inactivo" %></td></tr><% } %>
                 </table>
             </div>
         </section>
@@ -252,13 +295,16 @@
                     </div>
                     <form method="post">
                         <input type="hidden" name="accion" value="iniciarTodas"/>
-                        <button class="button primary" type="submit">Iniciar todas</button>
+                        <button class="button primary" type="submit">Iniciar asignadas</button>
                     </form>
                 </div>
-                <table class="assignment-table"><tr><th>Evaluado</th><th>Prueba</th><th>Estado</th><th>Acciones</th></tr>
-                <% for (AplicacionPrueba a : aplicaciones) { %><tr><td><strong><%= nombre(a.getEvaluado()) %></strong></td><td><%= h(a.getPrueba()) %></td><td><span class="status-badge"><%= h(a.getEstado()) %></span></td><td class="row-actions">
+                <table class="assignment-table"><tr><th>Evaluado</th><th>Prueba</th><th>Intento</th><th>Estado</th><th>Acciones</th></tr>
+                <% for (AplicacionPrueba a : aplicaciones) { %><tr><td><strong><%= nombre(a.getEvaluado()) %></strong></td><td><%= h(a.getPrueba()) %></td><td>Intento <%= intento(a, aplicaciones) %></td><td><span class="status-badge"><%= h(a.getEstado()) %></span></td><td class="row-actions">
                     <form method="post"><input type="hidden" name="accion" value="iniciarPrueba"/><input type="hidden" name="aplicacionId" value="<%= a.getId() %>"/><button class="button" type="submit">Iniciar</button></form>
                     <form method="post"><input type="hidden" name="accion" value="finalizarPrueba"/><input type="hidden" name="aplicacionId" value="<%= a.getId() %>"/><button class="button" type="submit">Finalizar</button></form>
+                    <% if (AplicacionPrueba.EstadoAplicacion.FINALIZADA.equals(a.getEstado()) && !Boolean.TRUE.equals(a.getAutorizadaReaplicacion())) { %>
+                        <form method="post"><input type="hidden" name="accion" value="autorizarReaplicacion"/><input type="hidden" name="aplicacionId" value="<%= a.getId() %>"/><button class="button" type="submit">Autorizar repetir</button></form>
+                    <% } %>
                 </td></tr><% } %>
                 </table>
             </div>
@@ -337,7 +383,13 @@
         </section>
         <% } else if ("resultados".equals(seccion)) { %>
         <section class="panel table-wrap">
-            <h2>Resultados</h2>
+            <div class="section-toolbar">
+                <div>
+                    <h2>Resultados</h2>
+                    <p class="muted">Busca por estudiante, prueba, intento o estado.</p>
+                </div>
+                <label class="search-box"><input data-filter-input="resultados-list" placeholder="Buscar persona o prueba"/></label>
+            </div>
             <%
                 int totalAsignadas = aplicaciones.size();
                 int finalizadas = 0;
@@ -360,8 +412,8 @@
                 <div class="metric"><span>Promedio S2</span><strong><%= promedioS2 %></strong></div>
                 <div class="metric"><span>Mejor S2</span><strong><%= mejorS2 %></strong></div>
             </div>
-            <table><tr><th>Evaluado</th><th>Prueba</th><th>Estado</th><th>Aciertos</th><th>Errores</th><th>S2</th></tr>
-            <% for (AplicacionPrueba a : aplicaciones) { ResultadoPrueba r = a.getResultado(); %><tr><td><%= nombre(a.getEvaluado()) %>
+            <table><tr><th>Evaluado</th><th>Prueba</th><th>Intento</th><th>Fecha inicio</th><th>Fecha fin</th><th>Estado</th><th>Aciertos</th><th>Errores</th><th>S2</th></tr>
+            <% for (AplicacionPrueba a : aplicaciones) { ResultadoPrueba r = a.getResultado(); %><tr data-filter-item="resultados-list" data-search="<%= nombre(a.getEvaluado()) %> <%= h(a.getPrueba()) %> Intento <%= intento(a, aplicaciones) %> <%= h(a.getEstado()) %>"><td><%= nombre(a.getEvaluado()) %>
                 <details>
                     <summary>Respuestas del estudiante</summary>
                     <table>
@@ -376,8 +428,9 @@
                         <% } %>
                     </table>
                 </details>
-            </td><td><%= h(a.getPrueba()) %></td><td><%= h(a.getEstado()) %></td><td><%= r == null ? "-" : h(r.getAciertos()) %></td><td><%= r == null ? "-" : h(r.getErrores()) %></td><td><strong><%= r == null ? "-" : h(r.getPuntuacionS2()) %></strong></td></tr><% } %>
+            </td><td><%= h(a.getPrueba()) %></td><td>Intento <%= intento(a, aplicaciones) %></td><td><%= f(a.getFechaInicio()) %></td><td><%= f(a.getFechaFin()) %></td><td><%= h(a.getEstado()) %></td><td><%= r == null ? "-" : h(r.getAciertos()) %></td><td><%= r == null ? "-" : h(r.getErrores()) %></td><td><strong><%= r == null ? "-" : h(r.getPuntuacionS2()) %></strong></td></tr><% } %>
             </table>
+            <div class="empty-filter" data-empty-filter="resultados-list">No hay resultados para esa busqueda.</div>
         </section>
         <% } else if ("observaciones".equals(seccion)) { %>
         <section class="observations-layout">
@@ -428,7 +481,7 @@
                                     </div>
                                     <span class="status-badge"><%= app == null ? "" : h(app.getEstado()) %></span>
                                 </div>
-                                <p class="muted"><%= h(o.getFechaObservacion()) %></p>
+                                <p class="muted"><%= f(o.getFechaObservacion()) %></p>
                                 <div class="observation-note"><%= h(o.getComentario()) %></div>
                             </div>
                         </article>
@@ -438,5 +491,22 @@
         </section>
         <% } %>
     </main>
+    <script>
+        document.querySelectorAll('[data-filter-input]').forEach(input => {
+            const key = input.dataset.filterInput;
+            const items = Array.from(document.querySelectorAll('[data-filter-item="' + key + '"]'));
+            const empty = document.querySelector('[data-empty-filter="' + key + '"]');
+            input.addEventListener('input', () => {
+                const text = input.value.trim().toLowerCase();
+                let visibles = 0;
+                items.forEach(item => {
+                    const match = !text || (item.dataset.search || item.textContent).toLowerCase().includes(text);
+                    item.style.display = match ? '' : 'none';
+                    if (match) visibles++;
+                });
+                if (empty) empty.style.display = visibles === 0 ? 'block' : 'none';
+            });
+        });
+    </script>
 </body>
 </html>

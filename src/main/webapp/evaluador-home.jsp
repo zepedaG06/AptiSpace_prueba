@@ -19,7 +19,7 @@
         .panel { background: #d9edf4; border: 1px solid #6aaec5; border-radius: 8px; padding: 0; overflow: hidden; box-shadow: 0 10px 26px rgba(31, 111, 139, .12); }
         .panel h3 { margin: 0; padding: 14px 18px; color: white; font-size: 19px; background: #1f6f8b; }
         .steps { display: grid; gap: 12px; }
-        .steps, .quick, .code { margin: 18px; }
+        .steps, .quick { margin: 18px; }
         .step { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; border: 1px solid #b9d5df; border-radius: 8px; padding: 14px; background: #f6fbfd; }
         .num { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #1f6f8b; color: white; font-weight: 700; }
         .step strong { display: block; margin-bottom: 4px; color: #1f2937; }
@@ -29,8 +29,6 @@
         .quick { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .quick a { min-height: 96px; border: 1px solid #b9d5df; border-radius: 8px; padding: 14px; text-decoration: none; color: #1f2937; background: #f6fbfd; }
         .quick strong { display: block; margin-bottom: 6px; color: #203a43; }
-        .code { padding: 14px; border-radius: 8px; background: #eaf5f9; border: 1px dashed #6aaec5; }
-        .code strong { color: #203a43; }
         @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } .step { grid-template-columns: 42px 1fr; } .step a { grid-column: 2; width: fit-content; } }
         @media (max-width: 620px) { .quick { grid-template-columns: 1fr; } .top { align-items: flex-start; flex-direction: column; } }
     </style>
@@ -86,13 +84,9 @@
                 <div class="quick">
                     <a href="mi-informacion-evaluador"><strong>Mi informacion</strong><span class="note">Consulta y actualiza tus datos de cuenta de evaluador.</span></a>
                     <a href="asignaciones"><strong>Reaplicaciones</strong><span class="note">Autoriza o inicia de nuevo una prueba cuando haga falta.</span></a>
-                    <a href="grupos"><strong>Integrantes</strong><span class="note">Consulta quienes entraron con el codigo del espacio.</span></a>
+                    <a href="grupos"><strong>Integrantes</strong><span class="note">Consulta quienes estan dentro de tus grupos.</span></a>
                     <a href="resultados"><strong>Resultados</strong><span class="note">Revisa S2 y respuestas por estudiante.</span></a>
                     <a href="observaciones"><strong>Observaciones</strong><span class="note">Agregar seguimiento profesional.</span></a>
-                </div>
-                <div class="code">
-                    <strong>Codigo del espacio</strong>
-                    <p class="note">Crea un grupo y comparte su codigo. Al registrarse, el evaluado lo escribe y queda dentro de ese espacio.</p>
                 </div>
             </aside>
         </div>

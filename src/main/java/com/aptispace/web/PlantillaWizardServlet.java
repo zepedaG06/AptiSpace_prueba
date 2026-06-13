@@ -31,8 +31,11 @@ public class PlantillaWizardServlet extends HttpServlet {
         EntityManager em = XPersistence.getManager();
         boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
         try {
+            String nombre = valor(request, "nombre");
+            if (nombre.isEmpty()) throw new IllegalArgumentException("El nombre de la plantilla es obligatorio.");
+            if (existePruebaConNombre(em, nombre)) throw new IllegalArgumentException("Ya existe una plantilla con ese nombre.");
             Prueba prueba = new Prueba();
-            prueba.setNombre(valor(request, "nombre"));
+            prueba.setNombre(nombre);
             prueba.setDescripcion(valor(request, "descripcion"));
             prueba.setTiempoLimite(entero(request, "tiempoLimite", 30));
             prueba.setCantidadEjercicios(entero(request, "cantidadEjercicios", 1));
@@ -140,6 +143,13 @@ public class PlantillaWizardServlet extends HttpServlet {
         if (multiples == null) return false;
         for (String valor : multiples) if (letra.name().equals(valor)) return true;
         return false;
+    }
+
+    private boolean existePruebaConNombre(EntityManager em, String nombre) {
+        Long total = em.createQuery("select count(p) from Prueba p where lower(p.nombre) = lower(:nombre)", Long.class)
+            .setParameter("nombre", nombre)
+            .getSingleResult();
+        return total > 0;
     }
 
     private boolean iniciarTransaccionSiHaceFalta(EntityManager em) {

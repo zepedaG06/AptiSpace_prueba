@@ -25,6 +25,7 @@ public class MiPruebaServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         EntityManager em = XPersistence.getManager();
         AplicacionPrueba aplicacion = obtenerAplicacionActual(em, request);
+        request.setAttribute("historial", obtenerHistorial(em, request));
         if (aplicacion == null) {
             request.setAttribute("sinPrueba", true);
             request.getRequestDispatcher("/WEB-INF/jsp/mi-prueba.jsp").forward(request, response);
@@ -49,6 +50,16 @@ public class MiPruebaServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/mi-prueba");
             return;
         }
+        if ("reaplicar".equals(request.getParameter("accion"))) {
+            try {
+                reaplicar(em, aplicacion);
+                response.sendRedirect(request.getContextPath() + "/mi-prueba");
+            }
+            catch (RuntimeException ex) {
+                response.sendRedirect(request.getContextPath() + "/mi-prueba?error=" + java.net.URLEncoder.encode(ex.getMessage(), "UTF-8"));
+            }
+            return;
+        }
         if (aplicacion.getRespuestas().isEmpty() || EstadoAplicacion.FINALIZADA.equals(aplicacion.getEstado())) {
             response.sendRedirect(request.getContextPath() + "/mi-prueba");
             return;
@@ -58,9 +69,14 @@ public class MiPruebaServlet extends HttpServlet {
         int indice = obtenerIndice(request, aplicacion.getRespuestas().size());
         try {
             RespuestaEvaluado respuesta = aplicacion.getRespuestas().get(indice);
-            guardarSeleccion(request, respuesta);
-
             String accion = request.getParameter("accion");
+            if (!"anterior".equals(accion) && !tieneSeleccion(request, respuesta)) {
+                revertirSiEsPropia(em, transaccionPropia);
+                response.sendRedirect(request.getContextPath() + "/mi-prueba?i=" + indice + "&error=" + java.net.URLEncoder.encode("Selecciona una respuesta antes de continuar.", "UTF-8"));
+                return;
+            }
+            if (tieneSeleccion(request, respuesta)) guardarSeleccion(request, respuesta);
+
             if ("finalizar".equals(accion)) {
                 aplicacion.finalizar();
                 ServicioCorreccion.corregir(aplicacion);
@@ -105,27 +121,72 @@ public class MiPruebaServlet extends HttpServlet {
         return aplicacion;
     }
 
+    private List<AplicacionPrueba> obtenerHistorial(EntityManager em, HttpServletRequest request) {
+        String usuario = (String) request.getSession(true).getAttribute("aptispace.usuario.EVALUADO");
+        TypedQuery<AplicacionPrueba> query = em.createQuery(
+            "select distinct a from AplicacionPrueba a left join fetch a.resultado "
+                + "where a.evaluado.usuario.nombreUsuario = :usuario "
+                + "order by a.id desc",
+            AplicacionPrueba.class);
+        query.setParameter("usuario", usuario);
+        return query.getResultList();
+    }
+
+    private void reaplicar(EntityManager em, AplicacionPrueba aplicacionAnterior) {
+        if (!EstadoAplicacion.FINALIZADA.equals(aplicacionAnterior.getEstado())) {
+            throw new IllegalArgumentException("Solo puedes repetir una prueba finalizada.");
+        }
+        if (!Boolean.TRUE.equals(aplicacionAnterior.getAutorizadaReaplicacion())) {
+            throw new IllegalArgumentException("El evaluador todavia no autorizo repetir esta prueba.");
+        }
+        boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
+        try {
+            aplicacionAnterior.setAutorizadaReaplicacion(Boolean.FALSE);
+            AplicacionPrueba nueva = new AplicacionPrueba();
+            nueva.setEvaluado(aplicacionAnterior.getEvaluado());
+            nueva.setPrueba(aplicacionAnterior.getPrueba());
+            nueva.setPsicologo(aplicacionAnterior.getPsicologo());
+            nueva.setAutorizadaReaplicacion(Boolean.FALSE);
+            asignarEjercicios(nueva);
+            nueva.iniciar();
+            em.persist(nueva);
+            em.merge(aplicacionAnterior);
+            confirmarSiEsPropia(em, transaccionPropia);
+        }
+        catch (RuntimeException ex) {
+            revertirSiEsPropia(em, transaccionPropia);
+            throw ex;
+        }
+    }
+
     private void prepararSiHaceFalta(EntityManager em, AplicacionPrueba aplicacion) {
         if (!aplicacion.getRespuestas().isEmpty() || aplicacion.getPrueba() == null) return;
         aplicacion.getPrueba().getEjercicios().size();
         if (aplicacion.getPrueba().getEjercicios().isEmpty()) return;
         boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
         try {
-            List<Ejercicio> ejercicios = new ArrayList<>(aplicacion.getPrueba().getEjercicios());
-            Collections.shuffle(ejercicios);
-            int cantidad = Math.min(aplicacion.getPrueba().getCantidadEjercicios(), ejercicios.size());
-            for (int i = 0; i < cantidad; i++) {
-                RespuestaEvaluado respuesta = new RespuestaEvaluado();
-                respuesta.setAplicacion(aplicacion);
-                respuesta.setEjercicio(ejercicios.get(i));
-                aplicacion.getRespuestas().add(respuesta);
-            }
+            asignarEjercicios(aplicacion);
             em.merge(aplicacion);
             confirmarSiEsPropia(em, transaccionPropia);
         }
         catch (RuntimeException ex) {
             revertirSiEsPropia(em, transaccionPropia);
             throw ex;
+        }
+    }
+
+    private void asignarEjercicios(AplicacionPrueba aplicacion) {
+        if (aplicacion.getPrueba() == null || aplicacion.getPrueba().getEjercicios().isEmpty()) {
+            throw new IllegalStateException("La prueba no tiene ejercicios cargados.");
+        }
+        List<Ejercicio> ejercicios = new ArrayList<>(aplicacion.getPrueba().getEjercicios());
+        Collections.shuffle(ejercicios);
+        int cantidad = Math.min(aplicacion.getPrueba().getCantidadEjercicios(), ejercicios.size());
+        for (int i = 0; i < cantidad; i++) {
+            RespuestaEvaluado respuesta = new RespuestaEvaluado();
+            respuesta.setAplicacion(aplicacion);
+            respuesta.setEjercicio(ejercicios.get(i));
+            aplicacion.getRespuestas().add(respuesta);
         }
     }
 
@@ -151,6 +212,16 @@ public class MiPruebaServlet extends HttpServlet {
         respuesta.setOpcionC(opciones.contains("C"));
         respuesta.setOpcionD(opciones.contains("D"));
         respuesta.setOpcionE(opciones.contains("E"));
+    }
+
+    private boolean tieneSeleccion(HttpServletRequest request, RespuestaEvaluado respuesta) {
+        boolean multiple = Ejercicio.TipoRespuesta.MULTIPLE.equals(respuesta.getEjercicio().getTipoRespuesta());
+        if (multiple) {
+            String[] opciones = request.getParameterValues("opciones");
+            return opciones != null && opciones.length > 0;
+        }
+        String opcion = request.getParameter("opcion");
+        return opcion != null && !opcion.isBlank();
     }
 
     private void finalizarSiTiempoVencido(EntityManager em, AplicacionPrueba aplicacion) {

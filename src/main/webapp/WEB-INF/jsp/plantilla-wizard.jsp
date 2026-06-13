@@ -212,20 +212,29 @@
             for (let i = 1; i <= total; i++) {
                 const modo = document.querySelector('[name="tipoRespuesta' + i + '"]').value;
                 const marcadas = document.querySelectorAll('[name="correcta' + i + '"]:checked, [name="correcta' + i + '[]"]:checked');
-                if (marcadas.length === 0) errores.push('Ejercicio ' + i + ' sin respuesta correcta');
-                if (modo === 'UNICA' && marcadas.length !== 1) errores.push('Ejercicio ' + i + ' debe tener una sola correcta');
-                if (modo === 'MULTIPLE' && marcadas.length < 2) errores.push('Ejercicio ' + i + ' debe tener dos o mas correctas');
-                if (!archivoSeleccionado('imagenModelo' + i)) errores.push('Ejercicio ' + i + ' sin imagen modelo');
+                const faltantes = [];
+                if (!archivoSeleccionado('imagenModelo' + i)) faltantes.push('modelo');
                 ['A', 'B', 'C', 'D', 'E'].forEach(letra => {
-                    if (!archivoSeleccionado('opcion' + i + letra)) errores.push('Ejercicio ' + i + ' sin imagen de opcion ' + letra);
+                    if (!archivoSeleccionado('opcion' + i + letra)) faltantes.push('opcion ' + letra);
                 });
+                let respuesta = '';
+                if (marcadas.length === 0) respuesta = 'marca la respuesta correcta';
+                else if (modo === 'UNICA' && marcadas.length !== 1) respuesta = 'deja solo una correcta';
+                else if (modo === 'MULTIPLE' && marcadas.length < 2) respuesta = 'marca dos o mas correctas';
+                if (faltantes.length || respuesta) {
+                    let mensaje = 'Ejercicio ' + i + ': ';
+                    const partes = [];
+                    if (faltantes.length) partes.push('sube imagenes faltantes (' + faltantes.join(', ') + ')');
+                    if (respuesta) partes.push(respuesta);
+                    errores.push(mensaje + partes.join(' y '));
+                }
             }
             if (errores.length) {
                 event.preventDefault();
                 const primerError = errores[0].match(/Ejercicio (\d+)/);
                 if (primerError) mostrarEjercicio(parseInt(primerError[1], 10));
                 const error = document.getElementById('client-error');
-                error.textContent = errores.join(', ') + '.';
+                error.innerHTML = '<strong>Revisa la plantilla antes de guardar:</strong><ul><li>' + errores.join('</li><li>') + '</li></ul>';
                 error.style.display = 'block';
                 error.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
