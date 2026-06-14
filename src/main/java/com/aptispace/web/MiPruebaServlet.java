@@ -24,8 +24,8 @@ public class MiPruebaServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         EntityManager em = XPersistence.getManager();
-        AplicacionPrueba aplicacion = obtenerAplicacionActual(em, request);
-        request.setAttribute("historial", obtenerHistorial(em, request));
+        AplicacionPrueba aplicacion = obtenerAplicacionFinalizada(em, request);
+        if (aplicacion == null) aplicacion = obtenerAplicacionActual(em, request);
         if (aplicacion == null) {
             request.setAttribute("sinPrueba", true);
             request.getRequestDispatcher("/WEB-INF/jsp/mi-prueba.jsp").forward(request, response);
@@ -82,7 +82,7 @@ public class MiPruebaServlet extends HttpServlet {
                 ServicioCorreccion.corregir(aplicacion);
                 em.merge(aplicacion);
                 confirmarSiEsPropia(em, transaccionPropia);
-                response.sendRedirect(request.getContextPath() + "/mi-prueba?i=" + indice);
+                response.sendRedirect(request.getContextPath() + "/mi-prueba?finalizada=" + aplicacion.getId());
                 return;
             }
 
@@ -103,11 +103,11 @@ public class MiPruebaServlet extends HttpServlet {
         TypedQuery<AplicacionPrueba> query = em.createQuery(
             "select distinct a from AplicacionPrueba a left join fetch a.respuestas r left join fetch r.ejercicio e "
                 + "where a.evaluado.usuario.nombreUsuario = :usuario "
-                + "and a.estado in :estados "
+                + "and a.estado = :estado "
                 + "order by a.id desc",
             AplicacionPrueba.class);
         query.setParameter("usuario", usuario);
-        query.setParameter("estados", List.of(EstadoAplicacion.ASIGNADA, EstadoAplicacion.EN_PROCESO, EstadoAplicacion.FINALIZADA));
+        query.setParameter("estado", EstadoAplicacion.EN_PROCESO);
         query.setMaxResults(1);
         List<AplicacionPrueba> aplicaciones = query.getResultList();
         if (aplicaciones.isEmpty()) return null;
@@ -121,15 +121,23 @@ public class MiPruebaServlet extends HttpServlet {
         return aplicacion;
     }
 
-    private List<AplicacionPrueba> obtenerHistorial(EntityManager em, HttpServletRequest request) {
+    private AplicacionPrueba obtenerAplicacionFinalizada(EntityManager em, HttpServletRequest request) {
+        Long id = largoOpcional(request.getParameter("finalizada"));
+        if (id == null) return null;
         String usuario = (String) request.getSession(true).getAttribute("aptispace.usuario.EVALUADO");
         TypedQuery<AplicacionPrueba> query = em.createQuery(
-            "select distinct a from AplicacionPrueba a left join fetch a.resultado "
-                + "where a.evaluado.usuario.nombreUsuario = :usuario "
-                + "order by a.id desc",
+            "select distinct a from AplicacionPrueba a left join fetch a.resultado left join fetch a.respuestas r left join fetch r.ejercicio e "
+                + "where a.id = :id and a.evaluado.usuario.nombreUsuario = :usuario and a.estado = :estado",
             AplicacionPrueba.class);
+        query.setParameter("id", id);
         query.setParameter("usuario", usuario);
-        return query.getResultList();
+        query.setParameter("estado", EstadoAplicacion.FINALIZADA);
+        List<AplicacionPrueba> aplicaciones = query.getResultList();
+        if (aplicaciones.isEmpty()) return null;
+        AplicacionPrueba aplicacion = aplicaciones.get(0);
+        aplicacion.getRespuestas().sort((a, b) -> a.getEjercicio().getNumero().compareTo(b.getEjercicio().getNumero()));
+        for (RespuestaEvaluado respuesta : aplicacion.getRespuestas()) respuesta.getEjercicio().getOpciones().size();
+        return aplicacion;
     }
 
     private void reaplicar(EntityManager em, AplicacionPrueba aplicacionAnterior) {
@@ -200,6 +208,12 @@ public class MiPruebaServlet extends HttpServlet {
         catch (Exception ex) {
             return 0;
         }
+    }
+
+    private Long largoOpcional(String valor) {
+        if (valor == null || valor.isBlank()) return null;
+        try { return Long.valueOf(valor); }
+        catch (NumberFormatException ex) { return null; }
     }
 
     private void guardarSeleccion(HttpServletRequest request, RespuestaEvaluado respuesta) {

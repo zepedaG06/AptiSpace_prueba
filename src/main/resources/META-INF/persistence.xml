@@ -17,6 +17,7 @@
         <class>com.aptispace.modelo.RespuestaEvaluado</class>
         <class>com.aptispace.modelo.ResultadoPrueba</class>
         <class>com.aptispace.modelo.ObservacionPsicologica</class>
+        <class>com.aptispace.modelo.ArchivoSubido</class>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/aptispace"/>

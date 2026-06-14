@@ -1,9 +1,6 @@
 package com.aptispace.web;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -38,7 +35,7 @@ public class MiInformacionEvaluadorServlet extends HttpServlet {
             String apellidos = requerido(request, "apellidos");
             String correo = requerido(request, "correo");
             String nuevaContrasena = valor(request, "nuevaContrasena");
-            String fotoPerfil = guardarFoto(request);
+            String fotoPerfil = guardarFoto(em, request);
 
             usuario.setNombres(nombres);
             usuario.setApellidos(apellidos);
@@ -58,31 +55,9 @@ public class MiInformacionEvaluadorServlet extends HttpServlet {
         }
     }
 
-    private String guardarFoto(HttpServletRequest request) throws IOException, ServletException {
+    private String guardarFoto(EntityManager em, HttpServletRequest request) throws IOException, ServletException {
         Part part = request.getPart("fotoPerfil");
-        if (part == null || part.getSize() == 0) return null;
-
-        String contentType = part.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("La foto de perfil debe ser una imagen.");
-        }
-
-        String extension = extension(part.getSubmittedFileName());
-        String nombreArchivo = UUID.randomUUID() + extension;
-        String rutaReal = request.getServletContext().getRealPath("/uploads/perfiles");
-        if (rutaReal == null) throw new IllegalStateException("No se pudo resolver la carpeta de perfiles.");
-        Path carpeta = Path.of(rutaReal);
-        Files.createDirectories(carpeta);
-        part.write(carpeta.resolve(nombreArchivo).toString());
-        return "uploads/perfiles/" + nombreArchivo;
-    }
-
-    private String extension(String nombre) {
-        if (nombre == null) return ".png";
-        int punto = nombre.lastIndexOf('.');
-        if (punto < 0) return ".png";
-        String extension = nombre.substring(punto).toLowerCase();
-        return extension.matches("\\.(png|jpg|jpeg|gif|webp)") ? extension : ".png";
+        return UploadStorage.guardarImagen(em, part, false, "La foto de perfil debe ser una imagen.");
     }
 
     private Usuario usuarioActual(HttpServletRequest request) {

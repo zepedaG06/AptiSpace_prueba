@@ -1,14 +1,38 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.*,com.aptispace.modelo.*" %>
+<%!
+    String h(Object v) {
+        if (v == null) return "";
+        return String.valueOf(v).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    }
+    String js(Object v) {
+        if (v == null) return "";
+        return String.valueOf(v)
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\r", "\\r")
+            .replace("\n", "\\n");
+    }
+    OpcionEjercicio opcion(Ejercicio ejercicio, OpcionEjercicio.LetraOpcion letra) {
+        if (ejercicio == null || ejercicio.getOpciones() == null) return null;
+        for (OpcionEjercicio opcion : ejercicio.getOpciones()) if (letra.equals(opcion.getLetra())) return opcion;
+        return null;
+    }
+%>
 <%
     String ok = request.getParameter("ok");
     String error = request.getParameter("error");
+    if (error == null) error = (String) request.getAttribute("error");
+    Prueba plantilla = (Prueba) request.getAttribute("plantilla");
+    boolean editando = plantilla != null && plantilla.getId() != null;
+    List<Ejercicio> ejerciciosGuardados = editando ? plantilla.getEjercicios() : Collections.emptyList();
 %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>AptiSpace | Crear plantilla</title>
+    <title>AptiSpace | <%= editando ? "Editar plantilla" : "Crear plantilla" %></title>
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #1f2937; background: #e8f0f5; }
@@ -64,7 +88,7 @@
 </head>
 <body>
     <header>
-        <h1>Crear plantilla visual</h1>
+        <h1><%= editando ? "Editar plantilla visual" : "Crear plantilla visual" %></h1>
         <a href="<%= request.getContextPath() %>/evaluador-home.jsp">Volver al panel</a>
     </header>
     <main>
@@ -72,13 +96,19 @@
         <% if (error != null && !error.isEmpty()) { %><div class="notice error"><%= error %></div><% } %>
         <div id="client-error" class="notice error" style="display:none;"></div>
         <form id="plantillaForm" method="post" action="<%= request.getContextPath() %>/plantilla-wizard" enctype="multipart/form-data">
+            <% if (editando) { %><input type="hidden" name="pruebaId" value="<%= plantilla.getId() %>"/><% } %>
             <section>
                 <h2>1. Datos de la plantilla</h2>
                 <div class="grid">
-                    <label>Nombre <input name="nombre" required placeholder="Ej. S2 Grupo A"/></label>
-                    <label>Tiempo limite en minutos <input name="tiempoLimite" type="number" min="1" max="180" value="30" required/></label>
-                    <label>Cantidad de ejercicios de la prueba <input id="cantidadEjercicios" name="cantidadEjercicios" type="number" min="1" max="40" value="1" required/></label>
-                    <label>Descripcion <textarea name="descripcion" placeholder="Uso o indicaciones de esta plantilla"></textarea></label>
+                    <label>Nombre <input name="nombre" required placeholder="Ej. S2 Grupo A" value="<%= editando ? h(plantilla.getNombre()) : "" %>"/></label>
+                    <label>Tiempo limite en minutos <input name="tiempoLimite" type="number" min="1" max="180" value="<%= editando ? h(plantilla.getTiempoLimite()) : "30" %>" required/></label>
+                    <label>Cantidad de ejercicios de la prueba <input id="cantidadEjercicios" name="cantidadEjercicios" type="number" min="1" max="40" value="<%= editando ? h(plantilla.getCantidadEjercicios()) : "1" %>" required/></label>
+                    <label>Estado <select name="estado">
+                        <option value="ACTIVA" <%= editando && Prueba.EstadoPrueba.ACTIVA.equals(plantilla.getEstado()) ? "selected" : "" %>>Activa</option>
+                        <option value="INACTIVA" <%= editando && Prueba.EstadoPrueba.INACTIVA.equals(plantilla.getEstado()) ? "selected" : "" %>>Inactiva</option>
+                        <option value="ARCHIVADA" <%= editando && Prueba.EstadoPrueba.ARCHIVADA.equals(plantilla.getEstado()) ? "selected" : "" %>>Archivada</option>
+                    </select></label>
+                    <label>Descripcion <textarea name="descripcion" placeholder="Uso o indicaciones de esta plantilla"><%= editando ? h(plantilla.getDescripcion()) : "" %></textarea></label>
                 </div>
             </section>
             <section>
@@ -94,7 +124,7 @@
             </section>
             <div class="actions">
                 <a class="button secondary" href="<%= request.getContextPath() %>/evaluador-home.jsp">Cancelar</a>
-                <button class="primary" type="submit">Guardar plantilla</button>
+                <button class="primary" type="submit"><%= editando ? "Guardar cambios" : "Guardar plantilla" %></button>
             </div>
         </form>
     </main>
@@ -103,7 +133,7 @@
             <h2>Ejercicio __N__</h2>
             <div class="grid">
                 <label>Enunciado <textarea name="enunciado__N__" required>Seleccione las figuras que corresponden al desplazamiento indicado.</textarea></label>
-                <label>Imagen modelo <input name="imagenModelo__N__" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview model-preview"></span></label>
+                <label>Imagen modelo <input name="imagenModelo__N__" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview model-preview" data-existing=""></span></label>
                 <label class="answer-mode">Tipo de respuesta
                     <select name="tipoRespuesta__N__" onchange="actualizarModoRespuesta(__N__)">
                         <option value="UNICA">Solo una opcion correcta</option>
@@ -116,15 +146,37 @@
                 </label>
             </div>
             <div class="options">
-                <div class="option"><label>Opcion A <input name="opcion__N__A" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="A"/> Correcta</label></div>
-                <div class="option"><label>Opcion B <input name="opcion__N__B" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="B"/> Correcta</label></div>
-                <div class="option"><label>Opcion C <input name="opcion__N__C" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="C"/> Correcta</label></div>
-                <div class="option"><label>Opcion D <input name="opcion__N__D" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="D"/> Correcta</label></div>
-                <div class="option"><label>Opcion E <input name="opcion__N__E" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview"></span></label><label class="check"><input type="radio" name="correcta__N__" value="E"/> Correcta</label></div>
+                <div class="option"><label>Opcion A <input name="opcion__N__A" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview" data-existing=""></span></label><label class="check"><input type="radio" name="correcta__N__" value="A"/> Correcta</label></div>
+                <div class="option"><label>Opcion B <input name="opcion__N__B" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview" data-existing=""></span></label><label class="check"><input type="radio" name="correcta__N__" value="B"/> Correcta</label></div>
+                <div class="option"><label>Opcion C <input name="opcion__N__C" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview" data-existing=""></span></label><label class="check"><input type="radio" name="correcta__N__" value="C"/> Correcta</label></div>
+                <div class="option"><label>Opcion D <input name="opcion__N__D" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview" data-existing=""></span></label><label class="check"><input type="radio" name="correcta__N__" value="D"/> Correcta</label></div>
+                <div class="option"><label>Opcion E <input name="opcion__N__E" type="file" accept="image/*" onchange="previsualizar(this)"/><span class="preview" data-existing=""></span></label><label class="check"><input type="radio" name="correcta__N__" value="E"/> Correcta</label></div>
             </div>
         </div>
     </template>
     <script>
+        const contextPath = '<%= request.getContextPath() %>';
+        const datosGuardados = {
+            ejercicios: [
+                <% for (int i = 0; i < ejerciciosGuardados.size(); i++) {
+                    Ejercicio e = ejerciciosGuardados.get(i);
+                %>
+                {
+                    numero: <%= e.getNumero() %>,
+                    enunciado: "<%= js(e.getEnunciado()) %>",
+                    tipoRespuesta: "<%= e.getTipoRespuesta() == null ? "UNICA" : e.getTipoRespuesta().name() %>",
+                    imagenModelo: "<%= js(e.getImagenModelo()) %>",
+                    opciones: {
+                        <% for (OpcionEjercicio.LetraOpcion letra : OpcionEjercicio.LetraOpcion.values()) {
+                            OpcionEjercicio op = opcion(e, letra);
+                        %>
+                        <%= letra.name() %>: { imagen: "<%= js(op == null ? "" : op.getImagenOpcion()) %>", correcta: <%= op != null && Boolean.TRUE.equals(op.getEsCorrecta()) %> },
+                        <% } %>
+                    }
+                }<%= i + 1 < ejerciciosGuardados.size() ? "," : "" %>
+                <% } %>
+            ]
+        };
         const cantidad = document.getElementById('cantidadEjercicios');
         const contenedor = document.getElementById('ejercicios');
         const template = document.getElementById('tpl-ejercicio').innerHTML;
@@ -144,14 +196,41 @@
             for (let i = 1; i <= total; i++) {
                 contenedor.insertAdjacentHTML('beforeend', template.replaceAll('__N__', i));
             }
+            aplicarDatosGuardados();
             contenedor.querySelectorAll('textarea').forEach(el => { if (actuales[el.name] !== undefined) el.value = actuales[el.name]; });
             contenedor.querySelectorAll('select').forEach(el => { if (actuales[el.name] !== undefined) el.value = actuales[el.name]; });
             for (let i = 1; i <= total; i++) actualizarModoRespuesta(i);
-            contenedor.querySelectorAll('input[name^="correcta"]').forEach(el => {
-                el.checked = actuales[el.name + ':' + el.value] === true || actuales[el.name + '[]:' + el.value] === true;
-            });
+            if (Object.keys(actuales).some(nombre => nombre.startsWith('correcta'))) {
+                contenedor.querySelectorAll('input[name^="correcta"]').forEach(el => {
+                    el.checked = actuales[el.name + ':' + el.value] === true || actuales[el.name + '[]:' + el.value] === true;
+                });
+            }
             ejercicioActivo = Math.min(ejercicioActivo, total);
             mostrarEjercicio(ejercicioActivo);
+        }
+        function aplicarDatosGuardados() {
+            datosGuardados.ejercicios.forEach(ejercicio => {
+                const numero = ejercicio.numero;
+                const enunciado = document.querySelector('[name="enunciado' + numero + '"]');
+                const tipo = document.querySelector('[name="tipoRespuesta' + numero + '"]');
+                if (enunciado) enunciado.value = ejercicio.enunciado || '';
+                if (tipo) tipo.value = ejercicio.tipoRespuesta || 'UNICA';
+                mostrarImagenExistente('imagenModelo' + numero, ejercicio.imagenModelo);
+                ['A', 'B', 'C', 'D', 'E'].forEach(letra => {
+                    const opcion = ejercicio.opciones[letra] || {};
+                    mostrarImagenExistente('opcion' + numero + letra, opcion.imagen);
+                    const correcta = document.querySelector('[name="correcta' + numero + '"][value="' + letra + '"]');
+                    if (correcta) correcta.checked = opcion.correcta === true;
+                });
+            });
+        }
+        function mostrarImagenExistente(nombreInput, ruta) {
+            if (!ruta) return;
+            const input = document.querySelector('[name="' + nombreInput + '"]');
+            const preview = input ? input.parentElement.querySelector('.preview') : null;
+            if (!preview) return;
+            preview.dataset.existing = ruta;
+            preview.innerHTML = '<img src="' + contextPath + '/' + ruta + '" alt="Vista previa guardada"/>';
         }
         function mostrarEjercicio(numero) {
             const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));
@@ -213,9 +292,9 @@
                 const modo = document.querySelector('[name="tipoRespuesta' + i + '"]').value;
                 const marcadas = document.querySelectorAll('[name="correcta' + i + '"]:checked, [name="correcta' + i + '[]"]:checked');
                 const faltantes = [];
-                if (!archivoSeleccionado('imagenModelo' + i)) faltantes.push('modelo');
+                if (!archivoDisponible('imagenModelo' + i)) faltantes.push('modelo');
                 ['A', 'B', 'C', 'D', 'E'].forEach(letra => {
-                    if (!archivoSeleccionado('opcion' + i + letra)) faltantes.push('opcion ' + letra);
+                    if (!archivoDisponible('opcion' + i + letra)) faltantes.push('opcion ' + letra);
                 });
                 let respuesta = '';
                 if (marcadas.length === 0) respuesta = 'marca la respuesta correcta';
@@ -242,6 +321,11 @@
         function archivoSeleccionado(nombre) {
             const input = document.querySelector('[name="' + nombre + '"]');
             return input && input.files && input.files.length > 0;
+        }
+        function archivoDisponible(nombre) {
+            const input = document.querySelector('[name="' + nombre + '"]');
+            const preview = input ? input.parentElement.querySelector('.preview') : null;
+            return archivoSeleccionado(nombre) || (preview && preview.dataset.existing);
         }
     </script>
 </body>

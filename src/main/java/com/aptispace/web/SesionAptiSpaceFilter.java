@@ -48,6 +48,7 @@ public class SesionAptiSpaceFilter implements Filter {
             || path.equals("/auth")
             || path.equals("/logout")
             || path.startsWith("/images/")
+            || path.startsWith("/uploads/")
             || path.startsWith("/css/")
             || path.startsWith("/js/");
     }
@@ -72,6 +73,7 @@ public class SesionAptiSpaceFilter implements Filter {
     private boolean esRutaEvaluado(String path) {
         return path.equals("/evaluado-home.jsp")
             || path.equals("/mi-prueba")
+            || path.equals("/mi-resultados")
             || path.equals("/mi-perfil")
             || path.equals("/unirme-grupo")
             || path.equals("/mi-grupo")
