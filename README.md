@@ -5,8 +5,23 @@ Proyecto web Java/OpenXava para evaluación de aptitud espacial - desplazamiento
 ## Abrir en IntelliJ IDEA
 1. Abrir IntelliJ IDEA.
 2. Seleccionar `Open`.
-3. Elegir la carpeta ``.
+3. Elegir la carpeta `C:\Users\Casa\AptiSpace`.
 4. Importar como proyecto Maven.
+
+## URL oficial
+La app desplegada en Railway esta disponible en:
+
+```text
+https://aptispace-production.up.railway.app/AptiSpace/
+```
+
+Healthcheck:
+
+```text
+https://aptispace-production.up.railway.app/AptiSpace/health
+```
+
+El healthcheck debe responder `OK`.
 
 ## Estructura
 - `src/main/java/com/aptispace/modelo`: entidades JPA.
@@ -36,7 +51,7 @@ Para variar la cantidad aplicada, editar la prueba y cambiar `cantidadEjercicios
 Cada nueva aplicacion toma una muestra aleatoria diferente del banco disponible.
 
 ## Ejecutar
-Desde ``:
+Desde `C:\Users\Casa\AptiSpace`:
 
 ```powershell
 mvn cargo:run
@@ -49,7 +64,7 @@ La app esta configurada para guardar en PostgreSQL:
 Base: aptispace
 Usuario: aptispace
 Clave: aptispace123
-URL: 
+URL: jdbc:postgresql://localhost:5432/aptispace
 ```
 
 Crear la base y el usuario con la clave del superusuario `postgres`:
@@ -67,15 +82,47 @@ Si quieres crear el esquema manualmente:
 URL local:
 
 ```text
-
+http://localhost:8080/AptiSpace/
 ```
 
 Usuarios de prueba:
 
 ```text
-Evaluador: evaluador / evaluador123
-Evaluado: evaluado / evaluado123
+Evaluador: evaluador@aptispace.local / evaluador123
+Evaluado: evaluado@aptispace.local / evaluado123
 ```
 
 El evaluador controla plantillas, grupos, asignaciones, resultados y observaciones.
 El evaluado solo entra a su prueba, resultado e informacion personal.
+
+## Railway
+Railway despliega desde la rama `main`.
+
+Variables esperadas en el servicio web:
+
+```text
+PORT
+DATABASE_URL
+APTISPACE_SESSION_SECRET
+```
+
+`DATABASE_URL` debe referenciar la base PostgreSQL de Railway, por ejemplo:
+
+```text
+${{aptispace-db.DATABASE_URL}}
+```
+
+No usar `JDBC_DATABASE_URL` junto con `DATABASE_URL`, porque la app prioriza `JDBC_DATABASE_URL`.
+
+El deploy usa el WAR precompilado:
+
+```text
+deploy/AptiSpace.war
+```
+
+Si se cambia codigo Java, JSP o recursos de la app, recompilar y actualizar el WAR antes de hacer push:
+
+```powershell
+mvn.cmd -DskipTests package
+Copy-Item target\aptispace-1.0.0.war deploy\AptiSpace.war -Force
+```
