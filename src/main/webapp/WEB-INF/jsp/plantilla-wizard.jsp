@@ -191,6 +191,15 @@
         const prevExercise = document.getElementById('prevExercise');
         const nextExercise = document.getElementById('nextExercise');
         let ejercicioActivo = 1;
+        document.addEventListener('submit', function (event) {
+            if (!event.target || event.target.id !== 'plantillaForm') return;
+            const nombre = document.querySelector('[name="nombre"]');
+            if (!nombre || nombre.value.trim()) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            mostrarErrorCliente(['Datos de la plantilla: escribe el nombre.']);
+            nombre.focus();
+        }, true);
         function renderEjercicios() {
             const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));
             const actuales = {};
@@ -328,12 +337,15 @@
                 event.preventDefault();
                 const primerError = errores[0].match(/Ejercicio (\d+)/);
                 if (primerError) mostrarEjercicio(parseInt(primerError[1], 10));
-                const error = document.getElementById('client-error');
-                error.innerHTML = '<strong>Revisa la plantilla antes de guardar:</strong><ul><li>' + errores.join('</li><li>') + '</li></ul>';
-                error.style.display = 'block';
-                error.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                mostrarErrorCliente(errores);
             }
         });
+        function mostrarErrorCliente(errores) {
+            const error = document.getElementById('client-error');
+            error.innerHTML = '<strong>Revisa la plantilla antes de guardar:</strong><ul><li>' + errores.join('</li><li>') + '</li></ul>';
+            error.style.display = 'block';
+            error.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
         function archivoSeleccionado(nombre) {
             const input = document.querySelector('[name="' + nombre + '"]');
             return input && input.files && input.files.length > 0;
