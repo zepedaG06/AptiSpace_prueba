@@ -44,6 +44,7 @@ public class SesionAptiSpaceFilter implements Filter {
     private boolean esPublico(String path) {
         return path.equals("/")
             || path.equals("/index.jsp")
+            || path.equals("/health")
             || path.equals("/auth")
             || path.equals("/logout")
             || path.startsWith("/images/")

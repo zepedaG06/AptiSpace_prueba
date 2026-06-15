@@ -28,6 +28,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>HealthServlet</servlet-name>
+        <servlet-class>com.aptispace.web.HealthServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>HealthServlet</servlet-name>
+        <url-pattern>/health</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>LogoutServlet</servlet-name>
         <servlet-class>com.aptispace.web.LogoutServlet</servlet-class>
     </servlet>
