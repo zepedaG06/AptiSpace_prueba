@@ -102,7 +102,7 @@
         <% if ("1".equals(ok)) { %><div class="notice">Plantilla guardada. Ya puedes crear otra o revisarla en Pruebas/Ejercicios.</div><% } %>
         <% if (error != null && !error.isEmpty()) { %><div class="notice error"><%= error %></div><% } %>
         <div id="client-error" class="notice error" style="display:none;"></div>
-        <form id="plantillaForm" method="post" action="<%= request.getContextPath() %>/plantilla-wizard" enctype="multipart/form-data">
+        <form id="plantillaForm" method="post" action="<%= request.getContextPath() %>/plantilla-wizard" enctype="multipart/form-data" novalidate>
             <% if (editando) { %><input type="hidden" name="pruebaId" value="<%= plantilla.getId() %>"/><% } %>
             <section>
                 <h2>1. Datos de la plantilla</h2>
@@ -296,10 +296,18 @@
         document.getElementById('plantillaForm').addEventListener('submit', function (event) {
             const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));
             const errores = [];
+            const nombre = document.querySelector('[name="nombre"]');
+            const tiempoLimite = document.querySelector('[name="tiempoLimite"]');
+            if (!nombre.value.trim()) errores.push('Datos de la plantilla: escribe el nombre.');
+            const minutos = parseInt(tiempoLimite.value || '0', 10);
+            if (!minutos || minutos < 1 || minutos > 180) errores.push('Datos de la plantilla: el tiempo limite debe estar entre 1 y 180 minutos.');
+            if (total < 1 || total > 40) errores.push('Datos de la plantilla: la cantidad de ejercicios debe estar entre 1 y 40.');
             for (let i = 1; i <= total; i++) {
+                const enunciado = document.querySelector('[name="enunciado' + i + '"]').value.trim();
                 const modo = document.querySelector('[name="tipoRespuesta' + i + '"]').value;
                 const marcadas = document.querySelectorAll('[name="correcta' + i + '"]:checked, [name="correcta' + i + '[]"]:checked');
                 const faltantes = [];
+                if (!enunciado) faltantes.push('enunciado');
                 if (!archivoDisponible('imagenModelo' + i)) faltantes.push('modelo');
                 ['A', 'B', 'C', 'D', 'E'].forEach(letra => {
                     if (!archivoDisponible('opcion' + i + letra)) faltantes.push('opcion ' + letra);
