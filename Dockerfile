@@ -1,14 +1,21 @@
-FROM maven:3.9-eclipse-temurin-17
+FROM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
 COPY pom.xml .
-RUN mvn -q -DskipTests dependency:go-offline
+RUN MAVEN_OPTS="-Xmx512m" mvn -q -DskipTests dependency:go-offline
 
 COPY . .
-RUN chmod +x docker-entrypoint.sh && mvn -q -DskipTests package
+RUN MAVEN_OPTS="-Xmx512m" mvn -q -DskipTests package
+
+FROM tomcat:9.0-jdk17-temurin
 
 ENV PORT=8080
 EXPOSE 8080
 
-CMD ["./docker-entrypoint.sh"]
+RUN rm -rf /usr/local/tomcat/webapps/*
+COPY --from=build /app/target/aptispace-1.0.0.war /usr/local/tomcat/webapps/AptiSpace.war
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
+
+CMD ["docker-entrypoint.sh"]

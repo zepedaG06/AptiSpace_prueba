@@ -2,6 +2,7 @@
 set -eu
 
 APP_PORT="${PORT:-8080}"
+APP_DIR="/usr/local/tomcat/webapps/AptiSpace"
 JDBC_URL="${JDBC_DATABASE_URL:-${DATABASE_URL:-jdbc:postgresql://localhost:5432/aptispace}}"
 JDBC_USER="${JDBC_DATABASE_USERNAME:-${POSTGRES_USER:-aptispace}}"
 JDBC_PASSWORD="${JDBC_DATABASE_PASSWORD:-${POSTGRES_PASSWORD:-aptispace123}}"
@@ -17,7 +18,15 @@ case "$JDBC_URL" in
     ;;
 esac
 
-cat > src/main/resources/META-INF/persistence.xml <<EOF
+export CATALINA_OPTS="${CATALINA_OPTS:-} -Dserver.port=${APP_PORT} -Daptispace.session.secret=${APTISPACE_SESSION_SECRET:-aptispace-local-session-key}"
+
+if [ ! -d "$APP_DIR" ]; then
+  mkdir -p "$APP_DIR"
+  (cd "$APP_DIR" && jar -xf /usr/local/tomcat/webapps/AptiSpace.war)
+  rm -f /usr/local/tomcat/webapps/AptiSpace.war
+fi
+
+cat > "$APP_DIR/WEB-INF/classes/META-INF/persistence.xml" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -52,4 +61,6 @@ cat > src/main/resources/META-INF/persistence.xml <<EOF
 </persistence>
 EOF
 
-mvn -q -DskipTests -Dapp.port="$APP_PORT" package cargo:run
+sed -i "s/port=\"8080\"/port=\"${APP_PORT}\"/g" /usr/local/tomcat/conf/server.xml
+
+exec catalina.sh run
