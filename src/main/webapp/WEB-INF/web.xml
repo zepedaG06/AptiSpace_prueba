@@ -37,12 +37,30 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>UploadsServlet</servlet-name>
+        <servlet-class>com.aptispace.web.UploadsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UploadsServlet</servlet-name>
+        <url-pattern>/uploads/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>MiPruebaServlet</servlet-name>
         <servlet-class>com.aptispace.web.MiPruebaServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>MiPruebaServlet</servlet-name>
         <url-pattern>/mi-prueba</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MiResultadosServlet</servlet-name>
+        <servlet-class>com.aptispace.web.MiResultadosServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MiResultadosServlet</servlet-name>
+        <url-pattern>/mi-resultados</url-pattern>
     </servlet-mapping>
 
     <servlet>

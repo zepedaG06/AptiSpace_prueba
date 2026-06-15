@@ -123,18 +123,18 @@ public class EvaluadorGestionServlet extends HttpServlet {
     private void eliminarPrueba(EntityManager em, HttpServletRequest request) {
         Prueba prueba = em.find(Prueba.class, largo(request, "pruebaId"));
         if (prueba == null) throw new IllegalArgumentException("No existe la plantilla indicada.");
-        Long usos = em.createQuery("select count(a) from AplicacionPrueba a where a.prueba = :prueba", Long.class)
+        List<AplicacionPrueba> aplicaciones = em.createQuery("select a from AplicacionPrueba a where a.prueba = :prueba", AplicacionPrueba.class)
             .setParameter("prueba", prueba)
-            .getSingleResult();
-        if (usos > 0) {
-            throw new IllegalArgumentException("No se puede borrar una plantilla que ya fue asignada. Cambiala a INACTIVA.");
-        }
+            .getResultList();
+        for (AplicacionPrueba aplicacion : aplicaciones) em.remove(aplicacion);
+        em.flush();
         em.remove(prueba);
     }
 
     private void asignarPrueba(EntityManager em, HttpServletRequest request) {
         Prueba prueba = em.find(Prueba.class, largo(request, "pruebaId"));
         if (prueba == null) throw new IllegalArgumentException("Selecciona una prueba valida.");
+        if (!Prueba.EstadoPrueba.ACTIVA.equals(prueba.getEstado())) throw new IllegalArgumentException("Solo puedes asignar plantillas activas.");
         Usuario psicologo = usuarioActual(em, request);
         List<Long> evaluadoIds = new ArrayList<>();
         Long grupoId = largoOpcional(request, "grupoId");

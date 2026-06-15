@@ -40,7 +40,7 @@
             <h3>Accesos del evaluado</h3>
             <div class="grid">
             <a class="tile" href="mi-prueba"><strong>Responder prueba</strong><span>Realiza la prueba una pregunta a la vez, con imagen modelo y opciones visuales.</span></a>
-            <a class="tile" href="mi-prueba"><strong>Mi resultado</strong><span>Consulta el resultado cuando la prueba este finalizada.</span></a>
+            <a class="tile" href="mi-resultados"><strong>Mi resultado</strong><span>Consulta un dashboard por prueba, intento, aciertos y fallos.</span></a>
             <a class="tile" href="mi-perfil"><strong>Mi informacion</strong><span>Revisa o actualiza sexo, edad, carrera, año y datos de contacto.</span></a>
                 <a class="tile" href="unirme-grupo"><strong>Unirme a grupo</strong><span>Ingresa el codigo que te comparta tu evaluador para recibir una prueba.</span></a>
             </div>
