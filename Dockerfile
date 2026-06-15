@@ -3,14 +3,13 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
 COPY pom.xml .
-RUN MAVEN_OPTS="-Xmx512m" mvn -q -DskipTests dependency:go-offline
-
 COPY . .
-RUN MAVEN_OPTS="-Xmx512m" mvn -q -DskipTests package
+RUN MAVEN_OPTS="-Xms64m -Xmx384m -XX:MaxMetaspaceSize=192m" mvn -q -DskipTests package
 
 FROM tomcat:9.0-jdk17-temurin
 
 ENV PORT=8080
+ENV CATALINA_OPTS="-Xms64m -Xmx256m -XX:MaxMetaspaceSize=192m -XX:+UseSerialGC"
 EXPOSE 8080
 
 RUN rm -rf /usr/local/tomcat/webapps/*

@@ -18,7 +18,7 @@ case "$JDBC_URL" in
     ;;
 esac
 
-export CATALINA_OPTS="${CATALINA_OPTS:-} -Dserver.port=${APP_PORT} -Daptispace.session.secret=${APTISPACE_SESSION_SECRET:-aptispace-local-session-key}"
+export CATALINA_OPTS="${CATALINA_OPTS:-"-Xms64m -Xmx256m -XX:MaxMetaspaceSize=192m -XX:+UseSerialGC"} -Dserver.port=${APP_PORT} -Daptispace.session.secret=${APTISPACE_SESSION_SECRET:-aptispace-local-session-key}"
 
 if [ ! -d "$APP_DIR" ]; then
   mkdir -p "$APP_DIR"
