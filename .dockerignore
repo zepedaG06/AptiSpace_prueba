@@ -1,0 +1,7 @@
+.git
+.idea
+target
+*.log
+cloudflared*.log
+server*.log
+aptispace-run*.log
