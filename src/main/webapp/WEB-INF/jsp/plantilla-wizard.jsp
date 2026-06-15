@@ -301,6 +301,8 @@
         cantidad.addEventListener('input', renderEjercicios);
         prevExercise.addEventListener('click', () => mostrarEjercicio(ejercicioActivo - 1));
         nextExercise.addEventListener('click', () => mostrarEjercicio(ejercicioActivo + 1));
+        document.getElementById('plantillaForm').addEventListener('input', limpiarErrorCliente);
+        document.getElementById('plantillaForm').addEventListener('change', limpiarErrorCliente);
         renderEjercicios();
         document.getElementById('plantillaForm').addEventListener('submit', function (event) {
             const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));
@@ -345,6 +347,11 @@
             error.innerHTML = '<strong>Revisa la plantilla antes de guardar:</strong><ul><li>' + errores.join('</li><li>') + '</li></ul>';
             error.style.display = 'block';
             error.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function limpiarErrorCliente() {
+            const error = document.getElementById('client-error');
+            error.innerHTML = '';
+            error.style.display = 'none';
         }
         function archivoSeleccionado(nombre) {
             const input = document.querySelector('[name="' + nombre + '"]');

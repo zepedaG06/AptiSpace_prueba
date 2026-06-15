@@ -89,10 +89,10 @@
         <% } else { %>
             <div class="status">
                 <span><%= aplicacion.getPrueba().getNombre() %></span>
-                <strong>Pregunta <%= indice + 1 %> de <%= total %></strong>
+                <strong><%= finalizada ? "Prueba finalizada" : "Pregunta " + (indice + 1) + " de " + total %></strong>
                 <% if (!finalizada) { %><span id="contador" class="timer" data-seconds="<%= segundosRestantes %>">--:--</span><% } %>
             </div>
-            <div class="bar"><span></span></div>
+            <% if (!finalizada) { %><div class="bar"><span></span></div><% } %>
             <section class="card">
                 <% if (finalizada && aplicacion.getResultado() != null) { %>
                     <h2>Felicidades, completaste la prueba</h2>
