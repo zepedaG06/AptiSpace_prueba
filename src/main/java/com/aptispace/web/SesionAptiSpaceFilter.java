@@ -28,7 +28,6 @@ public class SesionAptiSpaceFilter implements Filter {
 
         String tipoRequerido = tipoRequerido(path);
         String usuario = usuarioParaRuta(http, tipoRequerido);
-        String tipo = tipoRequerido != null ? tipoRequerido : (String) http.getSession(true).getAttribute("aptispace.tipo");
         if (usuario == null) {
             res.sendRedirect(http.getContextPath() + "/index.jsp");
             return;
@@ -61,9 +60,11 @@ public class SesionAptiSpaceFilter implements Filter {
 
     private String usuarioParaRuta(HttpServletRequest request, String tipoRequerido) {
         if (tipoRequerido != null) {
-            return (String) request.getSession(true).getAttribute("aptispace.usuario." + tipoRequerido);
+            return RoleSessionSupport.usuario(request, tipoRequerido);
         }
-        return (String) request.getSession(true).getAttribute("aptispace.usuario");
+        String evaluador = RoleSessionSupport.usuario(request, "PSICOLOGO");
+        if (evaluador != null) return evaluador;
+        return RoleSessionSupport.usuario(request, "EVALUADO");
     }
 
     private boolean esModuloEvaluado(String path) {

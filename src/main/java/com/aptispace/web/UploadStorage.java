@@ -23,7 +23,7 @@ public final class UploadStorage {
         ArchivoSubido archivo = new ArchivoSubido();
         archivo.setNombreOriginal(nombreArchivo);
         archivo.setContentType(contentType);
-        archivo.setTamaño(part.getSize());
+        archivo.setTamano(part.getSize());
         archivo.setDatos(part.getInputStream().readAllBytes());
         em.persist(archivo);
         em.flush();

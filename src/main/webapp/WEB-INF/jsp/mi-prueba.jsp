@@ -1,6 +1,19 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.aptispace.modelo.*" %>
 <%@ page import="com.aptispace.web.MiPruebaServlet" %>
+<%!
+    String h(Object v) {
+        if (v == null) return "";
+        return String.valueOf(v).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    }
+    String imgUrl(javax.servlet.http.HttpServletRequest request, String ruta) {
+        if (ruta == null || ruta.isBlank()) return "";
+        if (ruta.startsWith("http://") || ruta.startsWith("https://")) return h(ruta);
+        String limpia = ruta.replace("\\", "/");
+        while (limpia.startsWith("/")) limpia = limpia.substring(1);
+        return request.getContextPath() + "/" + h(limpia);
+    }
+%>
 <%
     Boolean sinPrueba = (Boolean) request.getAttribute("sinPrueba");
     AplicacionPrueba aplicacion = (AplicacionPrueba) request.getAttribute("aplicacion");
@@ -95,6 +108,7 @@
                         <a class="button primary" href="<%= request.getContextPath() %>/mi-resultados?aplicacionId=<%= aplicacion.getId() %>">Ver resultado</a>
                         <% if (Boolean.TRUE.equals(aplicacion.getAutorizadaReaplicacion())) { %>
                             <form method="post" action="<%= request.getContextPath() %>/mi-prueba">
+                                <input type="hidden" name="aplicacionId" value="<%= aplicacion.getId() %>"/>
                                 <button class="primary" type="submit" name="accion" value="reaplicar">Volver a hacer</button>
                             </form>
                         <% } %>
@@ -107,7 +121,7 @@
                                 <h2>Ejercicio <%= respuesta.getEjercicio().getNumero() %></h2>
                                 <p><%= respuesta.getEjercicio().getEnunciado() == null ? "Seleccione las opciones correctas." : respuesta.getEjercicio().getEnunciado() %></p>
                                 <% if (respuesta.getEjercicio().getImagenModelo() != null) { %>
-                                    <img src="<%= request.getContextPath() %>/<%= respuesta.getEjercicio().getImagenModelo() %>" alt="Imagen del ejercicio"/>
+                                    <img src="<%= imgUrl(request, respuesta.getEjercicio().getImagenModelo()) %>" alt="Imagen del ejercicio"/>
                                 <% } %>
                             </div>
                             <div class="options">
@@ -118,7 +132,7 @@
                                         <span>
                                             <strong>Opción <%= opcion.getLetra().name() %></strong>
                                             <% if (opcion.getImagenOpcion() != null) { %>
-                                                <img src="<%= request.getContextPath() %>/<%= opcion.getImagenOpcion() %>" alt="Opción <%= opcion.getLetra().name() %>"/>
+                                                <img src="<%= imgUrl(request, opcion.getImagenOpcion()) %>" alt="Opción <%= opcion.getLetra().name() %>"/>
                                             <% } %>
                                         </span>
                                     </label>

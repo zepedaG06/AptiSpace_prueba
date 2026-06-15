@@ -18,6 +18,13 @@
         for (OpcionEjercicio opcion : ejercicio.getOpciones()) if (letra.equals(opcion.getLetra())) return opcion;
         return null;
     }
+    String imgUrl(javax.servlet.http.HttpServletRequest request, String ruta) {
+        if (ruta == null || ruta.isBlank()) return "";
+        if (ruta.startsWith("http://") || ruta.startsWith("https://")) return h(ruta);
+        String limpia = ruta.replace("\\", "/");
+        while (limpia.startsWith("/")) limpia = limpia.substring(1);
+        return request.getContextPath() + "/" + h(limpia);
+    }
 %>
 <%
     String ok = request.getParameter("ok");
@@ -230,7 +237,8 @@
             const preview = input ? input.parentElement.querySelector('.preview') : null;
             if (!preview) return;
             preview.dataset.existing = ruta;
-            preview.innerHTML = '<img src="' + contextPath + '/' + ruta + '" alt="Vista previa guardada"/>';
+            const limpia = ruta.replace(/^[\/\\]+/, '').replaceAll('\\', '/');
+            preview.innerHTML = '<img src="' + contextPath + '/' + limpia + '" alt="Vista previa guardada"/>';
         }
         function mostrarEjercicio(numero) {
             const total = Math.max(1, Math.min(40, parseInt(cantidad.value || '1', 10)));

@@ -76,6 +76,13 @@
         .metric { border: 1px solid #c5ddec; border-radius: 8px; padding: 14px; background: linear-gradient(180deg, #f8fcff, #edf6fb); }
         .metric span { display: block; color: #5b6f82; margin-bottom: 6px; font-size: 13px; }
         .metric strong { color: #16324f; font-size: 28px; }
+        .scoreboard { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(0, 1.2fr); gap: 16px; align-items: stretch; margin-bottom: 16px; }
+        .score-main { border-radius: 8px; padding: 18px; background: linear-gradient(135deg, #16324f, #1f7fa3); color: white; display: grid; align-content: center; }
+        .score-main span { color: #dff3fa; font-weight: 700; }
+        .score-main strong { display: block; font-size: 52px; line-height: 1; margin-top: 8px; }
+        .score-context { border: 1px solid #c5ddec; border-radius: 8px; padding: 16px; background: #f8fcff; display: grid; gap: 10px; }
+        .score-context h3 { margin: 0; color: #16324f; }
+        .score-context p { margin: 0; color: #52606d; line-height: 1.45; }
         .summary { display: grid; gap: 10px; margin-bottom: 16px; padding: 14px; border-radius: 8px; background: #e7f5fb; border: 1px solid #b8d9e9; color: #20374d; }
         .summary strong { color: #0f5f7f; }
         .answers { display: grid; gap: 10px; }
@@ -86,8 +93,8 @@
         .badge.ok { background: #dff7ea; color: #12633f; }
         .badge.bad { background: #fde5e1; color: #8a2419; }
         .empty { padding: 24px; text-align: center; color: #5b6f82; }
-        @media (max-width: 900px) { .shell { grid-template-columns: 1fr; } .metrics { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 560px) { header { align-items: flex-start; flex-direction: column; } .metrics, .answer { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { .shell { grid-template-columns: 1fr; } .metrics { grid-template-columns: repeat(2, 1fr); } .scoreboard { grid-template-columns: 1fr; } }
+        @media (max-width: 560px) { header { align-items: flex-start; flex-direction: column; } .metrics, .answer { grid-template-columns: 1fr; } .score-main strong { font-size: 42px; } }
     </style>
 </head>
 <body>
@@ -129,6 +136,14 @@
                         <p>Intento <%= intento(seleccionada, historial) %> · finalizado <%= f(seleccionada.getFechaFin()) %></p>
                     </div>
                     <div class="panel-body">
+                        <div class="scoreboard">
+                            <div class="score-main"><span>Puntuacion S2</span><strong><%= resultado.getPuntuacionS2() %></strong></div>
+                            <div class="score-context">
+                                <h3>Dashboard del intento <%= intento(seleccionada, historial) %></h3>
+                                <p><%= h(seleccionada.getPrueba() == null ? "Prueba" : seleccionada.getPrueba().getNombre()) %> finalizada el <%= f(seleccionada.getFechaFin()) %>.</p>
+                                <p>Este panel es solo para revisar resultados; para responder una aplicacion usa Hacer prueba.</p>
+                            </div>
+                        </div>
                         <div class="metrics">
                             <div class="metric"><span>Aciertos</span><strong><%= resultado.getAciertos() %></strong></div>
                             <div class="metric"><span>Errores</span><strong><%= resultado.getErrores() %></strong></div>

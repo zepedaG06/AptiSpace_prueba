@@ -22,10 +22,9 @@
         header h1 { margin: 0 0 8px; font-size: 32px; letter-spacing: 0; }
         header p { margin: 0; color: #dbe8ef; line-height: 1.5; }
         main { max-width: 980px; margin: 22px auto 44px; padding: 0 20px; }
-        .top { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 16px; padding: 12px; background: white; border: 1px solid #d7e0e7; border-radius: 8px; }
+        .top { display: flex; justify-content: flex-start; gap: 12px; align-items: center; margin-bottom: 16px; padding: 12px; background: white; border: 1px solid #d7e0e7; border-radius: 8px; }
         .top a, .button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; border: 0; border-radius: 6px; padding: 10px 13px; font-weight: 700; text-decoration: none; cursor: pointer; }
         .top a:first-child, .button.primary { background: #1f6f8b; color: white; }
-        .top a:last-child { background: #eef3f7; color: #203a43; border: 1px solid #cbd5df; }
         .layout { display: grid; grid-template-columns: minmax(0, 1.1fr) .8fr; gap: 16px; align-items: start; }
         .panel { background: white; border: 1px solid #d7e0e7; border-radius: 8px; padding: 18px; }
         h2 { margin: 0 0 12px; color: #203a43; }
@@ -55,7 +54,6 @@
     <main>
         <div class="top">
             <a href="<%= request.getContextPath() %>/evaluador-home.jsp">Volver al panel</a>
-            <a href="<%= request.getContextPath() %>/logout">Cerrar sesion</a>
         </div>
         <% if ("1".equals(request.getParameter("ok"))) { %><div class="notice">Informacion actualizada.</div><% } %>
         <% if (request.getParameter("error") != null) { %><div class="error"><%= h(request.getParameter("error")) %></div><% } %>

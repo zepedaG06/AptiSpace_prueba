@@ -26,6 +26,7 @@ public class MiPruebaServlet extends HttpServlet {
         EntityManager em = XPersistence.getManager();
         AplicacionPrueba aplicacion = obtenerAplicacionFinalizada(em, request);
         if (aplicacion == null) aplicacion = obtenerAplicacionActual(em, request);
+        if (aplicacion == null) aplicacion = obtenerAplicacionReaplicable(em, request);
         if (aplicacion == null) {
             request.setAttribute("sinPrueba", true);
             request.getRequestDispatcher("/WEB-INF/jsp/mi-prueba.jsp").forward(request, response);
@@ -45,19 +46,22 @@ public class MiPruebaServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         EntityManager em = XPersistence.getManager();
-        AplicacionPrueba aplicacion = obtenerAplicacionActual(em, request);
-        if (aplicacion == null) {
-            response.sendRedirect(request.getContextPath() + "/mi-prueba");
-            return;
-        }
         if ("reaplicar".equals(request.getParameter("accion"))) {
             try {
-                reaplicar(em, aplicacion);
+                AplicacionPrueba aplicacionFinalizada = obtenerAplicacionFinalizadaPorId(em, request, largoOpcional(request.getParameter("aplicacionId")));
+                if (aplicacionFinalizada == null) throw new IllegalArgumentException("No se encontro el intento finalizado para repetir.");
+                reaplicar(em, aplicacionFinalizada);
                 response.sendRedirect(request.getContextPath() + "/mi-prueba");
             }
             catch (RuntimeException ex) {
                 response.sendRedirect(request.getContextPath() + "/mi-prueba?error=" + java.net.URLEncoder.encode(ex.getMessage(), "UTF-8"));
             }
+            return;
+        }
+
+        AplicacionPrueba aplicacion = obtenerAplicacionActual(em, request);
+        if (aplicacion == null) {
+            response.sendRedirect(request.getContextPath() + "/mi-prueba");
             return;
         }
         if (aplicacion.getRespuestas().isEmpty() || EstadoAplicacion.FINALIZADA.equals(aplicacion.getEstado())) {
@@ -108,10 +112,18 @@ public class MiPruebaServlet extends HttpServlet {
             AplicacionPrueba.class);
         query.setParameter("usuario", usuario);
         query.setParameter("estado", EstadoAplicacion.EN_PROCESO);
-        query.setMaxResults(1);
         List<AplicacionPrueba> aplicaciones = query.getResultList();
         if (aplicaciones.isEmpty()) return null;
-        AplicacionPrueba aplicacion = aplicaciones.get(0);
+        AplicacionPrueba aplicacion = null;
+        for (AplicacionPrueba candidata : aplicaciones) {
+            if (candidata.getFechaFin() != null) {
+                marcarFinalizadaSiHaceFalta(em, candidata);
+                continue;
+            }
+            aplicacion = candidata;
+            break;
+        }
+        if (aplicacion == null) return null;
         prepararSiHaceFalta(em, aplicacion);
         finalizarSiTiempoVencido(em, aplicacion);
         aplicacion.getRespuestas().sort((a, b) -> a.getEjercicio().getNumero().compareTo(b.getEjercicio().getNumero()));
@@ -121,8 +133,47 @@ public class MiPruebaServlet extends HttpServlet {
         return aplicacion;
     }
 
+    private void marcarFinalizadaSiHaceFalta(EntityManager em, AplicacionPrueba aplicacion) {
+        if (aplicacion == null || !EstadoAplicacion.EN_PROCESO.equals(aplicacion.getEstado()) || aplicacion.getFechaFin() == null) return;
+        boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
+        try {
+            aplicacion.setEstado(EstadoAplicacion.FINALIZADA);
+            em.merge(aplicacion);
+            confirmarSiEsPropia(em, transaccionPropia);
+        }
+        catch (RuntimeException ex) {
+            revertirSiEsPropia(em, transaccionPropia);
+            throw ex;
+        }
+    }
+
+    private AplicacionPrueba obtenerAplicacionReaplicable(EntityManager em, HttpServletRequest request) {
+        String usuario = (String) request.getSession(true).getAttribute("aptispace.usuario.EVALUADO");
+        TypedQuery<AplicacionPrueba> query = em.createQuery(
+            "select distinct a from AplicacionPrueba a left join fetch a.resultado left join fetch a.respuestas r left join fetch r.ejercicio e "
+                + "where a.evaluado.usuario.nombreUsuario = :usuario "
+                + "and a.estado = :estado "
+                + "and a.autorizadaReaplicacion = true "
+                + "order by a.id desc",
+            AplicacionPrueba.class);
+        query.setParameter("usuario", usuario);
+        query.setParameter("estado", EstadoAplicacion.FINALIZADA);
+        query.setMaxResults(1);
+        List<AplicacionPrueba> aplicaciones = query.getResultList();
+        if (aplicaciones.isEmpty()) return null;
+        AplicacionPrueba aplicacion = aplicaciones.get(0);
+        aplicacion.getRespuestas().sort((a, b) -> a.getEjercicio().getNumero().compareTo(b.getEjercicio().getNumero()));
+        for (RespuestaEvaluado respuesta : aplicacion.getRespuestas()) respuesta.getEjercicio().getOpciones().size();
+        return aplicacion;
+    }
+
     private AplicacionPrueba obtenerAplicacionFinalizada(EntityManager em, HttpServletRequest request) {
         Long id = largoOpcional(request.getParameter("finalizada"));
+        if (id == null) return null;
+        return obtenerAplicacionFinalizadaPorId(em, request, id);
+    }
+
+    private AplicacionPrueba obtenerAplicacionFinalizadaPorId(EntityManager em, HttpServletRequest request, Long id) {
         if (id == null) return null;
         String usuario = (String) request.getSession(true).getAttribute("aptispace.usuario.EVALUADO");
         TypedQuery<AplicacionPrueba> query = em.createQuery(

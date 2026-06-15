@@ -26,6 +26,9 @@ public class PlantillaWizardServlet extends HttpServlet {
             Prueba prueba = cargarPrueba(XPersistence.getManager(), id);
             if (prueba != null) {
                 prueba.getEjercicios().sort(Comparator.comparing(Ejercicio::getNumero));
+                for (Ejercicio ejercicio : prueba.getEjercicios()) {
+                    ejercicio.getOpciones().sort(Comparator.comparing(OpcionEjercicio::getLetra));
+                }
                 request.setAttribute("plantilla", prueba);
             }
             else {

@@ -41,7 +41,7 @@
     <main>
         <div class="top">
             <h2>Flujo principal</h2>
-            <a class="logout" href="logout">Cerrar sesion</a>
+            <a class="logout" href="logout?tipo=PSICOLOGO">Cerrar sesion</a>
         </div>
         <div class="layout">
             <section class="panel">

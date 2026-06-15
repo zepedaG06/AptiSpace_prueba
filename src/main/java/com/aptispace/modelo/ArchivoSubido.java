@@ -7,7 +7,7 @@ import org.openxava.annotations.*;
 
 @Entity
 @Table(name = "archivo_subido")
-@Tab(properties = "nombreOriginal, contentType, tamaño, fechaSubida")
+@Tab(properties = "nombreOriginal, contentType, tamano, fechaSubida")
 public class ArchivoSubido {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Hidden
     private Long id;
@@ -21,7 +21,7 @@ public class ArchivoSubido {
     private String contentType;
 
     @Column(name = "tamanio", nullable = false)
-    private Long tamaño = 0L;
+    private Long tamano = 0L;
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
@@ -38,8 +38,8 @@ public class ArchivoSubido {
     public void setNombreOriginal(String nombreOriginal) { this.nombreOriginal = nombreOriginal; }
     public String getContentType() { return contentType; }
     public void setContentType(String contentType) { this.contentType = contentType; }
-    public Long getTamaño() { return tamaño; }
-    public void setTamaño(Long tamaño) { this.tamaño = tamaño; }
+    public Long getTamano() { return tamano; }
+    public void setTamano(Long tamano) { this.tamano = tamano; }
     public byte[] getDatos() { return datos; }
     public void setDatos(byte[] datos) { this.datos = datos; }
     public LocalDateTime getFechaSubida() { return fechaSubida; }

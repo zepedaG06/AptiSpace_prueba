@@ -30,24 +30,26 @@ public class AuthServlet extends HttpServlet {
     }
 
     private void iniciarSesion(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String usuario = valor(request, "usuario");
+        String usuario = valor(request, "correo");
+        if (usuario.isEmpty()) usuario = valor(request, "usuario");
         String contrasena = valor(request, "contrasena");
         String tipo = valor(request, "tipo");
+        validarCorreo(usuario);
 
         EntityManager em = XPersistence.getManager();
-        Usuario encontrado = buscarUsuario(em, usuario);
+        Usuario encontrado = buscarPorCorreo(em, usuario);
         if (encontrado == null && esCuentaDemo(usuario, contrasena)) {
             asegurarCuentaDemo(em, usuario);
-            encontrado = buscarUsuario(em, usuario);
+            encontrado = buscarPorCorreo(em, usuario);
         }
         if (encontrado == null || !encontrado.getContrasena().equals(contrasena)) {
-            throw new IllegalArgumentException("Usuario o contrasena incorrectos.");
+            throw new IllegalArgumentException("Correo o contrasena incorrectos.");
         }
         if (!tieneRol(encontrado, tipo)) {
             throw new IllegalArgumentException("La cuenta no pertenece al entorno seleccionado.");
         }
 
-        guardarSesion(request, encontrado.getNombreUsuario(), tipo);
+        guardarSesion(request, response, encontrado.getNombreUsuario(), tipo);
         response.sendRedirect(destino(request, tipo));
     }
 
@@ -61,6 +63,7 @@ public class AuthServlet extends HttpServlet {
         if (contrasena.length() < 6) throw new IllegalArgumentException("La contrasena debe tener al menos 6 caracteres.");
         if (nombres.isEmpty() || apellidos.isEmpty()) throw new IllegalArgumentException("Nombres y apellidos son obligatorios.");
         if (correo.isEmpty()) throw new IllegalArgumentException("El correo es obligatorio.");
+        validarCorreo(correo);
 
         EntityManager em = XPersistence.getManager();
         String usuario = generarNombreUsuario(em, correo, nombres, apellidos);
@@ -80,7 +83,7 @@ public class AuthServlet extends HttpServlet {
             if ("EVALUADO".equals(tipo)) crearEvaluadoDesdeRegistro(em, request, nuevo);
 
             confirmarSiEsPropia(em, transaccionPropia);
-            guardarSesion(request, usuario, tipo);
+            guardarSesion(request, response, usuario, tipo);
             response.sendRedirect(destino(request, tipo));
         }
         catch (RuntimeException ex) {
@@ -121,6 +124,13 @@ public class AuthServlet extends HttpServlet {
         int consecutivo = 2;
         while (buscarUsuario(em, candidato) != null) candidato = base + consecutivo++;
         return candidato;
+    }
+
+    private void validarCorreo(String correo) {
+        if (correo == null || correo.isBlank()) throw new IllegalArgumentException("El correo es obligatorio.");
+        if (!correo.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            throw new IllegalArgumentException("Ingresa un correo valido.");
+        }
     }
 
     private Rol obtenerRol(EntityManager em, String tipo) {
@@ -194,8 +204,8 @@ public class AuthServlet extends HttpServlet {
     }
 
     private boolean esCuentaDemo(String usuario, String contrasena) {
-        return ("evaluador".equals(usuario) && "evaluador123".equals(contrasena))
-            || ("evaluado".equals(usuario) && "evaluado123".equals(contrasena));
+        return ("evaluador@aptispace.local".equalsIgnoreCase(usuario) && "evaluador123".equals(contrasena))
+            || ("evaluado@aptispace.local".equalsIgnoreCase(usuario) && "evaluado123".equals(contrasena));
     }
 
     private void asegurarCuentaDemo(EntityManager em, String usuario) {
@@ -204,11 +214,11 @@ public class AuthServlet extends HttpServlet {
             insertarRolSiNoExiste(em, "PSICOLOGO", "Registra evaluados, aplica pruebas y consulta resultados.");
             insertarRolSiNoExiste(em, "EVALUADO", "Realiza la prueba asignada.");
 
-            if ("evaluador".equals(usuario)) {
+            if ("evaluador@aptispace.local".equalsIgnoreCase(usuario)) {
                 insertarUsuarioSiNoExiste(em, "evaluador", "evaluador123", "Evaluador", "Demo", "evaluador@aptispace.local");
                 asignarRol(em, "evaluador", "PSICOLOGO");
             }
-            else if ("evaluado".equals(usuario)) {
+            else if ("evaluado@aptispace.local".equalsIgnoreCase(usuario)) {
                 insertarUsuarioSiNoExiste(em, "evaluado", "evaluado123", "Persona", "Demo", "evaluado@aptispace.local");
                 asignarRol(em, "evaluado", "EVALUADO");
                 Usuario cuenta = buscarUsuario(em, "evaluado");
@@ -351,10 +361,8 @@ public class AuthServlet extends HttpServlet {
         return request.getContextPath() + "/evaluador-home.jsp";
     }
 
-    private void guardarSesion(HttpServletRequest request, String usuario, String tipo) {
-        request.getSession(true).setAttribute("aptispace.usuario." + tipo, usuario);
-        request.getSession(true).setAttribute("aptispace.usuario", usuario);
-        request.getSession(true).setAttribute("aptispace.tipo", tipo);
+    private void guardarSesion(HttpServletRequest request, HttpServletResponse response, String usuario, String tipo) {
+        RoleSessionSupport.guardar(request, response, tipo, usuario);
         request.getSession(true).setAttribute("aptispace.admin", false);
     }
 

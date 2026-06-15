@@ -64,12 +64,28 @@ public class EvaluadorGestionServlet extends HttpServlet {
         request.setAttribute("pruebas", lista(em, "select distinct p from Prueba p left join fetch p.ejercicios order by p.nombre", Prueba.class));
         List<AplicacionPrueba> aplicaciones = lista(em, "select distinct a from AplicacionPrueba a left join fetch a.resultado left join fetch a.respuestas where a.psicologo = :psicologo order by a.id desc", AplicacionPrueba.class, psicologo);
         for (AplicacionPrueba aplicacion : aplicaciones) {
+            normalizarEstadoInconsistente(em, aplicacion);
             for (RespuestaEvaluado respuesta : aplicacion.getRespuestas()) {
                 respuesta.getEjercicio().getOpciones().size();
             }
         }
         request.setAttribute("aplicaciones", aplicaciones);
         request.setAttribute("observaciones", lista(em, "select o from ObservacionPsicologica o where o.psicologo = :psicologo order by o.fechaObservacion desc", ObservacionPsicologica.class, psicologo));
+    }
+
+    private void normalizarEstadoInconsistente(EntityManager em, AplicacionPrueba aplicacion) {
+        if (aplicacion == null || !AplicacionPrueba.EstadoAplicacion.EN_PROCESO.equals(aplicacion.getEstado())) return;
+        if (aplicacion.getFechaFin() == null && aplicacion.getResultado() == null) return;
+        boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
+        try {
+            aplicacion.setEstado(AplicacionPrueba.EstadoAplicacion.FINALIZADA);
+            em.merge(aplicacion);
+            confirmarSiEsPropia(em, transaccionPropia);
+        }
+        catch (RuntimeException ex) {
+            revertirSiEsPropia(em, transaccionPropia);
+            throw ex;
+        }
     }
 
     private String seccion(HttpServletRequest request) {
@@ -163,6 +179,9 @@ public class EvaluadorGestionServlet extends HttpServlet {
     private void iniciarPrueba(EntityManager em, HttpServletRequest request) {
         AplicacionPrueba aplicacion = em.find(AplicacionPrueba.class, largo(request, "aplicacionId"));
         if (aplicacion == null) throw new IllegalArgumentException("No existe la asignacion.");
+        if (!AplicacionPrueba.EstadoAplicacion.ASIGNADA.equals(aplicacion.getEstado())) {
+            throw new IllegalArgumentException("Solo se pueden iniciar asignaciones pendientes. Si ya finalizo, usa Autorizar repetir.");
+        }
         asignarEjerciciosAleatorios(aplicacion);
         aplicacion.iniciar();
         em.merge(aplicacion);
@@ -187,6 +206,9 @@ public class EvaluadorGestionServlet extends HttpServlet {
     private void finalizarPrueba(EntityManager em, HttpServletRequest request) {
         AplicacionPrueba aplicacion = em.find(AplicacionPrueba.class, largo(request, "aplicacionId"));
         if (aplicacion == null) throw new IllegalArgumentException("No existe la asignacion.");
+        if (!AplicacionPrueba.EstadoAplicacion.EN_PROCESO.equals(aplicacion.getEstado())) {
+            throw new IllegalArgumentException("Solo se pueden finalizar pruebas en proceso.");
+        }
         aplicacion.finalizar();
         ServicioCorreccion.corregir(aplicacion);
         em.merge(aplicacion);

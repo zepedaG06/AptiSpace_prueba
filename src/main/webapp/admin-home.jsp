@@ -29,7 +29,7 @@
     <main>
         <div class="top">
             <h2>Configuracion del banco S2</h2>
-            <a class="logout" href="logout">Cerrar sesion</a>
+            <a class="logout" href="logout?tipo=PSICOLOGO">Cerrar sesion</a>
         </div>
         <section class="grid">
             <a class="tile" href="m/PlantillaCorreccion"><strong>Plantillas</strong><span>Agrupa los ejercicios que quedaran disponibles para los psicologos.</span></a>

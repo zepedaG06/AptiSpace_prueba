@@ -1,12 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
     String error = request.getParameter("error");
-    String usuario = (String) session.getAttribute("aptispace.usuario");
-    String tipo = (String) session.getAttribute("aptispace.tipo");
-    if (usuario != null && tipo != null) {
-        response.sendRedirect("EVALUADO".equals(tipo) ? "evaluado-home.jsp" : "evaluador-home.jsp");
-        return;
-    }
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -163,19 +157,19 @@
                     <button class="active" type="button" onclick="modo('panel-evaluador', false)">Iniciar</button>
                     <button type="button" onclick="modo('panel-evaluador', true)">Crear cuenta</button>
                 </div>
-                <form class="login" method="post" action="auth">
+                <form class="login" method="post" action="auth" autocomplete="off">
                     <input type="hidden" name="accion" value="login"/>
                     <input type="hidden" name="tipo" value="PSICOLOGO"/>
-                    <label>Usuario o correo <input name="usuario" autocomplete="username" required/></label>
-                    <label>Contrasena <input name="contrasena" type="password" autocomplete="current-password" required/></label>
+                    <label>Correo <input name="correo" type="email" inputmode="email" autocomplete="off" required/></label>
+                    <label>Contrasena <input name="contrasena" type="password" autocomplete="new-password" required/></label>
                     <div class="actions"><button class="primary" type="submit">Entrar como evaluador</button></div>
                 </form>
-                <form class="registro" method="post" action="auth">
+                <form class="registro" method="post" action="auth" autocomplete="off">
                     <input type="hidden" name="accion" value="registro"/>
                     <input type="hidden" name="tipo" value="PSICOLOGO"/>
                     <label>Nombres <input name="nombres" required/></label>
                     <label>Apellidos <input name="apellidos" required/></label>
-                    <label>Correo <input name="correo" type="email" required autocomplete="email"/></label>
+                    <label>Correo <input name="correo" type="email" inputmode="email" required autocomplete="off"/></label>
                     <label>Contrasena <input name="contrasena" type="password" autocomplete="new-password" required minlength="6"/></label>
                     <div class="actions"><button class="primary" type="submit">Crear evaluador</button></div>
                 </form>
@@ -188,14 +182,14 @@
                     <button class="active" type="button" onclick="modo('panel-evaluado', false)">Iniciar</button>
                     <button type="button" onclick="modo('panel-evaluado', true)">Crear cuenta</button>
                 </div>
-                <form class="login" method="post" action="auth">
+                <form class="login" method="post" action="auth" autocomplete="off">
                     <input type="hidden" name="accion" value="login"/>
                     <input type="hidden" name="tipo" value="EVALUADO"/>
-                    <label>Usuario o correo <input name="usuario" autocomplete="username" required/></label>
-                    <label>Contrasena <input name="contrasena" type="password" autocomplete="current-password" required/></label>
+                    <label>Correo <input name="correo" type="email" inputmode="email" autocomplete="off" required/></label>
+                    <label>Contrasena <input name="contrasena" type="password" autocomplete="new-password" required/></label>
                     <div class="actions"><button class="primary" type="submit">Entrar como evaluado</button></div>
                 </form>
-                <form class="registro" method="post" action="auth">
+                <form class="registro" method="post" action="auth" autocomplete="off">
                     <input type="hidden" name="accion" value="registro"/>
                     <input type="hidden" name="tipo" value="EVALUADO"/>
                     <label>Nombres <input name="nombres" required/></label>
@@ -212,7 +206,7 @@
                     <label>Carrera <input name="carrera" placeholder="Ej. Ingenieria, Arquitectura"/></label>
                     <label>Año de la carrera <input name="anioCarrera" type="number" min="1" max="12"/></label>
                     <label>Codigo de espacio <input name="codigoEspacio" placeholder="Opcional"/></label>
-                    <label>Correo <input name="correo" type="email" required autocomplete="email"/></label>
+                    <label>Correo <input name="correo" type="email" inputmode="email" required autocomplete="off"/></label>
                     <label>Contrasena <input name="contrasena" type="password" autocomplete="new-password" required minlength="6"/></label>
                     <div class="actions"><button class="primary" type="submit">Crear evaluado</button></div>
                 </form>

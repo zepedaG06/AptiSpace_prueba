@@ -86,6 +86,13 @@
         for (GrupoEvaluacion g : evaluado.getGrupos()) salida.append(g.getNombre()).append(' ');
         return h(salida.toString());
     }
+    String imgUrl(javax.servlet.http.HttpServletRequest request, String ruta) {
+        if (ruta == null || ruta.isBlank()) return "";
+        if (ruta.startsWith("http://") || ruta.startsWith("https://")) return h(ruta);
+        String limpia = ruta.replace("\\", "/");
+        while (limpia.startsWith("/")) limpia = limpia.substring(1);
+        return request.getContextPath() + "/" + h(limpia);
+    }
 %>
 <%
     String seccion = (String) request.getAttribute("seccion");
@@ -356,12 +363,17 @@
                 </div>
                 <table class="assignment-table"><tr><th>Evaluado</th><th>Prueba</th><th>Intento</th><th>Estado</th><th>Acciones</th></tr>
                 <% for (Evaluado miembro : miembrosSeleccionados) { AplicacionPrueba a = ultimaAplicacion(miembro, aplicaciones); %><tr><td><strong><%= nombre(miembro) %></strong></td><td><%= a == null ? "Sin prueba asignada" : h(a.getPrueba()) %></td><td><%= a == null ? "-" : "Intento " + intento(a, aplicaciones) %></td><td><span class="status-badge"><%= a == null ? "PENDIENTE" : h(a.getEstado()) %></span></td><td class="row-actions">
-                    <% if (a != null) { %>
+                    <% if (a != null && AplicacionPrueba.EstadoAplicacion.ASIGNADA.equals(a.getEstado())) { %>
                     <form method="post"><input type="hidden" name="accion" value="iniciarPrueba"/><input type="hidden" name="aplicacionId" value="<%= a.getId() %>"/><button class="button" type="submit">Iniciar</button></form>
+                    <% } %>
+                    <% if (a != null && AplicacionPrueba.EstadoAplicacion.EN_PROCESO.equals(a.getEstado())) { %>
                     <form method="post"><input type="hidden" name="accion" value="finalizarPrueba"/><input type="hidden" name="aplicacionId" value="<%= a.getId() %>"/><button class="button" type="submit">Finalizar</button></form>
-                    <% if (AplicacionPrueba.EstadoAplicacion.FINALIZADA.equals(a.getEstado()) && !Boolean.TRUE.equals(a.getAutorizadaReaplicacion())) { %>
+                    <% } %>
+                    <% if (a != null && AplicacionPrueba.EstadoAplicacion.FINALIZADA.equals(a.getEstado()) && !Boolean.TRUE.equals(a.getAutorizadaReaplicacion())) { %>
                         <form method="post"><input type="hidden" name="accion" value="autorizarReaplicacion"/><input type="hidden" name="aplicacionId" value="<%= a.getId() %>"/><button class="button" type="submit">Autorizar repetir</button></form>
                     <% } %>
+                    <% if (a != null && AplicacionPrueba.EstadoAplicacion.FINALIZADA.equals(a.getEstado()) && Boolean.TRUE.equals(a.getAutorizadaReaplicacion())) { %>
+                        <span class="status-badge">Repeticion autorizada</span>
                     <% } %>
                 </td></tr><% } %>
                 </table>
@@ -390,7 +402,7 @@
                 <article class="template-card">
                     <div class="template-preview">
                         <% if (!portada.isEmpty()) { %>
-                            <img src="<%= request.getContextPath() %>/<%= portada %>" alt="Vista previa de <%= h(p.getNombre()) %>"/>
+                            <img src="<%= imgUrl(request, portada) %>" alt="Vista previa de <%= h(p.getNombre()) %>"/>
                         <% } else { %>
                             <div class="template-placeholder">S2</div>
                         <% } %>
