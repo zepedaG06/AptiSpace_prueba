@@ -5,7 +5,7 @@ Proyecto web Java/OpenXava para evaluación de aptitud espacial - desplazamiento
 ## Abrir en IntelliJ IDEA
 1. Abrir IntelliJ IDEA.
 2. Seleccionar `Open`.
-3. Elegir la carpeta `C:\Users\Casa\AptiSpace`.
+3. Buscar la ruta donde se guardo el proyecto.
 4. Importar como proyecto Maven.
 
 ## URL oficial
