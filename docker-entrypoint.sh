@@ -36,6 +36,8 @@ cat > "$APP_DIR/WEB-INF/classes/META-INF/persistence.xml" <<EOF
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <class>com.aptispace.modelo.Rol</class>
         <class>com.aptispace.modelo.Usuario</class>
+        <class>com.aptispace.modelo.Bitacora</class>
+        <class>com.aptispace.modelo.ConfiguracionBasica</class>
         <class>com.aptispace.modelo.Evaluado</class>
         <class>com.aptispace.modelo.GrupoEvaluacion</class>
         <class>com.aptispace.modelo.Prueba</class>
