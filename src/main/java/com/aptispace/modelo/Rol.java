@@ -8,7 +8,7 @@ import org.openxava.annotations.*;
 
 @Entity
 @Table(name = "rol", uniqueConstraints = @UniqueConstraint(columnNames = "nombre_rol"))
-@Tab(properties = "nombreRol, descripcion")
+@Tab(properties = "nombreRol, descripcion", baseCondition = "${nombreRol} <> 'PSICOLOGO'")
 public class Rol {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Hidden
     private Long id;

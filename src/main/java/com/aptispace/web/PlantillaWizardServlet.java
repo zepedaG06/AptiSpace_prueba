@@ -111,11 +111,9 @@ public class PlantillaWizardServlet extends HttpServlet {
         }
         catch (RuntimeException ex) {
             revertirSiEsPropia(em, transaccionPropia);
-            String id = valor(request, "pruebaId");
-            String destino = request.getContextPath() + "/plantilla-wizard";
-            if (!id.isEmpty()) destino += "?id=" + id + "&error=";
-            else destino += "?error=";
-            response.sendRedirect(destino + java.net.URLEncoder.encode(ex.getMessage(), "UTF-8"));
+            request.setAttribute("error", ex.getMessage());
+            request.setAttribute("plantilla", construirPlantillaTemporal(em, request));
+            request.getRequestDispatcher("/WEB-INF/jsp/plantilla-wizard.jsp").forward(request, response);
         }
     }
 
@@ -207,6 +205,78 @@ public class PlantillaWizardServlet extends HttpServlet {
             .setParameter("ejercicio", ejercicio)
             .getSingleResult();
         return total > 0;
+    }
+
+    private Prueba construirPlantillaTemporal(EntityManager em, HttpServletRequest request) {
+        Long pruebaId = largoOpcional(request, "pruebaId");
+        Prueba existente = pruebaId == null ? null : cargarPrueba(em, pruebaId);
+        if (existente != null) {
+            existente.getEjercicios().sort(Comparator.comparing(Ejercicio::getNumero));
+            for (Ejercicio ejercicio : existente.getEjercicios()) {
+                ejercicio.getOpciones().sort(Comparator.comparing(OpcionEjercicio::getLetra));
+            }
+        }
+
+        Prueba plantilla = new Prueba();
+        plantilla.setId(pruebaId);
+        plantilla.setNombre(valor(request, "nombre"));
+        plantilla.setDescripcion(valor(request, "descripcion"));
+        plantilla.setTiempoLimite(enteroTemporal(request, "tiempoLimite", existente == null ? 30 : existente.getTiempoLimite()));
+        plantilla.setCantidadEjercicios(enteroTemporal(request, "cantidadEjercicios", existente == null ? 1 : existente.getCantidadEjercicios()));
+        plantilla.setEstado(estadoTemporal(request, existente == null ? Prueba.EstadoPrueba.ACTIVA : existente.getEstado()));
+
+        int cantidad = Math.max(1, Math.min(40, plantilla.getCantidadEjercicios()));
+        for (int numero = 1; numero <= cantidad; numero++) {
+            Ejercicio base = existente == null ? null : ejercicioPorNumero(existente, numero);
+            Ejercicio ejercicio = new Ejercicio();
+            ejercicio.setPrueba(plantilla);
+            ejercicio.setNumero(numero);
+            ejercicio.setEnunciado(valor(request, "enunciado" + numero));
+            ejercicio.setTipoRespuesta(tipoRespuestaTemporal(request, numero, base));
+            ejercicio.setImagenModelo(base == null ? null : base.getImagenModelo());
+
+            for (LetraOpcion letra : LetraOpcion.values()) {
+                OpcionEjercicio opcionBase = base == null ? null : opcionPorLetra(base, letra);
+                OpcionEjercicio opcion = new OpcionEjercicio();
+                opcion.setEjercicio(ejercicio);
+                opcion.setLetra(letra);
+                opcion.setImagenOpcion(opcionBase == null ? null : opcionBase.getImagenOpcion());
+                opcion.setEsCorrecta(esCorrecta(request, numero, letra));
+                ejercicio.getOpciones().add(opcion);
+            }
+            plantilla.getEjercicios().add(ejercicio);
+        }
+        return plantilla;
+    }
+
+    private Integer enteroTemporal(HttpServletRequest request, String nombre, Integer defecto) {
+        String valor = valor(request, nombre);
+        if (valor.isEmpty()) return defecto;
+        try {
+            return Integer.valueOf(valor);
+        }
+        catch (NumberFormatException ex) {
+            return defecto;
+        }
+    }
+
+    private Prueba.EstadoPrueba estadoTemporal(HttpServletRequest request, Prueba.EstadoPrueba defecto) {
+        try {
+            return Prueba.EstadoPrueba.valueOf(valor(request, "estado", defecto.name()));
+        }
+        catch (RuntimeException ex) {
+            return defecto;
+        }
+    }
+
+    private TipoRespuesta tipoRespuestaTemporal(HttpServletRequest request, int numero, Ejercicio base) {
+        String valor = valor(request, "tipoRespuesta" + numero, base == null || base.getTipoRespuesta() == null ? "UNICA" : base.getTipoRespuesta().name());
+        try {
+            return TipoRespuesta.valueOf(valor);
+        }
+        catch (RuntimeException ex) {
+            return TipoRespuesta.UNICA;
+        }
     }
 
     private Long largoOpcional(HttpServletRequest request, String nombre) {

@@ -21,6 +21,11 @@ public class SesionAptiSpaceFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         String path = http.getRequestURI().substring(http.getContextPath().length());
 
+        if (path.equals("/index")) {
+            res.sendRedirect(http.getContextPath() + "/");
+            return;
+        }
+
         if (esPublico(path)) {
             chain.doFilter(request, response);
             return;
@@ -43,6 +48,7 @@ public class SesionAptiSpaceFilter implements Filter {
 
     private boolean esPublico(String path) {
         return path.equals("/")
+            || path.equals("/index")
             || path.equals("/index.jsp")
             || path.equals("/health")
             || path.equals("/auth")
@@ -54,6 +60,7 @@ public class SesionAptiSpaceFilter implements Filter {
     }
 
     private String tipoRequerido(String path) {
+        if (esRutaAdministrador(path)) return "ADMINISTRADOR";
         if (esRutaEvaluador(path)) return "PSICOLOGO";
         if (esRutaEvaluado(path)) return "EVALUADO";
         return null;
@@ -63,13 +70,24 @@ public class SesionAptiSpaceFilter implements Filter {
         if (tipoRequerido != null) {
             return RoleSessionSupport.usuario(request, tipoRequerido);
         }
+        String administrador = RoleSessionSupport.usuario(request, "ADMINISTRADOR");
+        if (administrador != null) return administrador;
         String evaluador = RoleSessionSupport.usuario(request, "PSICOLOGO");
         if (evaluador != null) return evaluador;
         return RoleSessionSupport.usuario(request, "EVALUADO");
     }
 
+    private boolean esRutaAdministrador(String path) {
+        return path.equals("/admin-home.jsp")
+            || path.startsWith("/m/Usuario")
+            || path.startsWith("/m/Rol")
+            || path.startsWith("/m/GrupoEvaluacion")
+            || path.startsWith("/m/Bitacora")
+            || path.startsWith("/m/ConfiguracionBasica");
+    }
+
     private boolean esModuloEvaluado(String path) {
-        return path.startsWith("/m/RespuestaEvaluado") || path.startsWith("/m/ResultadoPrueba");
+        return false;
     }
 
     private boolean esRutaEvaluado(String path) {
@@ -83,8 +101,7 @@ public class SesionAptiSpaceFilter implements Filter {
     }
 
     private boolean esRutaEvaluador(String path) {
-        return path.equals("/admin-home.jsp")
-            || path.equals("/evaluador-home.jsp")
+        return path.equals("/evaluador-home.jsp")
             || path.equals("/mi-informacion-evaluador")
             || path.equals("/plantilla-wizard")
             || path.equals("/grupos")
@@ -93,17 +110,7 @@ public class SesionAptiSpaceFilter implements Filter {
             || path.equals("/resultados")
             || path.equals("/plantillas")
             || path.equals("/catalogo")
-            || path.equals("/observaciones")
-            || path.startsWith("/m/Usuario")
-            || path.startsWith("/m/Rol")
-            || path.startsWith("/m/Evaluado")
-            || path.startsWith("/m/GrupoEvaluacion")
-            || path.startsWith("/m/Prueba")
-            || path.startsWith("/m/Ejercicio")
-            || path.startsWith("/m/OpcionEjercicio")
-            || path.startsWith("/m/PlantillaCorreccion")
-            || path.startsWith("/m/AplicacionPrueba")
-            || path.startsWith("/m/ObservacionPsicologica");
+            || path.equals("/observaciones");
     }
 
     @Override

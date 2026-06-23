@@ -32,7 +32,8 @@
     if (error == null) error = (String) request.getAttribute("error");
     Prueba plantilla = (Prueba) request.getAttribute("plantilla");
     boolean editando = plantilla != null && plantilla.getId() != null;
-    List<Ejercicio> ejerciciosGuardados = editando ? plantilla.getEjercicios() : Collections.emptyList();
+    boolean conDatos = plantilla != null;
+    List<Ejercicio> ejerciciosGuardados = conDatos ? plantilla.getEjercicios() : Collections.emptyList();
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -107,15 +108,15 @@
             <section>
                 <h2>1. Datos de la plantilla</h2>
                 <div class="grid">
-                    <label>Nombre <input name="nombre" required placeholder="Ej. S2 Grupo A" value="<%= editando ? h(plantilla.getNombre()) : "" %>"/></label>
-                    <label>Tiempo limite en minutos <input name="tiempoLimite" type="number" min="1" max="180" value="<%= editando ? h(plantilla.getTiempoLimite()) : "30" %>" required/></label>
-                    <label>Cantidad de ejercicios de la prueba <input id="cantidadEjercicios" name="cantidadEjercicios" type="number" min="1" max="40" value="<%= editando ? h(plantilla.getCantidadEjercicios()) : "1" %>" required/></label>
+                    <label>Nombre <input name="nombre" required placeholder="Ej. S2 Grupo A" value="<%= conDatos ? h(plantilla.getNombre()) : "" %>"/></label>
+                    <label>Tiempo limite en minutos <input name="tiempoLimite" type="number" min="1" max="180" value="<%= conDatos ? h(plantilla.getTiempoLimite()) : "30" %>" required/></label>
+                    <label>Cantidad de ejercicios de la prueba <input id="cantidadEjercicios" name="cantidadEjercicios" type="number" min="1" max="40" value="<%= conDatos ? h(plantilla.getCantidadEjercicios()) : "1" %>" required/></label>
                     <label>Estado <select name="estado">
-                        <option value="ACTIVA" <%= editando && Prueba.EstadoPrueba.ACTIVA.equals(plantilla.getEstado()) ? "selected" : "" %>>Activa</option>
-                        <option value="INACTIVA" <%= editando && Prueba.EstadoPrueba.INACTIVA.equals(plantilla.getEstado()) ? "selected" : "" %>>Inactiva</option>
-                        <option value="ARCHIVADA" <%= editando && Prueba.EstadoPrueba.ARCHIVADA.equals(plantilla.getEstado()) ? "selected" : "" %>>Archivada</option>
+                        <option value="ACTIVA" <%= conDatos && Prueba.EstadoPrueba.ACTIVA.equals(plantilla.getEstado()) ? "selected" : "" %>>Activa</option>
+                        <option value="INACTIVA" <%= conDatos && Prueba.EstadoPrueba.INACTIVA.equals(plantilla.getEstado()) ? "selected" : "" %>>Inactiva</option>
+                        <option value="ARCHIVADA" <%= conDatos && Prueba.EstadoPrueba.ARCHIVADA.equals(plantilla.getEstado()) ? "selected" : "" %>>Archivada</option>
                     </select></label>
-                    <label>Descripcion <textarea name="descripcion" placeholder="Uso o indicaciones de esta plantilla"><%= editando ? h(plantilla.getDescripcion()) : "" %></textarea></label>
+                    <label>Descripcion <textarea name="descripcion" placeholder="Uso o indicaciones de esta plantilla"><%= conDatos ? h(plantilla.getDescripcion()) : "" %></textarea></label>
                 </div>
             </section>
             <section>

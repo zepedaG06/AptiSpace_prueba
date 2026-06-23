@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.openxava.jpa.XPersistence;
+import com.aptispace.modelo.Bitacora;
 import com.aptispace.modelo.Evaluado;
 import com.aptispace.modelo.GrupoEvaluacion;
 import com.aptispace.modelo.Rol;
@@ -21,8 +22,10 @@ public class AuthServlet extends HttpServlet {
         String accion = valor(request, "accion");
 
         try {
-            if ("registro".equals(accion)) registrar(request, response);
-            else iniciarSesion(request, response);
+            if ("registro".equals(accion)) {
+                throw new IllegalArgumentException("El registro publico no esta disponible.");
+            }
+            iniciarSesion(request, response);
         }
         catch (Exception ex) {
             response.sendRedirect(request.getContextPath() + "/index.jsp?error=" + codificar(ex.getMessage()));
@@ -33,22 +36,25 @@ public class AuthServlet extends HttpServlet {
         String usuario = valor(request, "correo");
         if (usuario.isEmpty()) usuario = valor(request, "usuario");
         String contrasena = valor(request, "contrasena");
-        String tipo = valor(request, "tipo");
-        validarCorreo(usuario);
+        if (usuario.isEmpty()) throw new IllegalArgumentException("El correo es obligatorio.");
+        if (contrasena.isEmpty()) throw new IllegalArgumentException("La contrasena es obligatoria.");
 
         EntityManager em = XPersistence.getManager();
-        Usuario encontrado = buscarPorCorreo(em, usuario);
+        Usuario encontrado = buscarUsuario(em, usuario);
         if (encontrado == null && esCuentaDemo(usuario, contrasena)) {
             asegurarCuentaDemo(em, usuario);
-            encontrado = buscarPorCorreo(em, usuario);
+            encontrado = buscarUsuario(em, usuario);
         }
         if (encontrado == null || !encontrado.getContrasena().equals(contrasena)) {
-            throw new IllegalArgumentException("Correo o contrasena incorrectos.");
+            throw new IllegalArgumentException("Correo o contraseña incorrectos.");
         }
-        if (!tieneRol(encontrado, tipo)) {
-            throw new IllegalArgumentException("La cuenta no pertenece al entorno seleccionado.");
+        if (encontrado.getEstado() != Usuario.EstadoUsuario.ACTIVO) {
+            throw new IllegalArgumentException("La cuenta no esta activa.");
         }
 
+        String tipo = rolDeAcceso(encontrado);
+        if (tipo == null) throw new IllegalArgumentException("La cuenta no tiene un rol de acceso valido.");
+        registrarBitacora(em, encontrado.getNombreUsuario(), tipo, "INICIO_SESION", "Acceso correcto a AptiSpace.");
         guardarSesion(request, response, encontrado.getNombreUsuario(), tipo);
         response.sendRedirect(destino(request, tipo));
     }
@@ -140,11 +146,12 @@ public class AuthServlet extends HttpServlet {
     }
 
     private void asegurarDatosBase(EntityManager em) {
-        if (buscarRol(em, "PSICOLOGO") != null && buscarRol(em, "EVALUADO") != null) return;
+        if (buscarRol(em, "ADMINISTRADOR") != null && buscarRol(em, "EVALUADOR") != null && buscarRol(em, "EVALUADO") != null) return;
 
         boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
         try {
-            guardarRol(em, "PSICOLOGO", "Registra evaluados, aplica pruebas y consulta resultados.");
+            guardarRol(em, "ADMINISTRADOR", "Gestiona usuarios, roles, seguridad, bitacora y configuracion basica.");
+            guardarRol(em, "EVALUADOR", "Registra evaluados, aplica pruebas y consulta resultados.");
             guardarRol(em, "EVALUADO", "Realiza la prueba asignada.");
             confirmarSiEsPropia(em, transaccionPropia);
         }
@@ -204,21 +211,27 @@ public class AuthServlet extends HttpServlet {
     }
 
     private boolean esCuentaDemo(String usuario, String contrasena) {
-        return ("evaluador@aptispace.local".equalsIgnoreCase(usuario) && "evaluador123".equals(contrasena))
-            || ("evaluado@aptispace.local".equalsIgnoreCase(usuario) && "evaluado123".equals(contrasena));
+        return (("admin".equalsIgnoreCase(usuario) || "admin@aptispace.local".equalsIgnoreCase(usuario)) && "admin123".equals(contrasena))
+            || (("evaluador".equalsIgnoreCase(usuario) || "evaluador@aptispace.local".equalsIgnoreCase(usuario)) && "evaluador123".equals(contrasena))
+            || (("evaluado".equalsIgnoreCase(usuario) || "evaluado@aptispace.local".equalsIgnoreCase(usuario)) && "evaluado123".equals(contrasena));
     }
 
     private void asegurarCuentaDemo(EntityManager em, String usuario) {
         boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
         try {
-            insertarRolSiNoExiste(em, "PSICOLOGO", "Registra evaluados, aplica pruebas y consulta resultados.");
+            insertarRolSiNoExiste(em, "EVALUADOR", "Registra evaluados, aplica pruebas y consulta resultados.");
             insertarRolSiNoExiste(em, "EVALUADO", "Realiza la prueba asignada.");
+            insertarRolSiNoExiste(em, "ADMINISTRADOR", "Gestiona usuarios, roles, seguridad, bitacora y configuracion basica.");
 
-            if ("evaluador@aptispace.local".equalsIgnoreCase(usuario)) {
-                insertarUsuarioSiNoExiste(em, "evaluador", "evaluador123", "Evaluador", "Demo", "evaluador@aptispace.local");
-                asignarRol(em, "evaluador", "PSICOLOGO");
+            if ("admin".equalsIgnoreCase(usuario) || "admin@aptispace.local".equalsIgnoreCase(usuario)) {
+                insertarUsuarioSiNoExiste(em, "admin", "admin123", "Administrador", "AptiSpace", "admin@aptispace.local");
+                asignarRol(em, "admin", "ADMINISTRADOR");
             }
-            else if ("evaluado@aptispace.local".equalsIgnoreCase(usuario)) {
+            else if ("evaluador".equalsIgnoreCase(usuario) || "evaluador@aptispace.local".equalsIgnoreCase(usuario)) {
+                insertarUsuarioSiNoExiste(em, "evaluador", "evaluador123", "Evaluador", "Demo", "evaluador@aptispace.local");
+                asignarRol(em, "evaluador", "EVALUADOR");
+            }
+            else if ("evaluado".equalsIgnoreCase(usuario) || "evaluado@aptispace.local".equalsIgnoreCase(usuario)) {
                 insertarUsuarioSiNoExiste(em, "evaluado", "evaluado123", "Persona", "Demo", "evaluado@aptispace.local");
                 asignarRol(em, "evaluado", "EVALUADO");
                 Usuario cuenta = buscarUsuario(em, "evaluado");
@@ -257,7 +270,7 @@ public class AuthServlet extends HttpServlet {
 
     private Usuario crearUsuarioDemoSiAplica(EntityManager em, String nombreUsuario, String contrasena) {
         if ("evaluador".equals(nombreUsuario) && "evaluador123".equals(contrasena)) {
-            return crearUsuarioConRol(em, "evaluador", "evaluador123", "Evaluador", "Demo", "evaluador@aptispace.local", "PSICOLOGO");
+            return crearUsuarioConRol(em, "evaluador", "evaluador123", "Evaluador", "Demo", "evaluador@aptispace.local", "EVALUADOR");
         }
         if ("evaluado".equals(nombreUsuario) && "evaluado123".equals(contrasena)) {
             return crearUsuarioConRol(em, "evaluado", "evaluado123", "Persona", "Demo", "evaluado@aptispace.local", "EVALUADO");
@@ -287,6 +300,30 @@ public class AuthServlet extends HttpServlet {
 
     private boolean tieneRol(Usuario usuario, String tipo) {
         return usuario.getRoles().stream().anyMatch(rol -> tipo.equals(rol.getNombreRol()));
+    }
+
+    private void registrarBitacora(EntityManager em, String usuario, String rol, String accion, String detalle) {
+        boolean transaccionPropia = iniciarTransaccionSiHaceFalta(em);
+        try {
+            Bitacora bitacora = new Bitacora();
+            bitacora.setUsuario(usuario);
+            bitacora.setRol(rol);
+            bitacora.setAccion(accion);
+            bitacora.setDetalle(detalle);
+            em.persist(bitacora);
+            confirmarSiEsPropia(em, transaccionPropia);
+        }
+        catch (RuntimeException ex) {
+            revertirSiEsPropia(em, transaccionPropia);
+            throw ex;
+        }
+    }
+
+    private String rolDeAcceso(Usuario usuario) {
+        if (tieneRol(usuario, "ADMINISTRADOR")) return "ADMINISTRADOR";
+        if (tieneRol(usuario, "EVALUADOR") || tieneRol(usuario, "PSICOLOGO")) return "PSICOLOGO";
+        if (tieneRol(usuario, "EVALUADO")) return "EVALUADO";
+        return null;
     }
 
     private void crearEvaluadoDesdeRegistro(EntityManager em, HttpServletRequest request, Usuario usuario) {
@@ -357,6 +394,7 @@ public class AuthServlet extends HttpServlet {
     }
 
     private String destino(HttpServletRequest request, String tipo) {
+        if ("ADMINISTRADOR".equals(tipo)) return request.getContextPath() + "/m/Usuario";
         if ("EVALUADO".equals(tipo)) return request.getContextPath() + "/evaluado-home.jsp";
         return request.getContextPath() + "/evaluador-home.jsp";
     }

@@ -36,6 +36,7 @@ final class RoleSessionSupport {
     }
 
     static void limpiar(HttpServletRequest request, HttpServletResponse response) {
+        limpiarCookie(request, response, "ADMINISTRADOR");
         limpiarCookie(request, response, "PSICOLOGO");
         limpiarCookie(request, response, "EVALUADO");
     }

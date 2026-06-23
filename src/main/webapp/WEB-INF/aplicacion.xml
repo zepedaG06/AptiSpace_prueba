@@ -1,38 +1,16 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <application name="AptiSpace">
-    <module name="Evaluado"/>
-    <module name="AplicacionPrueba"/>
-    <module name="ResultadoPrueba"/>
-    <module name="ObservacionPsicologica"/>
-    <module name="Prueba"/>
-    <module name="Ejercicio"/>
-    <module name="OpcionEjercicio"/>
-    <module name="PlantillaCorreccion"/>
     <module name="Usuario"/>
     <module name="Rol"/>
+    <module name="GrupoEvaluacion"/>
+    <module name="Bitacora"/>
+    <module name="ConfiguracionBasica"/>
 
-    <folder name="Dashboard principal">
-        <module name="AplicacionPrueba"/>
-        <module name="ResultadoPrueba"/>
-    </folder>
-    <folder name="Gestión clínica">
-        <module name="Evaluado"/>
-        <module name="AplicacionPrueba"/>
-        <module name="ObservacionPsicologica"/>
-    </folder>
-    <folder name="Prueba Espacial S2">
-        <module name="Prueba"/>
-        <module name="Ejercicio"/>
-        <module name="OpcionEjercicio"/>
-        <module name="PlantillaCorreccion"/>
-        <module name="RespuestaEvaluado"/>
-    </folder>
-    <folder name="Resultados y reportes">
-        <module name="ResultadoPrueba"/>
-        <module name="ObservacionPsicologica"/>
-    </folder>
-    <folder name="Administración">
+    <folder name="Administracion">
         <module name="Usuario"/>
         <module name="Rol"/>
+        <module name="GrupoEvaluacion"/>
+        <module name="Bitacora"/>
+        <module name="ConfiguracionBasica"/>
     </folder>
 </application>

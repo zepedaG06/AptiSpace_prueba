@@ -1,12 +1,16 @@
-INSERT INTO rol (id, nombre_rol, descripcion) VALUES (2, 'PSICOLOGO', 'Registra evaluados, asigna pruebas, consulta resultados y agrega observaciones');
+INSERT INTO rol (id, nombre_rol, descripcion) VALUES (1, 'ADMINISTRADOR', 'Gestiona usuarios, roles, seguridad, bitacora y configuracion basica');
 INSERT INTO rol (id, nombre_rol, descripcion) VALUES (3, 'EVALUADO', 'Realiza la prueba y consulta resultados autorizados');
+INSERT INTO rol (id, nombre_rol, descripcion) VALUES (4, 'EVALUADOR', 'Registra evaluados, asigna pruebas, consulta resultados y agrega observaciones');
 
+INSERT INTO usuario (id, nombre_usuario, contrasena, nombres, apellidos, correo, estado, fecha_creacion)
+VALUES (1, 'admin', 'admin123', 'Administrador', 'AptiSpace', 'admin@aptispace.local', 'ACTIVO', CURRENT_TIMESTAMP);
 INSERT INTO usuario (id, nombre_usuario, contrasena, nombres, apellidos, correo, estado, fecha_creacion)
 VALUES (2, 'evaluador', 'evaluador123', 'Evaluador', 'Demo', 'evaluador@aptispace.local', 'ACTIVO', CURRENT_TIMESTAMP);
 INSERT INTO usuario (id, nombre_usuario, contrasena, nombres, apellidos, correo, estado, fecha_creacion)
 VALUES (3, 'evaluado', 'evaluado123', 'Persona', 'Demo', 'evaluado@aptispace.local', 'ACTIVO', CURRENT_TIMESTAMP);
 
-INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (2, 2);
+INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (1, 1);
+INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (2, 4);
 INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (3, 3);
 
 INSERT INTO evaluado (id, usuario_id, nombres, apellidos, fecha_nacimiento, edad, sexo, estudios_realizados, carrera, anio_carrera, profesion, fecha_registro)

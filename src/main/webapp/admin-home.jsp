@@ -14,30 +14,29 @@
         .top { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 18px; }
         .top h2 { margin: 0; font-size: 22px; }
         .logout { color: #1f6f8b; font-weight: 700; text-decoration: none; }
-        .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+        .grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
         a.tile { display: block; min-height: 128px; padding: 18px; border: 1px solid #d9e2ec; border-radius: 8px; background: white; text-decoration: none; color: #1f2937; }
         .tile strong { display: block; margin-bottom: 8px; font-size: 18px; color: #132f46; }
         .tile span { color: #52606d; line-height: 1.45; }
-        @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } .top { align-items: flex-start; flex-direction: column; } }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .top { align-items: flex-start; flex-direction: column; } }
     </style>
 </head>
 <body>
     <header>
-        <h1>Administrador de Plantillas</h1>
-        <p>Cuenta interna para crear pruebas, cargar imagenes, marcar opciones correctas y mantener las plantillas que usaran todos los psicologos.</p>
+        <h1>Administración AptiSpace</h1>
+        <p>Gestión de cuentas, roles, estado de acceso, bitácora y configuración básica del sistema.</p>
     </header>
     <main>
         <div class="top">
-            <h2>Configuracion del banco S2</h2>
-            <a class="logout" href="logout?tipo=PSICOLOGO">Cerrar sesion</a>
+            <h2>Módulos administrativos</h2>
+            <a class="logout" href="logout?tipo=ADMINISTRADOR">Cerrar sesión</a>
         </div>
         <section class="grid">
-            <a class="tile" href="m/PlantillaCorreccion"><strong>Plantillas</strong><span>Agrupa los ejercicios que quedaran disponibles para los psicologos.</span></a>
-            <a class="tile" href="m/Prueba"><strong>Pruebas</strong><span>Define nombre, tiempo limite y cantidad de ejercicios aleatorios por aplicacion.</span></a>
-            <a class="tile" href="m/Ejercicio"><strong>Ejercicios</strong><span>Carga la imagen modelo y el enunciado de cada ejercicio espacial.</span></a>
-            <a class="tile" href="m/OpcionEjercicio"><strong>Opciones</strong><span>Agrega imagenes A-E y marca cuales son correctas.</span></a>
-            <a class="tile" href="m/Usuario"><strong>Usuarios</strong><span>Administra cuentas de psicologos, evaluados y administradores.</span></a>
-            <a class="tile" href="m/Rol"><strong>Roles</strong><span>Control interno de permisos y tipos de cuenta.</span></a>
+            <a class="tile" href="m/Usuario"><strong>Usuarios</strong><span>Crea cuentas institucionales y administra datos de acceso.</span></a>
+            <a class="tile" href="m/Rol"><strong>Roles</strong><span>Mantén los perfiles ADMINISTRADOR, EVALUADOR y EVALUADO.</span></a>
+            <a class="tile" href="m/GrupoEvaluacion"><strong>Grupos</strong><span>Consulta los grupos registrados en AptiSpace.</span></a>
+            <a class="tile" href="m/Bitacora"><strong>Bitácora</strong><span>Consulta eventos básicos de acceso al sistema.</span></a>
+            <a class="tile" href="m/ConfiguracionBasica"><strong>Configuración</strong><span>Administra parámetros generales no clínicos.</span></a>
         </section>
     </main>
 </body>

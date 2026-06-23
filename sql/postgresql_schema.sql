@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     apellidos VARCHAR(80) NOT NULL,
     correo VARCHAR(120),
     foto_perfil VARCHAR(255),
+    rol_id BIGINT REFERENCES rol(id),
     estado VARCHAR(20) NOT NULL,
     fecha_creacion TIMESTAMP NOT NULL
 );
@@ -20,6 +21,22 @@ CREATE TABLE IF NOT EXISTS usuario_rol (
     usuario_id BIGINT NOT NULL REFERENCES usuario(id),
     rol_id BIGINT NOT NULL REFERENCES rol(id),
     PRIMARY KEY (usuario_id, rol_id)
+);
+
+CREATE TABLE IF NOT EXISTS bitacora (
+    id BIGSERIAL PRIMARY KEY,
+    fecha TIMESTAMP NOT NULL,
+    usuario VARCHAR(80),
+    rol VARCHAR(40),
+    accion VARCHAR(80) NOT NULL,
+    detalle VARCHAR(500)
+);
+
+CREATE TABLE IF NOT EXISTS configuracion_basica (
+    id BIGSERIAL PRIMARY KEY,
+    clave VARCHAR(80) NOT NULL UNIQUE,
+    valor VARCHAR(250) NOT NULL,
+    descripcion VARCHAR(500)
 );
 
 CREATE TABLE IF NOT EXISTS evaluado (

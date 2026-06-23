@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE application SYSTEM "dtds/application.dtd">
 <application name="AptiSpace">
     <default-module>
@@ -7,14 +7,7 @@
 
     <module name="Usuario"><model name="Usuario"/><controller name="Typical"/></module>
     <module name="Rol"><model name="Rol"/><controller name="Typical"/></module>
-    <module name="Evaluado"><model name="Evaluado"/><controller name="Typical"/></module>
     <module name="GrupoEvaluacion"><model name="GrupoEvaluacion"/><controller name="Typical"/></module>
-    <module name="Prueba"><model name="Prueba"/><controller name="Typical"/></module>
-    <module name="Ejercicio"><model name="Ejercicio"/><controller name="Typical"/></module>
-    <module name="OpcionEjercicio"><model name="OpcionEjercicio"/><controller name="Typical"/></module>
-    <module name="PlantillaCorreccion"><model name="PlantillaCorreccion"/><controller name="Typical"/></module>
-    <module name="AplicacionPrueba"><model name="AplicacionPrueba"/><controller name="AplicacionPrueba"/></module>
-    <module name="RespuestaEvaluado"><model name="RespuestaEvaluado"/><controller name="Typical"/></module>
-    <module name="ResultadoPrueba"><model name="ResultadoPrueba"/><controller name="Typical"/></module>
-    <module name="ObservacionPsicologica"><model name="ObservacionPsicologica"/><controller name="Typical"/></module>
+    <module name="Bitacora"><model name="Bitacora"/><controller name="Typical"/></module>
+    <module name="ConfiguracionBasica"><model name="ConfiguracionBasica"/><controller name="Typical"/></module>
 </application>

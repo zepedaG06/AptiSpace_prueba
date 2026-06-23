@@ -9,8 +9,8 @@ import org.openxava.annotations.*;
 
 @Entity
 @Table(name = "usuario", uniqueConstraints = @UniqueConstraint(columnNames = "nombre_usuario"))
-@View(members = "datos [nombreUsuario, contrasena, estado, fechaCreacion]; persona [nombres, apellidos, correo, fotoPerfil]; evaluado; roles")
-@Tab(properties = "nombreUsuario, nombres, apellidos, correo, estado, fechaCreacion")
+@View(members = "datos [nombreUsuario, contrasena, estado, fechaCreacion, rol]; persona [nombres, apellidos, correo]")
+@Tab(properties = "nombreUsuario, nombres, apellidos, correo, rolPrincipal, estado, fechaCreacion")
 public class Usuario {
     public enum EstadoUsuario { ACTIVO, INACTIVO, BLOQUEADO }
 
@@ -56,6 +56,12 @@ public class Usuario {
     @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY)
     private Evaluado evaluado;
 
+    @Required
+    @ManyToOne
+    @JoinColumn(name = "rol_id")
+    @DescriptionsList(descriptionProperties = "nombreRol", condition = "${nombreRol} <> 'PSICOLOGO'")
+    private Rol rol;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombreUsuario() { return nombreUsuario; }
@@ -78,5 +84,41 @@ public class Usuario {
     public void setRoles(Set<Rol> roles) { this.roles = roles; }
     public Evaluado getEvaluado() { return evaluado; }
     public void setEvaluado(Evaluado evaluado) { this.evaluado = evaluado; }
+    public Rol getRol() { return rolPrincipalEntidad(); }
+    public void setRol(Rol rol) {
+        this.rol = rol;
+        sincronizarRolesConRol();
+    }
+    @ReadOnly
+    public String getRolPrincipal() {
+        Rol principal = rolPrincipalEntidad();
+        if (principal == null) return "";
+        return "PSICOLOGO".equals(principal.getNombreRol()) ? "EVALUADOR" : principal.getNombreRol();
+    }
+    private Rol rolPrincipalEntidad() {
+        if (rol != null) return rol;
+        Rol psicologo = null;
+        for (Rol candidato : roles) {
+            if ("PSICOLOGO".equals(candidato.getNombreRol())) {
+                psicologo = candidato;
+                continue;
+            }
+            return candidato;
+        }
+        return psicologo;
+    }
+
+    @PostLoad
+    private void cargarRolPrincipal() {
+        if (rol == null) rol = rolPrincipalEntidad();
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void sincronizarRolesConRol() {
+        Rol seleccionado = rolPrincipalEntidad();
+        roles.clear();
+        if (seleccionado != null) roles.add(seleccionado);
+    }
     public String toString() { return nombreUsuario; }
 }
