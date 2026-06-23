@@ -8,6 +8,23 @@ Proyecto web Java/OpenXava para evaluación de aptitud espacial - desplazamiento
 3. Buscar la ruta donde se guardo el proyecto.
 4. Importar como proyecto Maven.
 
+## Ejecutar desde IntelliJ con Main
+1. Ejecutar `mvn package -DskipTests` una vez para generar `target/classes`.
+2. Crear una configuracion `Application`.
+3. Main class: `com.aptispace.Main`.
+4. Working directory: raiz del proyecto `AptiSpace`.
+5. Abrir:
+
+```text
+http://localhost:8081/AptiSpace/
+```
+
+Tambien se puede ejecutar desde terminal:
+
+```powershell
+mvn exec:java -Dapp.port=8081
+```
+
 ## URL oficial
 La app desplegada en Railway esta disponible en:
 

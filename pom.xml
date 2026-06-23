@@ -10,6 +10,7 @@
     <name>AptiSpace</name>
     <properties>
         <openxava.version>7.7</openxava.version>
+        <tomcat.embed.version>9.0.118</tomcat.embed.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,6 +33,18 @@
             <artifactId>h2</artifactId>
             <version>2.2.224</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>${tomcat.embed.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+            <version>${tomcat.embed.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
@@ -91,6 +104,15 @@
                             </properties>
                         </deployable>
                     </deployables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <mainClass>com.aptispace.Main</mainClass>
+                    <classpathScope>compile</classpathScope>
                 </configuration>
             </plugin>
         </plugins>
