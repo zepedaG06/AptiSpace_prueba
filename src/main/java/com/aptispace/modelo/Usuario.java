@@ -56,7 +56,6 @@ public class Usuario {
     @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY)
     private Evaluado evaluado;
 
-    @Required
     @ManyToOne
     @JoinColumn(name = "rol_id")
     @DescriptionsList(descriptionProperties = "nombreRol", condition = "${nombreRol} <> 'PSICOLOGO'")

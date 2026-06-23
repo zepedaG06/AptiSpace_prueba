@@ -41,7 +41,7 @@ public class AuthServlet extends HttpServlet {
 
         EntityManager em = XPersistence.getManager();
         Usuario encontrado = buscarUsuario(em, usuario);
-        if (encontrado == null && esCuentaDemo(usuario, contrasena)) {
+        if (esCuentaDemo(usuario, contrasena)) {
             asegurarCuentaDemo(em, usuario);
             encontrado = buscarUsuario(em, usuario);
         }
@@ -265,7 +265,8 @@ public class AuthServlet extends HttpServlet {
         Usuario cuenta = buscarUsuario(em, usuario);
         Rol rolEntidad = buscarRol(em, rol);
         if (cuenta == null || rolEntidad == null) return;
-        cuenta.getRoles().add(rolEntidad);
+        if (!"PSICOLOGO".equals(rol)) cuenta.setRol(rolEntidad);
+        else cuenta.getRoles().add(rolEntidad);
     }
 
     private Usuario crearUsuarioDemoSiAplica(EntityManager em, String nombreUsuario, String contrasena) {
